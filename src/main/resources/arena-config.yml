@@ -1,0 +1,11 @@
+
+pos1:
+  world: "world"
+  x: 1
+  y: 2
+  z: 4
+pos2:
+  world: "world"
+  x: 5
+  y: 3
+  z: 4

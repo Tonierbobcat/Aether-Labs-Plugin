@@ -1,0 +1,6 @@
+name: MiniGamePlugin
+version: '1.0-SNAPSHOT'
+main: com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin
+api-version: '1.21'
+depend: [MelodyAPI, CommandAPI]
+softdepend: [Essentials, PlaceholderAPI]
