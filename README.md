@@ -8,8 +8,8 @@ Placeholders
 ```
 Commands
 ```
-shop
-vote
-arena set <pos1> <pos2>
-arena debug fill <start, cancel>
+/shop
+/vote
+/arena set <pos1> <pos2>
+/arena debug fill <start, cancel>
 ```
