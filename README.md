@@ -6,3 +6,10 @@ Placeholders
 %minigameplugin_wins%
 %minigameplugin_deaths%
 ```
+Commands
+```
+shop
+vote
+arena set <pos1> <pos2>
+arena debug fill <start, cancel>
+```
