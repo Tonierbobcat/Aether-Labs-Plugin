@@ -1,11 +1,17 @@
 package com.loficostudios.minigameeventsplugin.Listeners;
 
 import com.loficostudios.melodyapi.utils.Common;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager;
-import com.loficostudios.minigameeventsplugin.Managers.PlayerManager;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.Countdown.Countdown;
+import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameState;
+import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.PlayerManager;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
+import com.loficostudios.minigameeventsplugin.BukkitEvents.RoundSurvivedEvent;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -13,26 +19,56 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import static com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager.PLAYER_KILL_MONEY_AMOUNT;
+import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugError;
+
 public class MiniGameListener implements Listener {
 
-    private final MiniGameEventsPlugin plugin;
+    private final RandomEventsPlugin plugin;
     private final GameManager gameManager;
     private final PlayerManager playerManager;
     public MiniGameListener(GameManager gameManager) {
         this.gameManager = gameManager;
-        this.plugin = MiniGameEventsPlugin.getInstance();
+        this.plugin = RandomEventsPlugin.getInstance();
         this.playerManager = gameManager.getPlayerManager();
     }
 
 
+
+
     @EventHandler
-    void onWorldChanged(PlayerChangedWorldEvent e) {
+    private void onFlammableBlockPlaced(BlockPlaceEvent e) {
+        //Player player = e.getPlayer();
+        Block block = e.getBlock();
+
+        int time = 3;
+
+
+
+
+        if (gameManager.inProgress() && block.getType().equals(Material.WHITE_WOOL)) {
+            Countdown timer = new Countdown(countdown -> {
+                //on tick
+
+                if (countdown == 2) {
+                    block.setType(Material.BLACK_WOOL);
+                }
+
+
+            }, () -> {
+                block.setType(Material.AIR);
+            });
+
+
+            timer.start(time);
+        }
 
     }
 
@@ -41,13 +77,20 @@ public class MiniGameListener implements Listener {
         final Player player = e.getPlayer();
         plugin.getOnlinePlayers().add(player);
 
-        if (gameManager.inProgress() && player.getWorld().equals(gameManager.getArena().getWorld())) {
-            gameManager.getStatusBar().addPlayer(player);
+        World arenaWorld = gameManager.getArena().getWorld();
+
+        if (arenaWorld != null) {
+            debugError("World is null onJoin");
         }
 
-        /*if (!gameManager.inProgress()) {
-            gameManager.startGameCountdown(GameManager.GAME_COUNTDOWN);
-        }*/
+        if (player.getWorld().equals(arenaWorld)) {
+            if (gameManager.inProgress()) {
+                gameManager.getStatusBar().addPlayer(player);
+            }
+            else if (plugin.getOnlinePlayers().size() > 1){
+                gameManager.startGameCountdown(GameManager.GAME_COUNTDOWN);
+            }
+        }
     }
 
     @EventHandler
@@ -56,26 +99,54 @@ public class MiniGameListener implements Listener {
         plugin.getOnlinePlayers().remove(player);
 
         if (playerManager.getPlayers().contains(player)) {
-            gameManager.handlePlayerQuit(player);
+            playerManager.handlePlayerQuit(player);
+        }
+    }
+
+    @EventHandler
+    private void onWorldChanged(PlayerChangedWorldEvent e) {
+        final Player player = e.getPlayer();
+
+        if (playerManager.getPlayers().contains(player)) {
+            playerManager.handlePlayerQuit(player);
         }
     }
 
     @EventHandler
     private void onDeath(PlayerDeathEvent e) {
-        Player player = e.getEntity();
+        final Player player = e.getEntity();
 
         if (gameManager.inProgress() && playerManager.getPlayers().contains(player)) {
-            gameManager.handlePlayerDeath(player);
+            e.setKeepInventory(true);
+            playerManager.handlePlayerDeath(player);
 
-            Player killer = player.getKiller();
+            final Player killer = player.getKiller();
 
             if (killer != null) {
                 plugin.getProfileManager().getProfile(killer.getUniqueId()).ifPresent(Profile::addKill);
+
+                if (plugin.vaultHook) {
+                    plugin.getEconomy().depositPlayer(
+                            killer,
+                            PLAYER_KILL_MONEY_AMOUNT);
+                }
             }
         }
     }
 
+    private static final int ROUND_SURVIVED_MONEY_AMOUNT = 10;
 
+    @EventHandler
+    private void onRoundSurvived(RoundSurvivedEvent e) {
+        RandomEventsPlugin plugin = RandomEventsPlugin.getInstance();
+
+        if (plugin.vaultHook) {
+            Economy economy = plugin.getEconomy();
+
+            economy.depositPlayer(e.getPlayer(), ROUND_SURVIVED_MONEY_AMOUNT);
+
+        }
+    }
 
     @EventHandler
     private void onAttack(EntityDamageEvent e) {
@@ -104,7 +175,7 @@ public class MiniGameListener implements Listener {
     }
 
     private boolean handleEventDuringSetupGame(Event e) {
-        if (gameManager.getCurrentState() == GameManager.GameState.SETUP && e instanceof Cancellable cancellable) {
+        if (gameManager.getCurrentState() == GameState.SETUP && e instanceof Cancellable cancellable) {
             cancellable.setCancelled(true);
             Common.broadcast("cancelled " + e.getEventName());
             return true;

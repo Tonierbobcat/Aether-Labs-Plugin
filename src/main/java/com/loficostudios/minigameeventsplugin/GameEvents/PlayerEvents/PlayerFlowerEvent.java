@@ -1,14 +1,16 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import static com.loficostudios.minigameeventsplugin.Items.ROSE;
+import static com.loficostudios.minigameeventsplugin.GameEvents.Items.ROSE;
 
-public class PlayerFlowerEvent extends RandomPlayerSelectorEvent {
+public class PlayerFlowerEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
     @Override
     public boolean onSelect(Player selectedPlayer) {
         selectedPlayer.getInventory().addItem(ROSE);
@@ -26,8 +28,13 @@ public class PlayerFlowerEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() +  " player(s) will  be given a rose! <3";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will  be given a rose! <3";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.POPPY;
     }
 
     @Override

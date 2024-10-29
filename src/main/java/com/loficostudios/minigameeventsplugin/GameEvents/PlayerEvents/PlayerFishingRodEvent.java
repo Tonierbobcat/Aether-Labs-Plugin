@@ -1,14 +1,16 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import static com.loficostudios.minigameeventsplugin.Items.FISHERMANS_ROD;
+import static com.loficostudios.minigameeventsplugin.GameEvents.Items.FISHERMANS_ROD;
 
-public class PlayerFishingRodEvent extends RandomPlayerSelectorEvent {
+public class PlayerFishingRodEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
 
     @Override
     public boolean onSelect(Player selectedPlayer) {
@@ -29,8 +31,13 @@ public class PlayerFishingRodEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() +  "player(s) will be a fisherman";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will be a fisherman";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.FISHING_ROD;
     }
 
     @Override

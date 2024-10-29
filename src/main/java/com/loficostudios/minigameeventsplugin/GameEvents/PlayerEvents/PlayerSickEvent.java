@@ -1,6 +1,8 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +11,7 @@ import java.util.Collection;
 
 import static com.loficostudios.minigameeventsplugin.Utils.EventUtils.effectPlayer;
 
-public class PlayerSickEvent extends RandomPlayerSelectorEvent {
+public class PlayerSickEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
     @Override
     public boolean onSelect(Player selectedPlayer) {
 
@@ -30,8 +32,13 @@ public class PlayerSickEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " player(s) ate something bad and got food poisoning";
+    public @NotNull String getWarningMessage() {
+        return "player(s) ate something bad and got food poisoning";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.SPIDER_EYE;
     }
 
     @Override

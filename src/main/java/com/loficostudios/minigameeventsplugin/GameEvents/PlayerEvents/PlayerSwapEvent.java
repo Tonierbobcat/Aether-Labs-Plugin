@@ -1,7 +1,9 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class PlayerSwapEvent extends RandomPlayerSelectorEvent {
+public class PlayerSwapEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
 
     @Override
     public boolean onSelect(Player selectedPlayer) {
@@ -49,8 +51,13 @@ public class PlayerSwapEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return "1 player(s) will swap with someone random.";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will swap with someone random.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.ENDER_PEARL;
     }
 
     @Override

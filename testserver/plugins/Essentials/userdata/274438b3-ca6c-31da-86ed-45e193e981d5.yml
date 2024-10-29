@@ -1,0 +1,30 @@
+teleportenabled: true
+teleportauto: false
+godmode: false
+muted: false
+jailed: false
+ip-address: 192.168.0.2
+afk: false
+socialspy: false
+npc: false
+powertoolsenabled: true
+accepting-pay: true
+baltop-exempt: false
+timestamps:
+  lastteleport: 0
+  lastheal: 0
+  mute: 0
+  jail: 0
+  onlinejail: 0
+  logout: 1730207525084
+  login: 1730207352222
+money: '10690.0'
+last-account-name: Tonierbobcat966
+logoutlocation:
+  world: 44083288-d317-4219-a6d0-47823a0a31af
+  world-name: world
+  x: -27.131435028823134
+  y: -8.493168485178183
+  z: 34.46743670816377
+  yaw: 90.1510009765625
+  pitch: 43.02155303955078

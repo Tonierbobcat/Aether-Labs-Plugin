@@ -1,13 +1,14 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateDirtEvent extends RandomPlayerSelectorEvent {
+public class PlateDirtEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
 
 
 
@@ -17,8 +18,13 @@ public class PlateDirtEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " plate(s) will get a bit dirty";
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will get a bit dirty";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.DIRT;
     }
 
 

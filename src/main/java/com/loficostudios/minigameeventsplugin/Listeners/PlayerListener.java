@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.Listeners;
 
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import com.loficostudios.minigameeventsplugin.Profile.ProfileAlreadyLoadedException;
 import com.loficostudios.minigameeventsplugin.Managers.ProfileManager;
 import com.loficostudios.minigameeventsplugin.Profile.ProfileNotLoadedException;
@@ -14,12 +14,12 @@ import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarnin
 
 public class PlayerListener implements Listener {
 
-    final MiniGameEventsPlugin plugin;
+    final RandomEventsPlugin plugin;
     final ProfileManager profileManager;
 
     public PlayerListener(ProfileManager profileManager) {
         this.profileManager = profileManager;
-        this.plugin = MiniGameEventsPlugin.getInstance();
+        this.plugin = RandomEventsPlugin.getInstance();
     }
 
     @EventHandler

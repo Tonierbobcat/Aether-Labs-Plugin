@@ -1,9 +1,11 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.WorldEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IWorldEvent;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class WorldPlateRepairEvent extends BaseEvent {
+public class WorldPlateRepairEvent extends BaseEvent implements IWorldEvent {
 
 
 
@@ -20,8 +22,13 @@ public class WorldPlateRepairEvent extends BaseEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
+    public @NotNull String getWarningMessage() {
         return "All plates will be repaired.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.STONE_BRICKS;
     }
 
 }

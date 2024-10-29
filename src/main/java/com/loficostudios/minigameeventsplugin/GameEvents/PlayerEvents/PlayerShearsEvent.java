@@ -1,14 +1,16 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import static com.loficostudios.minigameeventsplugin.Items.BROKEN_SHEARS;
+import static com.loficostudios.minigameeventsplugin.GameEvents.Items.BROKEN_SHEARS;
 
-public class PlayerShearsEvent extends RandomPlayerSelectorEvent {
+public class PlayerShearsEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
     @Override
     public boolean onSelect(Player selectedPlayer) {
 
@@ -27,8 +29,13 @@ public class PlayerShearsEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " player(s) will be given a broken pair of shears.";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will be given a broken pair of shears.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.SHEARS;
     }
 
     @Override

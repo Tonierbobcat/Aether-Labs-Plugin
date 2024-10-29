@@ -1,15 +1,17 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import static com.loficostudios.minigameeventsplugin.Items.SPOOKY_PUMPKIN;
+import static com.loficostudios.minigameeventsplugin.GameEvents.Items.SPOOKY_PUMPKIN;
 
-public class PlayerSpookyEvent extends RandomPlayerSelectorEvent {
+public class PlayerSpookyEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
 
 
     @Override
@@ -41,8 +43,13 @@ public class PlayerSpookyEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return "1 player will become spooky.";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will become spooky.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.CARVED_PUMPKIN;
     }
 
     @Override

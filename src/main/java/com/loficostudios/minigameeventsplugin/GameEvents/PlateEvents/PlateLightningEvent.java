@@ -2,15 +2,18 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
+import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.NotificationType;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateLightningEvent extends RandomPlayerSelectorEvent {
+public class PlateLightningEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
     @Override
     public boolean onSelect(Player selectedPlayer) {
 
@@ -24,7 +27,10 @@ public class PlateLightningEvent extends RandomPlayerSelectorEvent {
 
         for (int i = 0; i < 3; i++) {
             getArena().getWorld().strikeLightning(location);
-            getGameManager().notify(GameManager.NotificationType.GLOBAL, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.5f, 1);
+            getPlayerManager().notify(
+                    NotificationType.GLOBAL,
+                    Sound.ENTITY_LIGHTNING_BOLT_IMPACT,
+                    0.5f, 1);
         }
 
         return true;
@@ -41,8 +47,13 @@ public class PlateLightningEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + "plate(s) will get a burst of lightning.";
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will get a burst of lightning.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.LIGHTNING_ROD;
     }
 
     @Override

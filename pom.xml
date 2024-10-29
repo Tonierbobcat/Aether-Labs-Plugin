@@ -27,19 +27,30 @@
           <target>16</target>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+                <execution>
+                    <id>shade</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <minimizeJar>true</minimizeJar>
+                <relocations>
+                    <relocation>
+                        <pattern>dev.jorel.commandapi</pattern>
+                        <!-- TODO: Change this to my own package name -->
+                        <shadedPattern>com.loficostudios.minigameeventsplugin</shadedPattern>
+                    </relocation>
+                </relocations>
+            </configuration>
+        </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jar-plugin</artifactId>
@@ -62,6 +73,11 @@
           <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
       </repository>
       <repository>
+          <id>jitpack.io</id>
+          <url>https://jitpack.io</url>
+      </repository>
+
+      <repository>
           <id>sonatype</id>
           <url>https://oss.sonatype.org/content/groups/public/</url>
       </repository>
@@ -78,22 +94,27 @@
 
   <dependencies>
       <dependency>
-          <groupId>net.ess3</groupId>
-          <artifactId>EssentialsX</artifactId>
-          <version>2.18.2</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
           <groupId>org.spigotmc</groupId>
           <artifactId>spigot-api</artifactId>
           <version>1.21-R0.1-SNAPSHOT</version>
           <scope>provided</scope>
       </dependency>
       <dependency>
-          <groupId>dev.jorel</groupId>
-          <artifactId>commandapi-bukkit-core</artifactId>
-          <version>9.5.2</version>
+          <groupId>net.ess3</groupId>
+          <artifactId>EssentialsX</artifactId>
+          <version>2.18.2</version>
           <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.github.MilkBowl</groupId>
+          <artifactId>VaultAPI</artifactId>
+          <version>1.7</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>dev.jorel</groupId>
+          <artifactId>commandapi-bukkit-shade</artifactId>
+          <version>9.5.2</version>
       </dependency>
       <dependency>
           <groupId>me.clip</groupId>

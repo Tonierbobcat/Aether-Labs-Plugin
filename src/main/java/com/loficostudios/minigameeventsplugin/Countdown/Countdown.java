@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.Countdown;
 
-import com.loficostudios.minigameeventsplugin.Managers.GameManager;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -74,7 +74,7 @@ public class Countdown {
         this.onTick = onTick;
         this.onEnd = onEnd;
 
-        gameManager = MiniGameEventsPlugin.getInstance().getGameManager();
+        gameManager = RandomEventsPlugin.getInstance().getGameManager();
     }
 
     public BukkitTask start(int time) {
@@ -101,7 +101,7 @@ public class Countdown {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(MiniGameEventsPlugin.getInstance(), 0, 20);
+        }.runTaskTimer(RandomEventsPlugin.getInstance(), 0, 20);
     }
 
     public void stop() {

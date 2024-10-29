@@ -2,6 +2,8 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class PlayerRandomPlateEvent extends RandomPlayerSelectorEvent {
+public class PlayerRandomPlateEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
 
     Random random = new Random();
 
@@ -48,8 +50,13 @@ public class PlayerRandomPlateEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " player(s) will teleport to a random plate.";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will teleport to a random plate.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.ENDER_EYE;
     }
 
     @Override

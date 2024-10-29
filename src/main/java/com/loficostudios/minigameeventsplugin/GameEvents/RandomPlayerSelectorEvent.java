@@ -1,10 +1,9 @@
 package com.loficostudios.minigameeventsplugin.GameEvents;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerSelector;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager;
+import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.NotificationType;
 import com.loficostudios.minigameeventsplugin.Utils.PlayerState;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import lombok.Getter;
 import org.bukkit.Sound;
 import org.bukkit.boss.BossBar;
@@ -69,7 +68,10 @@ public abstract class RandomPlayerSelectorEvent extends BaseEvent implements IPl
                 progressBar.setTitle(message.get());
             }
 
-            getGameManager().notify(GameManager.NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
+            getPlayerManager().notify(
+                    NotificationType.GLOBAL,
+                    Sound.BLOCK_NOTE_BLOCK_PLING,
+                    1, 2);
 
         }, this::onComplete);
     }
@@ -109,7 +111,7 @@ public abstract class RandomPlayerSelectorEvent extends BaseEvent implements IPl
                 }
                 else {
 
-                    Common.broadcast("reached end of selectrandomPlayer statement");
+                    debug("reached end of selectrandomPlayer statement");
 
                     if (onEnd != null)
                         onEnd.accept(selectedPlayers);
@@ -117,6 +119,6 @@ public abstract class RandomPlayerSelectorEvent extends BaseEvent implements IPl
                 }
 
             }
-        }.runTaskTimer(MiniGameEventsPlugin.getInstance(), 0, 15));
+        }.runTaskTimer(RandomEventsPlugin.getInstance(), 0, 15));
     }
 }

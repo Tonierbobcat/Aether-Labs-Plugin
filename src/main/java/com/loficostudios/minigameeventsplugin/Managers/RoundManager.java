@@ -1,13 +1,18 @@
 package com.loficostudios.minigameeventsplugin.Managers;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.FallBackEvent;
 import com.loficostudios.minigameeventsplugin.Countdown.Countdown;
+import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.NotificationType;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.BukkitEvents.RoundSurvivedEvent;
+import com.loficostudios.minigameeventsplugin.Utils.PlayerState;
 import lombok.Getter;
 import org.bukkit.Sound;
 import org.bukkit.boss.BossBar;
+import org.bukkit.plugin.PluginManager;
 
 import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
 
@@ -25,7 +30,7 @@ public class RoundManager {
 
     private Countdown timer;
 
-    RoundManager(GameManager gameManager, EventManager eventManager) {
+    public RoundManager(GameManager gameManager, EventManager eventManager) {
         this.gameManager = gameManager;
         this.eventManager = eventManager;
     }
@@ -58,11 +63,20 @@ public class RoundManager {
 
         roundsElapsed++;
 
-        gameManager.statusBar.setTitle(nextEvent.warningMessage());
+        String warningMessage;
+
+        if (nextEvent instanceof RandomPlayerSelectorEvent randomPlayerSelectorEvent) {
+            warningMessage = randomPlayerSelectorEvent.getAmount() + " " + nextEvent.getWarningMessage();
+        }
+        else {
+            warningMessage = nextEvent.getWarningMessage();
+        }
+
+        gameManager.getStatusBar().setTitle(warningMessage);
 
         progressBar = gameManager.getProgressBar();
 
-        gameManager.notify(GameManager.NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
+        gameManager.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
         timer = new Countdown(
                 countdown -> {
                     progressBar.setTitle(countdown + " seconds");
@@ -80,7 +94,7 @@ public class RoundManager {
         if (timer != null)
             timer.stop();
 
-        eventManager.handleEvent(e);
+        eventManager.handleStart(e);
         if (!gameManager.inProgress()) {
             return;
         }
@@ -88,7 +102,7 @@ public class RoundManager {
         if (e instanceof RandomPlayerSelectorEvent) {
         }
         else {
-            gameManager.notify(GameManager.NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
+            gameManager.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
         }
 
         timer = new Countdown(
@@ -100,6 +114,8 @@ public class RoundManager {
     }
 
     public void resetRounds() {
+        eventManager.handleCancel(eventManager.getCurrentEvent());
+
         roundsElapsed = 0;
     }
 
@@ -107,14 +123,24 @@ public class RoundManager {
         if (timer != null)
             timer.stop();
 
-        eventManager.currentEvent.end();
-
         cancelRound();
 
-        Common.broadcast("current round: " + roundsElapsed + " maxRounds: " + MAX_ROUNDS);
+        if (eventManager.handleEnd(eventManager.getCurrentEvent())) {
+            eventManager.handleCancel(eventManager.getCurrentEvent());
+        }
+
+        PluginManager pluginManager = RandomEventsPlugin.getInstance().getServer().getPluginManager();
+
+        gameManager.getPlayerManager()
+                .getPlayers(PlayerState.ALIVE)
+                .forEach(player -> pluginManager.callEvent(new RoundSurvivedEvent(player)));
+
+        debug("current round: " + roundsElapsed + " maxRounds: " + MAX_ROUNDS);
 
         handleNextRound();
     }
+
+
 
     public void cancelRound() {
 
@@ -123,20 +149,7 @@ public class RoundManager {
 
         if (this.progressBar != null)
             progressBar.removeAll();
-
-
-        /*if (task != null) {
-            task.cancel();
-            task = null;
-        }*/
-
-        BaseEvent cache = eventManager.currentEvent;
-
-        debug("canceled round");
-
-        if (cache != null) {
-            cache.cancel();
-            eventManager.currentEvent = null;
-        }
     }
+
+
 }

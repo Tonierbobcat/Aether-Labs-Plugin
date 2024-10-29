@@ -2,10 +2,13 @@ package com.loficostudios.minigameeventsplugin.GameEvents.WorldEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
 import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
+import com.loficostudios.minigameeventsplugin.Interfaces.IWorldEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
-public class WorldGhastEvent extends BaseEvent {
+
+public class WorldGhastEvent extends BaseEvent implements IWorldEvent {
 
 
     @Override
@@ -14,8 +17,13 @@ public class WorldGhastEvent extends BaseEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
+    public @NotNull String getWarningMessage() {
         return "A ghast has been spotted in the arena!";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.GHAST_TEAR;
     }
 
 

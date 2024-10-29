@@ -2,13 +2,15 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateZombieEvent extends RandomPlayerSelectorEvent {
+public class PlateZombieEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
     @Override
     public boolean onSelect(Player selectedPlayer) {
 
@@ -33,8 +35,13 @@ public class PlateZombieEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " plate(s) will get a pet zombie! :D";
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will get a pet zombie! :D";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.ZOMBIE_SPAWN_EGG;
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameArena;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.Countdown.Countdown;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import com.loficostudios.minigameeventsplugin.Utils.Generator;
 import com.loficostudios.minigameeventsplugin.Utils.Selection;
 import lombok.Getter;
@@ -29,6 +28,8 @@ public class SpawnPlatform {
         PILLAR
     }
 
+    private final RandomEventsPlugin plugin;
+
     @Getter
     private final Player player;
 
@@ -54,12 +55,16 @@ public class SpawnPlatform {
         this.player = null;
         this.location = loc;
 
+        this.plugin = RandomEventsPlugin.getInstance();
+
         this.radius = DEFAULT_PLATFORM_RADIUS;
 
-        this.arena = MiniGameEventsPlugin.getInstance().getGameManager().getArena();
+        this.arena = this.plugin.getGameManager().getArena();
 
         this.type = type;
         this.material = material;
+
+
 
         debug("BEFORE CREATE");
     }
@@ -67,15 +72,14 @@ public class SpawnPlatform {
     public SpawnPlatform(Player player, Location loc, PlatformType type, Material material) {
         this.player = player;
         this.location = loc;
-
+        this.plugin = RandomEventsPlugin.getInstance();
         this.radius = DEFAULT_PLATFORM_RADIUS;
 
-        this.arena = MiniGameEventsPlugin.getInstance().getGameManager().getArena();
+        this.arena = this.plugin.getGameManager().getArena();
 
         this.type = type;
         this.material = material;
 
-        Common.broadcast("created platform");
     }
 
     private static final boolean ENABLE_TELEPORT_AFTER_PLATFORM_GENERATE = true;
@@ -171,7 +175,7 @@ public class SpawnPlatform {
     }
 
     private void calculateBlocks(Location center, Consumer<Set<Block>> callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(MiniGameEventsPlugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Selection selection = new Selection(arena.getPos1(), arena.getPos2());
 
             Set<Block> blocksToSet = new HashSet<>();
@@ -191,7 +195,7 @@ public class SpawnPlatform {
                 }
             }
 
-            Bukkit.getScheduler().runTask(MiniGameEventsPlugin.getInstance(), () -> callback.accept(blocksToSet));
+            Bukkit.getScheduler().runTask(plugin, () -> callback.accept(blocksToSet));
         });
     }
 

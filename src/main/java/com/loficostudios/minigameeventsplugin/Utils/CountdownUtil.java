@@ -1,13 +1,10 @@
 package com.loficostudios.minigameeventsplugin.Utils;
 
-import com.google.common.base.Preconditions;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 public class CountdownUtil {
@@ -24,10 +21,10 @@ public class CountdownUtil {
                 }
                 else {
                     // I have it like this so that it does not run the onEnd tasks async.
-                    Bukkit.getScheduler().runTask(MiniGameEventsPlugin.getInstance(), onEnd);
+                    Bukkit.getScheduler().runTask(RandomEventsPlugin.getInstance(), onEnd);
                     this.cancel();
                 }
             }
-        }.runTaskTimer(MiniGameEventsPlugin.getInstance(), 0, 20);
+        }.runTaskTimer(RandomEventsPlugin.getInstance(), 0, 20);
     }
 }

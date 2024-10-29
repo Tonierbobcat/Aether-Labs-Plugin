@@ -2,6 +2,7 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Random;
 
-public class PlayerSwordEvent extends RandomPlayerSelectorEvent {
+public class PlayerSwordEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
 
     private final Random random = new Random();
     private final ItemStack[] swords = new ItemStack[] {
@@ -29,8 +30,13 @@ public class PlayerSwordEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " player(s) will be granted a random sword.";
+    public @NotNull String getWarningMessage() {
+        return "player(s) will be granted a random sword.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.DIAMOND_SWORD;
     }
 
     @Override

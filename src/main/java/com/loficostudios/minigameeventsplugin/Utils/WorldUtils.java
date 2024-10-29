@@ -28,4 +28,28 @@ public class WorldUtils {
             }
         }
     }
+
+    public static void fillArea(Selection selection, Material material) {
+
+        Location pos1 =selection.pos1;
+        Location pos2 = selection.pos2;
+
+        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block block = selection.getBlock(x, y, z);
+                    if (block != null) {
+                        block.setType(material);
+                    }
+                }
+            }
+        }
+    }
 }

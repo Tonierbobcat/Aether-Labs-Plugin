@@ -1,6 +1,6 @@
 name: MiniGamePlugin
 version: '${project.version}'
-main: com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin
+main: com.loficostudios.minigameeventsplugin.RandomEventsPlugin
 api-version: '1.21'
-depend: [MelodyAPI, CommandAPI]
-softdepend: [Essentials, PlaceholderAPI]
+depend: [MelodyAPI]
+softdepend: [Essentials, PlaceholderAPI, Vault]

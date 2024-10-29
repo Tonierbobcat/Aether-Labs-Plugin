@@ -1,8 +1,8 @@
 package com.loficostudios.minigameeventsplugin.Placeholders;
 
-import com.loficostudios.minigameeventsplugin.Managers.GameManager;
+import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.Managers.ProfileManager;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.Utils.PlayerState;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -20,7 +20,7 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
 
     public MiniGamePlaceholder(ProfileManager profileManager) {
         this.profileManager = profileManager;
-        gameManager = MiniGameEventsPlugin.getInstance().getGameManager();
+        gameManager = RandomEventsPlugin.getInstance().getGameManager();
     }
 
     @Override
@@ -53,11 +53,15 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
         if (player == null)
             return "";
 
+        if (params.equals("alive")) {
+            return String.valueOf(gameManager.getPlayerManager().getPlayers(PlayerState.ALIVE).size());
+        }
 
+        if (params.equals("rounds")) {
+            return String.valueOf(gameManager.getRoundManager().getRoundsElapsed());
+        }
 
         Optional<Profile> optionalProfile = profileManager.getProfile(player.getUniqueId());
-
-
         if (optionalProfile.isPresent()) {
 
             Profile profile = optionalProfile.get();
@@ -70,15 +74,6 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
             };
         }
 
-        if (params.equals("alive")) {
-            return String.valueOf(gameManager.getPlayerManager(). getPlayers(PlayerState.ALIVE).size());
-        }
-
-        if (params.equals("rounds")) {
-            return String.valueOf(gameManager.getRoundManager().getRoundsElapsed());
-        }
-
         return "";
-
     }
 }

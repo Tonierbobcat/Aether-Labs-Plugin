@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import com.loficostudios.minigameeventsplugin.Utils.PlayerState;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlayerCakeEvent extends BaseEvent {
+public class PlayerCakeEvent extends BaseEvent implements IPlayerEvent {
 
     @Override
     public void start() {
@@ -27,8 +28,13 @@ public class PlayerCakeEvent extends BaseEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
+    public @NotNull String getWarningMessage() {
         return "All players will get cake!";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.CAKE;
     }
 
     @Override

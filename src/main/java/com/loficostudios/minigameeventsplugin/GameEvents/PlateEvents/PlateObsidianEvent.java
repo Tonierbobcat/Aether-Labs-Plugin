@@ -2,13 +2,14 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateObsidianEvent extends RandomPlayerSelectorEvent {
+public class PlateObsidianEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
 
     @Override
     public boolean onSelect(Player selectedPlayer) {
@@ -34,10 +35,14 @@ public class PlateObsidianEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + "plate(s) will become solid";
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will become solid";
     }
 
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.OBSIDIAN;
+    }
 
 
     @Override

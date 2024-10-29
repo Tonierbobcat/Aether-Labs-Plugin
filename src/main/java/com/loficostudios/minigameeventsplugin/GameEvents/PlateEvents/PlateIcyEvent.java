@@ -2,13 +2,14 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateIcyEvent extends RandomPlayerSelectorEvent {
+public class PlateIcyEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
     @Override
     public boolean onSelect(Player selectedPlayer) {
 
@@ -30,17 +31,22 @@ public class PlateIcyEvent extends RandomPlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull String warningMessage() {
-        return getAmount() + " plate(s) will be a bit slippery.";
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will be a bit slippery.";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.ICE;
     }
 
     @Override
     public Integer getMin() {
-        return 0;
+        return 1;
     }
 
     @Override
     public Integer getMax() {
-        return 0;
+        return 3;
     }
 }

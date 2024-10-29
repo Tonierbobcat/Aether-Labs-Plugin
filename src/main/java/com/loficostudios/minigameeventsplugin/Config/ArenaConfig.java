@@ -3,38 +3,62 @@ package com.loficostudios.minigameeventsplugin.Config;
 
 import com.loficostudios.melodyapi.libs.boostedyaml.YamlDocument;
 import com.loficostudios.melodyapi.libs.boostedyaml.block.implementation.Section;
-import com.loficostudios.melodyapi.utils.Common;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
-import org.bukkit.Bukkit;
+import com.loficostudios.melodyapi.utils.SimpleDocument;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.util.NumberConversions;
 
 import java.io.IOException;
 
 import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
+import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarning;
 
 @SuppressWarnings("SameParameterValue")
 public class ArenaConfig {
 
-    private static final YamlDocument arenaConfig = MiniGameEventsPlugin.getInstance().getArenaConfig();
+    private final YamlDocument config;
 
-    public static final Location POS1 = getLocationFromConfig(arenaConfig, "pos1", true);
-    public static final Location POS2 = getLocationFromConfig(arenaConfig, "pos2", true);
+    private final RandomEventsPlugin plugin;
 
+    public ArenaConfig(RandomEventsPlugin plugin) {
+        this.plugin = plugin;
 
-    public static void update(Location pos1, Location pos2) {
+        this.config = SimpleDocument.create(this.plugin, "arena-config.yml");
 
-        Section loc1 = arenaConfig.getSection("pos1");
-        Section loc2 = arenaConfig.getSection("pos2");
+        POS_1 = getLocationFromConfig(config, "pos1", true);
+        POS_2 = getLocationFromConfig(config, "pos2", true);
+        WORLD_NAME = (String) config.get("world");
+    }
 
-        World defaultWorld = MiniGameEventsPlugin.getInstance().getServer().getWorlds().get(0);
+    public static Location POS_1 = null;
+    public static Location POS_2 = null;
+    public static String WORLD_NAME = "";
 
-        loc1.set("world", pos2.getWorld() == null ? defaultWorld : pos2.getWorld().getName());
+    private static Location getLocationFromConfig(YamlDocument config, String path, boolean round) {
+        Section loc = config.getSection(path);
+
+        double x = NumberConversions.floor((double) loc.get("x"));
+        double y = NumberConversions.floor((double) loc.get("y"));
+        double z = NumberConversions.floor((double) loc.get("z"));
+
+        Location location = new Location(null, x, y, z);
+        debug("config. " + path + ": " + location);
+        return location;
+    }
+
+    public void update(Location pos1, Location pos2) {
+
+        Section loc1 = config.getSection("pos1");
+        Section loc2 = config.getSection("pos2");
+
+        World defaultWorld = plugin.getServer().getWorlds().get(0);
+
+        config.set("world", pos2.getWorld() == null ? defaultWorld : pos2.getWorld().getName());
+
         loc1.set("x", pos1.getX());
         loc1.set("y", pos1.getY());
         loc1.set("z", pos1.getZ());
-
-        loc2.set("world", pos2.getWorld() == null ? defaultWorld : pos2.getWorld().getName());
         loc2.set("x", pos2.getX());
         loc2.set("y", pos2.getY());
         loc2.set("z", pos2.getZ());
@@ -42,29 +66,12 @@ public class ArenaConfig {
         //File configFile = YamlDocument.load
 
         try {
-            arenaConfig.save();
+            config.save();
         }
         catch (IOException e) {
-            MiniGameEventsPlugin.getInstance().getServer().getLogger().warning(e.getMessage());
+            debugWarning(e.getMessage());
         }
     }
 
-    private static Location getLocationFromConfig(YamlDocument config, String path, boolean round) {
-        Section loc = config.getSection(path);
 
-        double x = round ? Math.round((double) loc.get("x")) : (double) loc.get("x");
-        double y = round ? Math.round((double) loc.get("y")) : (double) loc.get("y");
-        double z = round ? Math.round((double) loc.get("z")) : (double) loc.get("z");
-
-        String worldName = (String) loc.get("world");
-
-        World defaultWorld = MiniGameEventsPlugin.getInstance().getServer().getWorlds().get(0);
-
-        World worldFromFile = Bukkit.getWorld(worldName == null ? "none" : worldName);
-
-        World world = worldFromFile == null ? defaultWorld : worldFromFile;
-
-        debug("config. " + path + ": " + new Location(world, x, y, z));
-        return new Location(world, x, y, z);
-    }
 }

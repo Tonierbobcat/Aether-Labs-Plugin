@@ -1,19 +1,25 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
-import com.loficostudios.minigameeventsplugin.Managers.PlayerManager;
+import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
+import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.PlayerManager;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class PlateSlimeEvent extends BaseEvent {
+public class PlateSlimeEvent extends BaseEvent implements IPlateEvent {
     @Override
     public @NotNull String getName() {
         return "Trampoline Event";
     }
 
     @Override
-    public @NotNull String warningMessage() {
+    public @NotNull String getWarningMessage() {
         return "All plates will become a trampoline";
+    }
+
+    @Override
+    public @NotNull Material getDisplayMaterial() {
+        return Material.SLIME_BLOCK;
     }
 
 

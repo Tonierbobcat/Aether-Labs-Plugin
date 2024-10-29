@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameArena;
 
-import com.loficostudios.melodyapi.utils.Common;
-import com.loficostudios.minigameeventsplugin.MiniGameEventsPlugin;
+import com.loficostudios.minigameeventsplugin.Config.ArenaConfig;
+import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
 import com.loficostudios.minigameeventsplugin.Utils.Selection;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -21,22 +21,23 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarning;
+import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.*;
 import static com.loficostudios.minigameeventsplugin.Utils.Selection.randomDouble;
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
 import static com.loficostudios.minigameeventsplugin.Utils.WorldUtils.fillArea;
 
 public class GameArena {
 
-    private static final Material FILL_MATERIAL = Material.LAVA;
-    private static final int FILL_SPEED = 5;
+    public static final Material DEFAULT_FILL_MATERIAL = Material.LAVA;
+    public static final int DEFAULT_FILL_SPEED = 5;
     public static final Material DEFAULT_PLATFORM_MATERIAL = Material.STONE;
     public static final SpawnPlatform.PlatformType DEFAULT_PLATFORM_TYPE = SpawnPlatform.PlatformType.FLAT;
+    private static final Boolean SPAWN_EXTRA_PLATFORMS = false;
+    private static final Integer EXTRA_PLATFORMS_AMOUNT = 5;
 
     @Getter private Location pos1;
     @Getter private Location pos2;
 
-    @Getter private World world;
+    private World world;
 
     private final Collection<Entity> mobs = new ArrayList<>();
 
@@ -45,11 +46,29 @@ public class GameArena {
 
     private BukkitTask lavaTask;
 
+    public World getWorld() {
+
+        if (this.world == null) {
+            World worldFromConfig = RandomEventsPlugin.getInstance()
+                    .getServer()
+                    .getWorld(ArenaConfig.WORLD_NAME);
+
+            if (worldFromConfig != null) {
+                this.world = worldFromConfig;
+                this.pos1.setWorld(worldFromConfig);
+                this.pos2.setWorld(worldFromConfig);
+                return worldFromConfig;
+            }
+            throw new IllegalArgumentException();
+        }
+        else {
+            return this.world;
+        }
+    }
+
     public GameArena(Location pos1, Location pos2) {
         this.pos1 = pos1;
         this.pos2 = pos2;
-
-        this.world = pos1.getWorld();
     }
 
     public Location getRandomLocation() {
@@ -71,49 +90,61 @@ public class GameArena {
     //region Clean Up
     public void cancelLavaTask() {
         if (lavaTask != null) {
-            Common.broadcast("canceledLava Task");
+            debug("canceled lava task");
             lavaTask.cancel();
             lavaTask = null;
         }
     }
 
     public void clear() {
-        removeAllPlatforms();
-
         fillArea(pos1, pos2, Material.AIR);
     }
 
     public void removeMobs() {
-        mobs.forEach(mob -> {
-            String name = mob.getName();
-            mob.remove();
 
-            Common.broadcast("Removed " + name);
-        });
+        int amountRemoved = 0;
+
+        for (Entity mob : mobs) {
+            mob.remove();
+            amountRemoved++;
+        }
+
+        debug("Removed " + amountRemoved + " mobs");
     }
     //endregion
+
 
     //region Platform Functions
     public void spawnPlatforms(Collection<Player> players) {
 
         Selection bounds = new Selection(getPos1(), getPos2());
 
-        players.forEach(player -> {
+        int platformsCreated = 0;
+
+        for (Player player : players) {
             Location randomLocation = getRandomLocation();
-
             Location location = new Location(getWorld(), randomLocation.getX(), bounds.getMiddleY(), randomLocation.getZ());
-
             SpawnPlatform spawnPlatform = addSpawnPlatform(player, location, null, null, null);
-        });
-
-        //add extra spawn platforms
-        for(int i = 0; i < 5; i++) {
-            Location randomLocation = getRandomLocation();
-
-            Location location = new Location(getWorld(), randomLocation.getX(), bounds.getMiddleY(), randomLocation.getZ());
-
-            SpawnPlatform spawnPlatform = addSpawnPlatform(location, null, null, null);
+            if (spawnPlatform != null) {
+                platformsCreated++;
+            }
         }
+
+
+        if (SPAWN_EXTRA_PLATFORMS) {
+            for(int i = 0; i < EXTRA_PLATFORMS_AMOUNT; i++) {
+                Location randomLocation = getRandomLocation();
+
+                Location location = new Location(getWorld(), randomLocation.getX(), bounds.getMiddleY(), randomLocation.getZ());
+
+                SpawnPlatform spawnPlatform = addSpawnPlatform(location, null, null, null);
+                if (spawnPlatform != null) {
+                    platformsCreated++;
+                }
+            }
+        }
+
+        debug("created " + platformsCreated + " platforms");
 
     }
 
@@ -199,11 +230,13 @@ public class GameArena {
         mobs.add(getWorld().spawnEntity(location, type));
     }
 
-    public void startLevelFillTask() {
+    public void startLevelFillTask(Material fillMaterial, int speed) {
         if (lavaTask != null) {
             debugWarning("Unable to start lava fill task. already started");
             return;
         }
+
+        RandomEventsPlugin plugin = RandomEventsPlugin.getInstance();
 
         Selection bounds = new Selection(pos1, pos2);
         List<Block> blocks = new ArrayList<>();
@@ -245,12 +278,21 @@ public class GameArena {
 
                         for (int i = 0; i < batch_size && currentIndex < blocks.size(); i++) {
                             Block block = blocks.get(currentIndex);
-                            block.setType(FILL_MATERIAL);
+
+                            try {
+                                block.setType(fillMaterial);
+                            } catch (Exception e) {
+
+                                debugError("could not fill arena with material: " + fillMaterial.name());
+                                this.cancel();
+                                return;
+                            }
+
                             currentIndex++;
                         }
                     }
-                }.runTaskTimer(MiniGameEventsPlugin.getInstance(), 0, FILL_SPEED);
+                }.runTaskTimer(plugin, 0, speed);
             }
-        }.runTaskAsynchronously(MiniGameEventsPlugin.getInstance());
+        }.runTaskAsynchronously(plugin);
     }
 }

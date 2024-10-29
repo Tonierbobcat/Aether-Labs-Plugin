@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,10 @@ public class Selection {
 
     public static double randomDouble(double min, double max) {
         return min + ThreadLocalRandom.current().nextDouble(Math.abs(max - min + 1));
+    }
+
+    public int count() {
+        return blocks.size();
     }
 
     public Selection(Location pos1, Location pos2) {
@@ -96,7 +101,7 @@ public class Selection {
         return (minY + maxY) / 2; // Floors the value if there's no exact middle
     }
 
-    public Block getBlock(int x, int y, int z) {
+    public @Nullable Block getBlock(int x, int y, int z) {
         return blocks.get(new Vector(x, y, z));
     }
 }
