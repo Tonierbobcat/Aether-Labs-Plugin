@@ -1,7 +1,9 @@
 package com.loficostudios.minigameeventsplugin.GameArena;
 
+import com.loficostudios.minigameeventsplugin.BukkitEvents.ArenaLavaLevelChangedEvent;
 import com.loficostudios.minigameeventsplugin.Config.ArenaConfig;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.Utils.Debug;
 import com.loficostudios.minigameeventsplugin.Utils.Selection;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -10,7 +12,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -21,18 +25,18 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.*;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.*;
 import static com.loficostudios.minigameeventsplugin.Utils.Selection.randomDouble;
 import static com.loficostudios.minigameeventsplugin.Utils.WorldUtils.fillArea;
 
+@SuppressWarnings("UnusedReturnValue")
 public class GameArena {
 
-    public static final Material DEFAULT_FILL_MATERIAL = Material.LAVA;
-    public static final int DEFAULT_FILL_SPEED = 5;
+    public static final int MIN_GAME_ARENA_AREA = 146068;
     public static final Material DEFAULT_PLATFORM_MATERIAL = Material.STONE;
     public static final SpawnPlatform.PlatformType DEFAULT_PLATFORM_TYPE = SpawnPlatform.PlatformType.FLAT;
-    private static final Boolean SPAWN_EXTRA_PLATFORMS = false;
-    private static final Integer EXTRA_PLATFORMS_AMOUNT = 5;
+    private static final Boolean DEFAULT_SPAWN_EXTRA_PLATFORMS = true;
+    private static final Integer EXTRA_PLATFORMS_AMOUNT = 25;
 
     @Getter private Location pos1;
     @Getter private Location pos2;
@@ -49,7 +53,7 @@ public class GameArena {
     public World getWorld() {
 
         if (this.world == null) {
-            World worldFromConfig = RandomEventsPlugin.getInstance()
+            World worldFromConfig = AetherLabsPlugin.getInstance()
                     .getServer()
                     .getWorld(ArenaConfig.WORLD_NAME);
 
@@ -88,95 +92,148 @@ public class GameArena {
     }
 
     //region Clean Up
-    public void cancelLavaTask() {
-        if (lavaTask != null) {
-            debug("canceled lava task");
-            lavaTask.cancel();
-            lavaTask = null;
-        }
-    }
 
     public void clear() {
-        fillArea(pos1, pos2, Material.AIR);
+        Selection selection = new Selection(pos1, pos2);
+
+        List<Block> blocks = new ArrayList<>(selection.getBlocks());
+
+        blocks.forEach(block -> {
+            block.setType(Material.AIR);
+        });
     }
 
-    public void removeMobs() {
-
+    public void removeEntities() {
         int amountRemoved = 0;
 
-        for (Entity mob : mobs) {
-            mob.remove();
-            amountRemoved++;
-        }
-
-        debug("Removed " + amountRemoved + " mobs");
-    }
-    //endregion
+        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
 
 
-    //region Platform Functions
-    public void spawnPlatforms(Collection<Player> players) {
-
-        Selection bounds = new Selection(getPos1(), getPos2());
-
-        int platformsCreated = 0;
-
-        for (Player player : players) {
-            Location randomLocation = getRandomLocation();
-            Location location = new Location(getWorld(), randomLocation.getX(), bounds.getMiddleY(), randomLocation.getZ());
-            SpawnPlatform spawnPlatform = addSpawnPlatform(player, location, null, null, null);
-            if (spawnPlatform != null) {
-                platformsCreated++;
-            }
-        }
+        for (LivingEntity entity : world.getLivingEntities()) {
+            Location loc = entity.getLocation();
+            if (loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
+                    loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
+                    loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ) {
 
 
-        if (SPAWN_EXTRA_PLATFORMS) {
-            for(int i = 0; i < EXTRA_PLATFORMS_AMOUNT; i++) {
-                Location randomLocation = getRandomLocation();
-
-                Location location = new Location(getWorld(), randomLocation.getX(), bounds.getMiddleY(), randomLocation.getZ());
-
-                SpawnPlatform spawnPlatform = addSpawnPlatform(location, null, null, null);
-                if (spawnPlatform != null) {
-                    platformsCreated++;
+                if (entity.getType() != EntityType.PLAYER) {
+                    entity.remove();
+                    amountRemoved++;
                 }
             }
         }
 
-        debug("created " + platformsCreated + " platforms");
-
+        log("Removed " + amountRemoved + " mobs");
     }
+    //endregion
 
-    public SpawnPlatform addSpawnPlatform(@NotNull Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Consumer<Collection<Block>> onGenerate) {
+//    public void InitializeSpawnPlatforms(Collection<Player> players, SpawnPlatform.SpawnAlgorithm algorithm) {
+//
+//        //Selection bounds = new Selection(getPos1(), getPos2());
+//
+//        Material defaultSpawnPlatMat = DEFAULT_PLATFORM_MATERIAL;
+//        SpawnPlatform.PlatformType type = DEFAULT_PLATFORM_TYPE;
+//
+//        int platformsCreated = 0;
+//
+//        for (Player player : players) {
+//
+//
+//
+//            SpawnPlatform spawnPlatform = new SpawnPlatform(player, type, defaultSpawnPlatMat);
+//
+//            if (spawnPlatform.create(null, algorithm)) {
+//                playerSpawnPlatforms.put(player, spawnPlatform);
+//                platformsCreated++;
+//            }
+//            else {
+//                logWarning("could not create platform for player " + player);
+//            }
+//        }
+//
+//
+//        if (DEFAULT_SPAWN_EXTRA_PLATFORMS) {
+//            for(int i = 0; i < EXTRA_PLATFORMS_AMOUNT; i++) {
+//                SpawnPlatform spawnPlatform = new SpawnPlatform(type, defaultSpawnPlatMat);
+//
+//                if (spawnPlatform.create(null, algorithm)) {
+//                    spawnPlatforms.add(spawnPlatform);
+//                    platformsCreated++;
+//                }
+//            }
+//        }
+//
+//        log("created " + platformsCreated + " platforms");
+//    }
 
-        SpawnPlatform spawnPlatform = new SpawnPlatform(location,
+    public SpawnPlatform addSpawnPlatform(@Nullable Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Runnable onAdd, @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
+
+        SpawnPlatform spawnPlatform = new SpawnPlatform(
                 type != null ? type : DEFAULT_PLATFORM_TYPE,
-                material != null ? material : DEFAULT_PLATFORM_MATERIAL);
+                material != null ? material : DEFAULT_PLATFORM_MATERIAL,
+                spawnAlgorithm);
 
-        spawnPlatforms.add(spawnPlatform);
+        boolean isCreated = false;
 
-        if (!spawnPlatform.create(onGenerate)) {
-            spawnPlatforms.remove(spawnPlatform);
+        if (location != null) {
+            isCreated = spawnPlatform.create(location, onGenerate -> {
+                if (onAdd != null)
+                    onAdd.run();
+            });
+        }
+        else {
+            isCreated = spawnPlatform.create(onGenerate -> {
+                if (onAdd != null)
+                    onAdd.run();
+            });
         }
 
-        return spawnPlatform;
+        if (!isCreated) {
+            return null;
+        }
+        else {
+            spawnPlatforms.add(spawnPlatform);
+            return spawnPlatform;
+        }
     }
 
-    public SpawnPlatform addSpawnPlatform(@NotNull Player player, @NotNull Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Consumer<Collection<Block>> onGenerate) {
+    public SpawnPlatform addSpawnPlatform(@NotNull Player player, @Nullable Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Consumer<SpawnPlatform> onAdd, @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
 
-        SpawnPlatform spawnPlatform = new SpawnPlatform(player, location,
+        SpawnPlatform spawnPlatform = new SpawnPlatform(player,
                 type != null ? type : DEFAULT_PLATFORM_TYPE,
-                material != null ? material : DEFAULT_PLATFORM_MATERIAL);
+                material != null ? material : DEFAULT_PLATFORM_MATERIAL,
+                spawnAlgorithm);
 
-        playerSpawnPlatforms.put(player, spawnPlatform);
+        boolean isCreated = false;
 
-        if (!spawnPlatform.create(onGenerate)) {
-            playerSpawnPlatforms.remove(player);
+        if (location != null) {
+            isCreated = spawnPlatform.create(location, onGenerate -> {
+                if (onAdd != null)
+                    onAdd.accept(spawnPlatform);
+            });
+        }
+        else {
+            isCreated = spawnPlatform.create(onGenerate -> {
+                if (onAdd != null)
+                    onAdd.accept(spawnPlatform);
+            });
         }
 
 
-        return spawnPlatform;
+
+        if (!isCreated) {
+            return null;
+        }
+        else {
+            playerSpawnPlatforms.put(player, spawnPlatform);
+            Debug.log("add spawn platform for " + player.getName());
+            return spawnPlatform;
+        }
     }
 
     public void removeSpawnPlatform(SpawnPlatform platform, boolean warning) {
@@ -191,11 +248,11 @@ public class GameArena {
 
         if (player != null) {
             playerSpawnPlatforms.remove(player);
-            debug("removed " + player.getName() +  "'s platform from arena");
+            log("removed " + player.getName() +  "'s platform from arena");
         }
         else {
             spawnPlatforms.remove(platform);
-            debug("removed platform from arena");
+            log("removed platform from arena");
         }
     }
 
@@ -215,33 +272,39 @@ public class GameArena {
 
 
     public Collection<SpawnPlatform> getSpawnPlatforms() {
-        return Stream.concat(
-                playerSpawnPlatforms.values().stream(),
-                spawnPlatforms.stream()
-        ).collect(Collectors.toList());
+
+        Collection<SpawnPlatform> concat = new ArrayList<>();
+
+        concat.addAll(spawnPlatforms);
+        concat.addAll(playerSpawnPlatforms.values());
+
+        return concat;
     }
 
     public SpawnPlatform getSpawnPlatform(Player player) {
         return playerSpawnPlatforms.get(player);
     }
-    //endregion
 
-    public void spawnMob(EntityType type, Location location) {
-        mobs.add(getWorld().spawnEntity(location, type));
+
+    public Entity spawnMob(EntityType type, Location location) {
+        return getWorld().spawnEntity(location, type);
     }
 
     public void startLevelFillTask(Material fillMaterial, int speed) {
         if (lavaTask != null) {
-            debugWarning("Unable to start lava fill task. already started");
+            logWarning("Unable to start lava fill task. already started");
             return;
         }
 
-        RandomEventsPlugin plugin = RandomEventsPlugin.getInstance();
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
 
         Selection bounds = new Selection(pos1, pos2);
         List<Block> blocks = new ArrayList<>();
 
+        final GameArena arena = this;
         lavaTask = new BukkitRunnable() {
+
+
             @Override
             public void run() {
                 int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
@@ -250,6 +313,9 @@ public class GameArena {
                 int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
                 int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
                 int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+
+
+
 
 
                 for (int y = minY; y <= maxY; y++) {
@@ -264,26 +330,42 @@ public class GameArena {
                 int batch_size = (maxX - minX + 1);
 
 
+
+                //SETS the blocks
                 lavaTask = new BukkitRunnable() {
 
+                    int lavaLevel = 0;
+                    int currentYLevel = blocks.get(0).getY();
                     int currentIndex = 0;
 
                     @Override
                     public void run() {
-                        // Check if all blocks have been filled
+
+
                         if (currentIndex >= blocks.size()) {
-                            cancel(); // Stop the task when done
+                            this.cancel();
                             return;
                         }
+
+
+
 
                         for (int i = 0; i < batch_size && currentIndex < blocks.size(); i++) {
                             Block block = blocks.get(currentIndex);
 
                             try {
                                 block.setType(fillMaterial);
+
+                                if (block.getY() != currentYLevel) {
+                                    lavaLevel++;
+                                    currentYLevel = block.getY();
+                                    PluginManager pluginManager = AetherLabsPlugin.getInstance().getServer().getPluginManager();
+                                    pluginManager.callEvent(new ArenaLavaLevelChangedEvent(arena, block.getY(), lavaLevel));
+                                }
+
                             } catch (Exception e) {
 
-                                debugError("could not fill arena with material: " + fillMaterial.name());
+                                logError("could not fill arena with material: " + fillMaterial.name());
                                 this.cancel();
                                 return;
                             }
@@ -295,4 +377,13 @@ public class GameArena {
             }
         }.runTaskAsynchronously(plugin);
     }
+
+    public void cancelLavaFillTask() {
+        if (lavaTask != null) {
+            log("canceled lava task");
+            lavaTask.cancel();
+            lavaTask = null;
+        }
+    }
+
 }

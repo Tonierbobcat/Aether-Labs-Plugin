@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.Listeners;
 
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.Profile.ProfileAlreadyLoadedException;
 import com.loficostudios.minigameeventsplugin.Managers.ProfileManager;
 import com.loficostudios.minigameeventsplugin.Profile.ProfileNotLoadedException;
@@ -10,16 +10,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarning;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.logWarning;
 
 public class PlayerListener implements Listener {
 
-    final RandomEventsPlugin plugin;
+    final AetherLabsPlugin plugin;
     final ProfileManager profileManager;
 
     public PlayerListener(ProfileManager profileManager) {
         this.profileManager = profileManager;
-        this.plugin = RandomEventsPlugin.getInstance();
+        this.plugin = AetherLabsPlugin.getInstance();
     }
 
     @EventHandler
@@ -30,7 +30,7 @@ public class PlayerListener implements Listener {
         try {
             profileManager.loadProfile(player.getUniqueId());
         } catch (ProfileAlreadyLoadedException exception) {
-            debugWarning("Profile for " + player.getName() + "is already loaded");
+            logWarning("Profile for " + player.getName() + "is already loaded");
         }
     }
 
@@ -42,7 +42,7 @@ public class PlayerListener implements Listener {
         try {
             profileManager.unloadProfile(player.getUniqueId());
         } catch (ProfileNotLoadedException exception) {
-            debugWarning("Player " + player.getName() + " tried to unload his profile but it was not loaded.");
+            logWarning("Player " + player.getName() + " tried to unload his profile but it was not loaded.");
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -11,7 +10,7 @@ import java.util.Collection;
 
 import static com.loficostudios.minigameeventsplugin.GameEvents.Items.SPOOKY_PUMPKIN;
 
-public class PlayerSpookyEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerSpookyEvent extends RandomPlayerSelectorEvent {
 
 
     @Override

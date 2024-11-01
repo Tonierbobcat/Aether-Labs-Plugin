@@ -1,8 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -12,7 +11,8 @@ import java.util.Collection;
 
 import static com.loficostudios.minigameeventsplugin.Utils.EventUtils.effectPlayer;
 
-public class PlayerBlindEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerBlindEvent extends RandomPlayerSelectorEvent {
+
 
     @Override
     public boolean onSelect(Player selectedPlayer) {

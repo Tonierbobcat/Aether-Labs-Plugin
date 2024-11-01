@@ -1,7 +1,8 @@
 package com.loficostudios.minigameeventsplugin.GameArena;
 
+import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.Countdown.Countdown;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.Utils.Generator;
 import com.loficostudios.minigameeventsplugin.Utils.Selection;
 import lombok.Getter;
@@ -17,8 +18,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarning;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.log;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.logWarning;
 
 
 public class SpawnPlatform {
@@ -28,7 +29,7 @@ public class SpawnPlatform {
         PILLAR
     }
 
-    private final RandomEventsPlugin plugin;
+    private final AetherLabsPlugin plugin;
 
     @Getter
     private final Player player;
@@ -46,37 +47,42 @@ public class SpawnPlatform {
 
     private static final int DEFAULT_PLATFORM_RADIUS = 2;
 
+    private Hologram hologram;
+
     @Getter
     private int radius;
 
     private final GameArena arena;
 
-    public SpawnPlatform(Location loc, PlatformType type, Material material) {
-        this.player = null;
-        this.location = loc;
+    private final SpawnAlgorithm spawnAlgorithm;
 
-        this.plugin = RandomEventsPlugin.getInstance();
+    public SpawnPlatform(@NotNull PlatformType type, @NotNull Material material, @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
+        this.player = null;
+
+        this.plugin = AetherLabsPlugin.getInstance();
 
         this.radius = DEFAULT_PLATFORM_RADIUS;
 
         this.arena = this.plugin.getGameManager().getArena();
+
+        this.spawnAlgorithm = spawnAlgorithm;
 
         this.type = type;
         this.material = material;
 
 
 
-        debug("BEFORE CREATE");
+        log("BEFORE CREATE");
     }
 
-    public SpawnPlatform(Player player, Location loc, PlatformType type, Material material) {
+    public SpawnPlatform(@NotNull Player player, @NotNull PlatformType type, @NotNull  Material material,  @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
         this.player = player;
-        this.location = loc;
-        this.plugin = RandomEventsPlugin.getInstance();
+        //this.location = loc;
+        this.plugin = AetherLabsPlugin.getInstance();
         this.radius = DEFAULT_PLATFORM_RADIUS;
 
         this.arena = this.plugin.getGameManager().getArena();
-
+        this.spawnAlgorithm = spawnAlgorithm;
         this.type = type;
         this.material = material;
 
@@ -90,7 +96,7 @@ public class SpawnPlatform {
 
 
 
-        removalTask = new Countdown(countdown -> {
+        removalTask = new Countdown("platform removal", countdown -> {
 
             if (countdown % 2 == 0) {
                 setPlatform(Material.RED_STAINED_GLASS);
@@ -101,11 +107,39 @@ public class SpawnPlatform {
         }, this::remove).start(REMOVAL_TIME);
     }
 
+    public enum SpawnAlgorithm { EQUAL_HEIGHT, RANDOM_HEIGHT }
+
+    public boolean create(Location location, Consumer<Collection<Block>> onGenerate) {
+
+        Location center = null;
+
+        Generator generator = new Generator(material, generatedBlocks -> {
+
+            if (onGenerate != null) {
+                onGenerate.accept(generatedBlocks);
+            }
+
+
+
+        });
+
+        calculateBlocks(center, calculatedBlocks -> {
+            generator.generate(calculatedBlocks);
+            blocks.addAll(calculatedBlocks);
+        });
+
+        this.location = center;
+        return true;
+    }
+
     public boolean create(Consumer<Collection<Block>> onGenerate) {
 
 
 
-        Selection bounds = new Selection(arena.getPos1(), arena.getPos2());
+        Selection bounds = new Selection(arena.getPos1(), arena.getPos2()).adjustSelection(-10);
+
+
+
         Location center = null;
 
         boolean isCreated = false;
@@ -116,11 +150,26 @@ public class SpawnPlatform {
         while (!isCreated && attempts < 50) {
 
 
-            center = bounds.getRandomLocation();
 
+            center = bounds.getRandomLocation();
             center.setY(bounds.getMiddleY());
 
+
+            //OLD DIFFERENT HEIGHTS LOGIC
+//            switch (algorithm) {
+//                case RANDOM_HEIGHT:
+//                    center = bounds.getRandomLocation();
+//                    break;
+//                case EQUAL_HEIGHT:
+//                    center = bounds.getRandomLocation();
+//                    center.setY(bounds.getMiddleY());
+//                    break;
+//            }
+
             if (isLocationValid(center)) {
+
+
+
 
                 Generator generator = new Generator(material, generatedBlocks -> {
 
@@ -128,12 +177,16 @@ public class SpawnPlatform {
                         onGenerate.accept(generatedBlocks);
                     }
 
-                    if (ENABLE_TELEPORT_AFTER_PLATFORM_GENERATE) {
-                        if (player != null)
-                            teleportCenter();
-                    }
-
                 });
+
+                if (this.spawnAlgorithm.equals(SpawnAlgorithm.RANDOM_HEIGHT)) {
+
+                    int y = bounds.getRandomLocation().getBlockY();
+
+                    //center.setY(y);
+
+                    center = new Location(center.getWorld(), center.getBlockX(), y, center.getBlockZ());
+                }
 
                 calculateBlocks(center, calculatedBlocks -> {
                     generator.generate(calculatedBlocks);
@@ -147,7 +200,30 @@ public class SpawnPlatform {
 
         if (isCreated) {
             this.location = center;
-            debugWarning("attempts to create " + attempts);
+            logWarning("attempts to create " + attempts);
+
+            Location hologramLoc = new Location(location.getWorld(),
+                    this.location.getX() + 0.5,
+                    this.location.getY() - 1,
+                    this.location.getZ() + 0.5);
+
+
+            String HOLOGRAM_NAME = "{name}'s plate";
+
+            if (player != null) {
+                hologram = new Hologram(SimpleColor.deserialize(
+                        HOLOGRAM_NAME.replace("{name}", player.getName())),
+                        hologramLoc);
+            }
+            else {
+                hologram = new Hologram(SimpleColor.deserialize(
+                        HOLOGRAM_NAME.replace("{name}", "NaN")),
+                        hologramLoc);
+            }
+
+
+            //ArmorStand hologram = location.getWorld().spawn
+
             return true;
         }
         else {
@@ -159,15 +235,27 @@ public class SpawnPlatform {
         blocks.remove(block);
     }
 
-    private static final int MIN_SPACING = 5;
+    private static final int MIN_SPACING = 7;
 
 
 
     private boolean isLocationValid(Location center) {
-        debug("Spawn Platform amount in arena " + arena.getSpawnPlatforms().size());
+
+
+        /*for (SpawnPlatform platform : arena.getSpawnPlatforms()) {
+            if (center.distance(platform.location) < MIN_SPACING + radius) {
+                return false;
+            }
+        }
+        return true;*/
 
         for (SpawnPlatform platform : arena.getSpawnPlatforms()) {
-            if (center.distance(platform.location) < MIN_SPACING + radius) {
+            // Calculate the distance in x and z only
+            double dx = center.getX() - platform.location.getX();
+            double dz = center.getZ() - platform.location.getZ();
+            double distanceXZ = Math.sqrt(dx * dx + dz * dz); // 2D distance ignoring y
+
+            if (distanceXZ < MIN_SPACING + radius) {
                 return false;
             }
         }
@@ -229,19 +317,22 @@ public class SpawnPlatform {
 
         generator.generate(blocks);
         blocks.clear();
+
+        if (hologram != null)
+            hologram.remove();
     }
 
     public boolean shrink(int amount) {
 
 
         if (radius == 0) {
-            debug("removing platform");
+            log("removing platform");
             return false;
         }
 
-        debug("current radius " + radius);
+        log("current radius " + radius);
         radius -= amount;
-        debug("new radius " + radius);
+        log("new radius " + radius);
 
 
 
@@ -249,7 +340,7 @@ public class SpawnPlatform {
 
 
 
-        debug("shrunk to radius " + radius);
+        log("shrunk to radius " + radius);
 
         return true;
     }
@@ -260,7 +351,7 @@ public class SpawnPlatform {
 
         updateBlocks(material, false);
 
-        debug("expanded to radius " + radius);
+        log("expanded to radius " + radius);
 
         return true;
     }

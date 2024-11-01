@@ -1,17 +1,17 @@
 package com.loficostudios.minigameeventsplugin.Listeners;
 
 import com.loficostudios.melodyapi.utils.Common;
-import com.loficostudios.minigameeventsplugin.Countdown.Countdown;
+import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameState;
 import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.PlayerManager;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.Managers.VoteManager;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.BukkitEvents.RoundSurvivedEvent;
+import com.loficostudios.minigameeventsplugin.Utils.Debug;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -21,22 +21,24 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import static com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager.PLAYER_KILL_MONEY_AMOUNT;
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugError;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager.MIN_PLAYERS_TO_START;
 
 public class MiniGameListener implements Listener {
 
-    private final RandomEventsPlugin plugin;
+    private final AetherLabsPlugin plugin;
     private final GameManager gameManager;
     private final PlayerManager playerManager;
     public MiniGameListener(GameManager gameManager) {
         this.gameManager = gameManager;
-        this.plugin = RandomEventsPlugin.getInstance();
+        this.plugin = AetherLabsPlugin.getInstance();
         this.playerManager = gameManager.getPlayerManager();
     }
 
@@ -45,31 +47,51 @@ public class MiniGameListener implements Listener {
 
     @EventHandler
     private void onFlammableBlockPlaced(BlockPlaceEvent e) {
-        //Player player = e.getPlayer();
         Block block = e.getBlock();
 
-        int time = 3;
-
-
-
+        int time = 20;
 
         if (gameManager.inProgress() && block.getType().equals(Material.WHITE_WOOL)) {
-            Countdown timer = new Countdown(countdown -> {
-                //on tick
 
-                if (countdown == 2) {
-                    block.setType(Material.BLACK_WOOL);
+            new BukkitRunnable() {
+
+                int timer = time;
+
+                List<Material> allowed = new ArrayList<>(List.of(
+
+                        Material.BLACK_WOOL,
+                        Material.GRAY_WOOL,
+                        Material.LIGHT_GRAY_WOOL,
+                        Material.WHITE_WOOL
+
+                ));
+
+                @Override
+                public void run() {
+
+                    if (!allowed.contains(block.getType())) {
+                        Debug.log("canceled wool task");
+                        this.cancel();
+                    }
+
+
+                    if (timer > 0) {
+                        timer--;
+
+                        switch (timer) {
+                            case 6 -> block.setType(Material.LIGHT_GRAY_WOOL);
+                            case 4 -> block.setType(Material.GRAY_WOOL);
+                            case 2 -> block.setType(Material.BLACK_WOOL);
+                        }
+                    }
+                    else {
+                        block.setType(Material.AIR);
+                        this.cancel();
+                    }
+
                 }
-
-
-            }, () -> {
-                block.setType(Material.AIR);
-            });
-
-
-            timer.start(time);
+            }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 20);
         }
-
     }
 
     @EventHandler
@@ -77,18 +99,21 @@ public class MiniGameListener implements Listener {
         final Player player = e.getPlayer();
         plugin.getOnlinePlayers().add(player);
 
-        World arenaWorld = gameManager.getArena().getWorld();
+        GameArena arena = gameManager.getArena();
+        if (arena == null)
+            return;
 
-        if (arenaWorld != null) {
-            debugError("World is null onJoin");
-        }
-
-        if (player.getWorld().equals(arenaWorld)) {
+        if (player.getWorld().equals(arena.getWorld())) {
             if (gameManager.inProgress()) {
                 gameManager.getStatusBar().addPlayer(player);
             }
-            else if (plugin.getOnlinePlayers().size() > 1){
-                gameManager.startGameCountdown(GameManager.GAME_COUNTDOWN);
+            else if (gameManager.getPlayerManager().getPlayersInGameWorld().size() >= MIN_PLAYERS_TO_START){
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        gameManager.startCountdown(GameManager.GAME_COUNTDOWN);
+                    }
+                }.runTaskLater(plugin, 5);
             }
         }
     }
@@ -98,47 +123,37 @@ public class MiniGameListener implements Listener {
         final Player player = e.getPlayer();
         plugin.getOnlinePlayers().remove(player);
 
-        if (playerManager.getPlayers().contains(player)) {
-            playerManager.handlePlayerQuit(player);
+        //if (gameManager.getCurrentState().equals(GameState.COUNTDOWN)) {
+        //
+        //}
+
+        VoteManager voteManager = VoteManager.getInstance();
+        if (voteManager != null) {
+            voteManager.validateVotes();
         }
+
+
+        playerManager.handlePlayerQuit(player);
     }
 
     @EventHandler
     private void onWorldChanged(PlayerChangedWorldEvent e) {
         final Player player = e.getPlayer();
 
-        if (playerManager.getPlayers().contains(player)) {
-            playerManager.handlePlayerQuit(player);
+        VoteManager voteManager = VoteManager.getInstance();
+        if (voteManager != null) {
+            voteManager.validateVotes();
         }
+
+        playerManager.handlePlayerQuit(player);
     }
 
-    @EventHandler
-    private void onDeath(PlayerDeathEvent e) {
-        final Player player = e.getEntity();
-
-        if (gameManager.inProgress() && playerManager.getPlayers().contains(player)) {
-            e.setKeepInventory(true);
-            playerManager.handlePlayerDeath(player);
-
-            final Player killer = player.getKiller();
-
-            if (killer != null) {
-                plugin.getProfileManager().getProfile(killer.getUniqueId()).ifPresent(Profile::addKill);
-
-                if (plugin.vaultHook) {
-                    plugin.getEconomy().depositPlayer(
-                            killer,
-                            PLAYER_KILL_MONEY_AMOUNT);
-                }
-            }
-        }
-    }
 
     private static final int ROUND_SURVIVED_MONEY_AMOUNT = 10;
 
     @EventHandler
     private void onRoundSurvived(RoundSurvivedEvent e) {
-        RandomEventsPlugin plugin = RandomEventsPlugin.getInstance();
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
 
         if (plugin.vaultHook) {
             Economy economy = plugin.getEconomy();
@@ -165,6 +180,7 @@ public class MiniGameListener implements Listener {
 
         Block block = e.getBlock();
         Player player = e.getPlayer();
+
 
         if (gameManager.inProgress()) {
             SpawnPlatform spawnPlatform =  gameManager.getArena().getSpawnPlatform(player);

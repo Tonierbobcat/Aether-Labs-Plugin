@@ -1,7 +1,6 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,11 +11,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class PlayerSwapEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerSwapEvent extends RandomPlayerSelectorEvent {
 
     @Override
     public boolean onSelect(Player selectedPlayer) {
-        List<Player> players = new ArrayList<>(getPlayers()
+        List<Player> players = new ArrayList<>(getObjects()
                 .stream()
                 .filter(player -> !player.getUniqueId().equals(selectedPlayer.getUniqueId()))
                 .toList());

@@ -31,6 +31,11 @@ public class FallBackEvent extends BaseEvent {
     }
 
     @Override
+    public @NotNull EventType getType() {
+        return EventType.GLOBAL;
+    }
+
+    @Override
     public void start() {
         gameManager.forceEnd();
     }

@@ -1,8 +1,10 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
+import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
+
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -10,26 +12,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlatePigsEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
-
+public class PlatePigsEvent extends RandomPlatformSelectorEvent {
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-        SpawnPlatform spawnPlatform = getArena().getSpawnPlatform(selectedPlayer);
+    public boolean onSelect(SpawnPlatform selectedObject) {
+        Player player = selectedObject.getPlayer();
 
-        if (spawnPlatform == null) {
-            return false;
-        }
+        if (player != null) {
+            for (int i = 0; i < 4; i++) {
+                getArena().spawnMob(EntityType.PIG, selectedObject.getTeleportLocation());
+            }
 
-        for (int i = 0; i < 4; i++) {
-            getArena().spawnMob(EntityType.PIG, spawnPlatform.getTeleportLocation());
+            return true;
         }
 
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
     }
 
     @Override

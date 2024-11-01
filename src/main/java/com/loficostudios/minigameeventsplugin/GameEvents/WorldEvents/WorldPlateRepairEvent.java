@@ -1,13 +1,16 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.WorldEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IWorldEvent;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class WorldPlateRepairEvent extends BaseEvent implements IWorldEvent {
+public class WorldPlateRepairEvent extends BaseEvent {
 
-
+    @Override
+    public @NotNull EventType getType() {
+        return EventType.GLOBAL;
+    }
 
     @Override
     public void start() {

@@ -1,11 +1,16 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class PlateExpandEvent extends BaseEvent implements IPlateEvent {
+public class PlateExpandEvent extends BaseEvent {
+
+    @Override
+    public @NotNull EventType getType() {
+        return EventType.PLATE;
+    }
 
     @Override
     public @NotNull String getName() {

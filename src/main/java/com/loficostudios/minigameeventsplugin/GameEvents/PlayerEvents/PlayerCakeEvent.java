@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
 import com.loficostudios.minigameeventsplugin.Utils.PlayerState;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -11,11 +11,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlayerCakeEvent extends BaseEvent implements IPlayerEvent {
+public class PlayerCakeEvent extends BaseEvent {
+
+    @Override
+    public @NotNull EventType getType() {
+        return EventType.PLAYER;
+    }
 
     @Override
     public void start() {
-        Collection<Player> playersAlive = getPlayerManager().getPlayers(PlayerState.ALIVE);
+        Collection<Player> playersAlive = getPlayerManager().getPlayersInGame(PlayerState.ALIVE);
 
         playersAlive.forEach(player -> {
             player.getInventory().addItem(new ItemStack(Material.CAKE));
@@ -39,7 +44,7 @@ public class PlayerCakeEvent extends BaseEvent implements IPlayerEvent {
 
     @Override
     public void run() {
-        getPlayerManager().getPlayers(PlayerState.ALIVE).forEach(player ->
+        getPlayerManager().getPlayersInGame(PlayerState.ALIVE).forEach(player ->
                 player.getWorld().spawnParticle(
                         Particle.HEART,
                         player.getLocation().add(0, 1, 0), 10));

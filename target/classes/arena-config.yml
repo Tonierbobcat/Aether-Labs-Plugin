@@ -1,9 +1,9 @@
 world: "world"
 pos1:
-  x: 1.0
-  y: 2.0
-  z: 4.0
+  x:
+  y:
+  z:
 pos2:
-  x: 5.0
-  y: 3.0
-  z: 4.0
+  x:
+  y:
+  z:

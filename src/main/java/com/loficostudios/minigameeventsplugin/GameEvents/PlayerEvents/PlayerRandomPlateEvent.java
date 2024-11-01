@@ -2,7 +2,6 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class PlayerRandomPlateEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerRandomPlateEvent extends RandomPlayerSelectorEvent {
 
     Random random = new Random();
 

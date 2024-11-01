@@ -1,32 +1,28 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
+import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateObsidianEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
+public class PlateObsidianEvent extends RandomPlatformSelectorEvent {
 
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-        SpawnPlatform platform = getArena().getSpawnPlatform(selectedPlayer);
+    public boolean onSelect(SpawnPlatform selectedObject) {
+        Player player = selectedObject.getPlayer();
 
-        platform.recreate(Material.OBSIDIAN);
+        if (player != null) {
+            selectedObject.recreate(Material.OBSIDIAN);
+            return true;
+        }
 
         return true;
     }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-
-
-    }
-
 
 
     @Override

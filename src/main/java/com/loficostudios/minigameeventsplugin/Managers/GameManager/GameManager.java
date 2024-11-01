@@ -1,11 +1,21 @@
 package com.loficostudios.minigameeventsplugin.Managers.GameManager;
 
+import com.loficostudios.melodyapi.utils.Common;
+import com.loficostudios.melodyapi.utils.SimpleColor;
+import com.loficostudios.minigameeventsplugin.Config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.Countdown.Countdown;
 import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
+import com.loficostudios.minigameeventsplugin.GameTypes.BaseGameMode;
+import com.loficostudios.minigameeventsplugin.Managers.VoteManager;
+import com.loficostudios.minigameeventsplugin.messages.Messages;
+import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
+import com.loficostudios.minigameeventsplugin.GameTypes.NormalMode;
+import com.loficostudios.minigameeventsplugin.GameTypes.RandomHeightsMode;
 import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.NotificationType;
 import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.PlayerManager;
 import com.loficostudios.minigameeventsplugin.Managers.RoundManager;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.Managers.SetupWizard;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.Utils.*;
 
@@ -15,22 +25,27 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
-
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.log;
 
 public class GameManager {
 
-    private final RandomEventsPlugin plugin;
+    private final AetherLabsPlugin plugin;
 
 
 
     //region Variables
-    public static final int GAME_COUNTDOWN = 15;
+    public final EggWarsMode EGG_WARS = new EggWarsMode(this);
+    public final NormalMode NORMAL = new NormalMode(this);
+    public final RandomHeightsMode DIFFERENT_HEIGHTS = new RandomHeightsMode(this);
+
+    public static int MIN_PLAYERS_TO_START = 1;
+
+    public static final int GAME_COUNTDOWN = 10;
     private static final int RESET_TIMER_AFTER_END_GAME = 3;
     public static final int PLAYER_KILL_MONEY_AMOUNT = 100;
 
@@ -42,19 +57,29 @@ public class GameManager {
     private GameArena arena;
     @Getter
     private @NotNull GameState currentState = GameState.NONE;
+
+
+    private BaseGameMode currentMode;
+
     @Getter
     private BossBar statusBar = Bukkit.createBossBar(null, BarColor.YELLOW, BarStyle.SOLID);
 
-    private Countdown timer;
+
     //endregion
 
     private final BossBar progressBar = Bukkit.createBossBar("", BarColor.WHITE, BarStyle.SOLID);
 
-    public GameManager(RandomEventsPlugin plugin) {
+    public GameManager(AetherLabsPlugin plugin) {
         this.roundManager = new RoundManager(this, plugin.getEventManager());
         this.playerManager = new PlayerManager(this, plugin.getProfileManager());
         this.plugin = plugin;
-        this.arena = new GameArena(plugin.getArenaConfig().POS_1, plugin.getArenaConfig().POS_2);
+
+        Location pos1 = ArenaConfig.POS_1;
+        Location pos2 = ArenaConfig.POS_2;
+
+        if (pos1 != null || pos2 != null) {
+            this.arena = new GameArena(pos1, pos2);
+        }
     }
 
     public boolean inProgress() {
@@ -66,26 +91,67 @@ public class GameManager {
         return this.progressBar;
     }
 
+    public @NotNull BaseGameMode getCurrentMode() {
+
+        if (currentMode == null)
+            return NORMAL;
+
+        return currentMode;
+
+    }
+
     //region Start & End Game Functions
-    public void startGameCountdown(Integer time) {
+    public boolean cancelCountdown() {
+        if (!currentState.equals(GameState.COUNTDOWN))
+            return false;
+
+
+        if (countdown.cancel()) {
+            Debug.log("Cancelled countdown");
+
+            setState(GameState.NONE);
+            statusBar.removeAll();
+            progressBar.removeAll();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private Countdown countdown;
+
+    public Boolean startCountdown(Integer time) {
+        if (arena == null) {
+            return false;
+        }
+
         roundManager.cancelRound();
 
         setState(GameState.COUNTDOWN);
 
-        if (timer != null)
-            timer.stop();
+        VoteManager voteManager = new VoteManager(this);
 
         Collection<Player> playersInGameWorld = playerManager.getPlayersInGameWorld();
 
         playersInGameWorld.forEach(statusBar::addPlayer);
 
-        statusBar.setTitle("Resetting arena and starting a new game soon...");
+        statusBar.setTitle(SimpleColor.deserialize(
+                Messages.STATUS_COUNTDOWN
+        ));
 
         BossBar progressBar = getProgressBar();
 
-        timer = new Countdown(
+        Collection<Player> participatingPlayers = getPlayerManager().getAvailablePlayers();
+
+        Debug.log("" + participatingPlayers);
+
+
+        countdown = new Countdown("countdown",
                 (Integer countdown) -> {
-                    progressBar.setTitle("In... " + countdown);
+                    progressBar.setTitle(SimpleColor.deserialize(
+                            "In... " + countdown
+                    ));
 
                     if (countdown == 3) {
                         playerManager.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
@@ -98,87 +164,83 @@ public class GameManager {
                 () -> {
                     progressBar.removeAll();
 
-                    Collection<Player> participatingPlayers = getPlayerManager().getAvailablePlayers();
-                    setupGame(participatingPlayers);
+
+                    if (!participatingPlayers.isEmpty()) {
+                        if (participatingPlayers.size() >= MIN_PLAYERS_TO_START) {
+                            statusBar.setTitle(SimpleColor.deserialize(Messages.STATUS_STARTING));
+
+                            BaseGameMode selected = voteManager.getMode();
+                            if (setCurrentMode(selected)) {
+                                new SetupWizard(this).setup(selected, participatingPlayers);
+                                setState(GameState.SETUP);
+                            } else {
+                                Debug.logError("Game mode selection failed");
+                            }
+
+                            return;
+                        }
+                        Debug.logWarning("Canceled game! Not enough players.");
+                    } else {
+                        Debug.logWarning("Canceled game! Player list is empty.");
+                    }
+
+                    setState(GameState.NONE);
+
+                    playerManager.notify(NotificationType.GLOBAL, Messages.NOT_ENOUGH_PLAYERS);
+
+                    statusBar.removeAll();
                 });
 
-        timer.start(time);
+        tasks.add(countdown.start(time));
+
+        return true;
     }
 
-    private void setupGame(Collection<Player> participatingPlayers) {
-        setState(GameState.SETUP);
+    private boolean setCurrentMode(BaseGameMode mode) {
 
-        if (timer != null)
-            timer.stop();
-
-        statusBar.setTitle("Setting up game please wait...");
-
-        participatingPlayers.forEach(player -> {
-
-            playerManager.addPlayer(player, PlayerState.ALIVE);
-
-            for (PotionEffect effect : player.getActivePotionEffects())
-                player.removePotionEffect(effect.getType());
-
-            playerManager.savePlayer(player);
-
-            player.getEquipment().clear();
-            player.getInventory().clear();
-
-        });
-
-        BossBar progressBar = getProgressBar();
-
-        timer = new Countdown(countDown -> {
-            progressBar.setTitle(String.valueOf(countDown));
-
-            switch(countDown) {
-                case 3:
-                    debug("clearing area...");
-                    arena.clear();
-                    break;
-                case 2:
-                    debug("spawning platforms...");
-                    arena.spawnPlatforms(participatingPlayers);
-
-                    break;
-                case 1:
-
-                    break;
-            }
-
-        }, this::startGame);
-        timer.start(3);
+        if (mode != null) {
+            currentMode = mode;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
-    private void startGame() {
+    public void startGame() {
         setState(GameState.RUNNING);
-
-        if (timer != null)
-            timer.stop();
-
-        arena.startLevelFillTask(GameArena.DEFAULT_FILL_MATERIAL, GameArena.DEFAULT_FILL_SPEED);
+        currentMode.start();
+        log("started game");
 
         playerManager.notify(NotificationType.INGAME,Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
 
         roundManager.handleNextRound();
-
-        debug("started game");
     }
 
-    public void end(Player winner) {
-        currentState = GameState.ENDED;
+    public void endGame(Player winner) {
+        setState(GameState.ENDED);
+        currentMode.end();
+        Debug.log("ended game");
+
 
         roundManager.cancelRound();
 
-        arena.cancelLavaTask();
-        arena.removeMobs();
+        arena.cancelLavaFillTask();
+        arena.removeEntities();
+
+
 
         GameMode previousGamemode;
 
         playerManager.restorePlayers();
 
-        statusBar.setTitle(winner == null ? "Nobody" : winner.getName() + " won the game");
+        statusBar.setColor(BarColor.PURPLE);
+
+        statusBar.setTitle(SimpleColor.deserialize(
+                Messages.STATUS_PLAYER_WIN
+                        .replace("{winner}", winner == null ? "NaN" : winner.getName())));
+
+
         if (winner != null) {
             previousGamemode = winner.getGameMode();
             winner.setGameMode(GameMode.SPECTATOR);
@@ -186,65 +248,69 @@ public class GameManager {
             previousGamemode = null;
         }
 
-        timer = new Countdown((Integer countdown) ->
+        tasks.add(new Countdown("end", (Integer countdown) ->
                 playerManager.notify(
                         NotificationType.GLOBAL,
                         Sound.ENTITY_FIREWORK_ROCKET_LAUNCH,
                         1, 1),
                 () -> {
+                    tasks.forEach(BukkitTask::cancel);
+
                     if (winner != null) {
                         winner.setGameMode(previousGamemode);
                         plugin.getProfileManager().getProfile(winner.getUniqueId())
                                 .ifPresent(Profile::addWin);
                     }
-                    playerManager.getPlayers(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
+                    playerManager.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
 
                     reset();
-                });
-        timer.start(RESET_TIMER_AFTER_END_GAME);
+                    startCountdown(GAME_COUNTDOWN);
+                }).start(RESET_TIMER_AFTER_END_GAME));
     }
 
     public void forceEnd() {
-        currentState = GameState.ENDED;
+        setState(GameState.ENDED);
 
         roundManager.cancelRound();
 
-        arena.cancelLavaTask();
-        arena.removeMobs();
+        tasks.forEach(BukkitTask::cancel);
+
+        arena.cancelLavaFillTask();
+        arena.removeEntities();
 
         playerManager.restorePlayers();
 
-        playerManager.getPlayers(PlayerState.ALIVE).forEach(player -> {
+        playerManager.getPlayersInGame(PlayerState.ALIVE).forEach(player -> {
             player.teleport(arena.getWorld().getSpawnLocation());
         });
 
         reset();
     }
 
-    private void reset() {
+    private final Set<BukkitTask> tasks = new HashSet<>();
+
+    private void reset(){
         setState(GameState.NONE);
 
-        if (timer != null) {
-            timer.stop();
-            timer = null;
-        }
-
+        statusBar.setColor(BarColor.YELLOW);
         statusBar.removeAll();
         progressBar.removeAll();
+
+        currentMode.reset();
 
         resetArena();
         resetPlayers();
 
         roundManager.resetRounds();
 
-        debug("reset game");
+        log("reset game");
     }
     //endregion
 
     private void resetArena() {
         arena.clear();
         arena.removeAllPlatforms();
-        arena.removeMobs();
+        arena.removeEntities();
     }
 
     private void resetPlayers() {
@@ -256,7 +322,7 @@ public class GameManager {
     }
 
     public void setGameArena(Location pos1, Location pos2) {
-        arena = new GameArena(pos1, pos2);
         plugin.getArenaConfig().update(pos1, pos2);
+        this.arena = new GameArena(pos1, pos2);
     }
 }

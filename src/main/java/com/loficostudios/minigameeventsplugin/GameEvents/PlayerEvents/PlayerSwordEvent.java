@@ -2,7 +2,6 @@ package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
 
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Random;
 
-public class PlayerSwordEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerSwordEvent extends RandomPlayerSelectorEvent {
 
     private final Random random = new Random();
     private final ItemStack[] swords = new ItemStack[] {

@@ -8,7 +8,7 @@
 package com.loficostudios.minigameeventsplugin.Profile;
 
 import com.loficostudios.melodyapi.file.impl.YamlFile;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -31,11 +31,19 @@ public class Profile {
 	@Getter
 	private final UUID uuid;
 
+	@Getter
+	private boolean isOptedOut;
+
+
+	public void optOutOfGame() {
+		isOptedOut = true;
+	}
+
 	public Profile(UUID uuid) {
 		this.uuid = uuid;
 
 
-		this.playerFile = new YamlFile("players/" + uuid + ".yml", RandomEventsPlugin.getInstance());
+		this.playerFile = new YamlFile("players/" + uuid + ".yml", AetherLabsPlugin.getInstance());
 		this.playerConfig = playerFile.getConfig();
 
 		this.wins = playerConfig.getInt("wins");

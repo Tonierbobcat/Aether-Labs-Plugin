@@ -1,29 +1,23 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
+import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateIcyEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
+public class PlateIcyEvent extends RandomPlatformSelectorEvent {
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-
-        SpawnPlatform spawnPlatform = getArena().getSpawnPlatform(selectedPlayer);
-
-        spawnPlatform.setPlatform(Material.ICE);
-
-        return true;
+    public @NotNull EventType getType() {
+        return EventType.PLATE;
     }
 
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
 
-    }
+
 
     @Override
     public @NotNull String getName() {
@@ -48,5 +42,18 @@ public class PlateIcyEvent extends RandomPlayerSelectorEvent implements IPlateEv
     @Override
     public Integer getMax() {
         return 3;
+    }
+
+    @Override
+    protected boolean onSelect(SpawnPlatform selectedObject) {
+
+        Player player = selectedObject.getPlayer();
+
+        if (player != null) {
+            selectedObject.setPlatform(Material.ICE);
+            return true;
+        }
+
+        return true;
     }
 }

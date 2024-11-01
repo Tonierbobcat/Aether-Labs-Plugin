@@ -1,21 +1,26 @@
 package com.loficostudios.minigameeventsplugin.Managers.PlayerManager;
 
+import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameState;
 import com.loficostudios.minigameeventsplugin.Managers.ProfileManager;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
+import com.loficostudios.minigameeventsplugin.Utils.Debug;
 import com.loficostudios.minigameeventsplugin.Utils.PlayerState;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.log;
 
 public class PlayerManager {
 
@@ -32,31 +37,26 @@ public class PlayerManager {
         this.profileManager = profileManager;
     }
 
-    public PlayerState getPlayerState(Player player) {
-        return players.get(player);
-    }
-
-    public Collection<Player> getPlayers() {
-        return players.keySet().stream().toList();
-    }
-
-    public Collection<Player> getPlayers(PlayerState state) {
-        return players.entrySet()
-                .stream()
-                .filter(entry -> entry.getValue() == state)
-                .map(Map.Entry::getKey)
-                .toList();
-    }
-
     public Collection<Player> getAvailablePlayers() {
 
-        RandomEventsPlugin plugin = RandomEventsPlugin.getInstance();
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
 
         return gameManager.getArena().getWorld()
                 .getPlayers()
                 .stream()
                 .filter(player -> {
-
+                    Profile profile = null;
+                    
+                    Optional<Profile> optional = profileManager.getProfile(player.getUniqueId());
+                    if (optional.isPresent()) {
+                        profile = optional.get();
+                    }
+                    
+                    if (profile != null && profile.isOptedOut()) {
+                        Debug.log("Player " + player.getName() + "is opted out from game");
+                        return false;
+                    }
+                    
                     if (!player.isValid()) {
                         return false;
                     }
@@ -73,7 +73,39 @@ public class PlayerManager {
         return gameManager.getArena().getWorld().getPlayers();
     }
 
-    //region INVENTORY SHIT
+    public Collection<Player> getPlayersInGame() {
+        return players.keySet().stream().toList();
+    }
+
+    public Collection<Player> getPlayersInGame(PlayerState state) {
+        return players.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() == state)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    public PlayerState getPlayerState(Player player) {
+        return players.get(player);
+    }
+
+    public void initializePlayers(@NotNull Collection<Player> participatingPlayers) {
+        if (participatingPlayers.isEmpty()) {
+
+            gameManager.forceEnd();
+            throw new IllegalArgumentException("participatingPlayers cannot be empty");
+        }
+
+        participatingPlayers.forEach(player -> {
+            this.savePlayer(player);
+            this.addPlayer(player, PlayerState.ALIVE);
+
+            clearPotionEffects(player);
+
+            clearInventory(player);
+        });
+    }
+
     public void savePlayer(final Player player) {
 
         UUID uuid = player.getUniqueId();
@@ -102,7 +134,7 @@ public class PlayerManager {
         savedPlayerInventory.remove(uuid);
         savedPlayerEquipment.remove(uuid);
 
-        debug("restored players inventory " + player.getName());
+        log("restored players inventory " + player.getName());
     }
 
     public void restorePlayers() {
@@ -129,18 +161,40 @@ public class PlayerManager {
         savedPlayerInventory.clear();
         savedPlayerEquipment.clear();
     }
-    //endregion
-
 
     public void handlePlayerQuit(final Player player) {
-        restorePlayer(player);
+        GameState currentState = gameManager.getCurrentState();
 
-        setPlayerState(player, PlayerState.DEAD);
-        profileManager.getProfile(player.getUniqueId())
-                .ifPresent(Profile::addDeath);
+        switch (currentState) {
+            case COUNTDOWN:
+                List<Player> validPlayers = new ArrayList<>(getAvailablePlayers());
 
-        debug(player.getName() + " quit game");
-        validatePlayers();
+                int size = validPlayers.size() - 1;
+
+                Debug.log("valid players: " + size);
+                if (size < GameManager.MIN_PLAYERS_TO_START) {
+
+                    if (gameManager.cancelCountdown())
+                        return;
+                    else {
+                        Debug.logError("Could not cancel game countdown");
+                    }
+                }
+                break;
+            case RUNNING:
+                if (getPlayersInGame().contains(player)) {
+                    restorePlayer(player);
+
+                    setPlayerState(player, PlayerState.DEAD);
+                    profileManager.getProfile(player.getUniqueId())
+                            .ifPresent(Profile::addDeath);
+
+                    Debug.log(player.getName() + " quit game");
+
+                    validatePlayersAlive();
+                }
+                break;
+        }
     }
 
     public void handlePlayerDeath(final Player player) {
@@ -150,7 +204,7 @@ public class PlayerManager {
         profileManager.getProfile(player.getUniqueId())
                 .ifPresent(Profile::addDeath);
 
-        validatePlayers();
+        validatePlayersAlive();
 
         SpawnPlatform platform = gameManager.getArena().getSpawnPlatform(player);
 
@@ -158,31 +212,41 @@ public class PlayerManager {
             gameManager.getArena().removeSpawnPlatform(platform, true);
         }
 
-        debug(player.getName() + " died");
+        log(player.getName() + " died");
 
     }
 
-    public void validatePlayers() {
-        if (gameManager.getCurrentState().equals(GameState.ENDED))
-            return;
-        List<Player> alivePlayers = getPlayers(PlayerState.ALIVE).stream().toList();
 
+    public void validatePlayersAlive() {
+        GameState currentState = gameManager.getCurrentState();
+
+        if (currentState.equals(GameState.ENDED))
+            return;
+
+//        if (validPlayers.size() < GameManager.MIN_PLAYERS_TO_START) {
+//            gameManager.cancelGameCountdown();
+//            players.clear();
+//
+//            Debug.log("cancelled countdown");
+//
+//            return;
+//        }
+
+        List<Player> alivePlayers = getPlayersInGame(PlayerState.ALIVE).stream().toList();
         if (!alivePlayers.isEmpty()) {
             Player winner = alivePlayers.get(0);
             if (alivePlayers.size() == 1 && winner != null) {
-                gameManager.end(winner);
+                gameManager.endGame(winner);
             }
         }
         else {
-            gameManager.end(null);
+            gameManager.endGame(null);
         }
     }
 
     public void resetPlayers() {
         players.clear();
     }
-
-    //region Player Functions
 
     public void setPlayerState(Player player, PlayerState state) {
         PlayerState oldState = getPlayerState(player);
@@ -194,15 +258,52 @@ public class PlayerManager {
             players.put(player, state);
     }
 
-
     public void addPlayer(Player player, PlayerState state) {
         players.put(player, state);
     }
 
+    //region INVENTORY FUNCTIONS
+    private void clearInventory(@NotNull final Player player) {
+        EntityEquipment equipment = player.getEquipment();
+        if (equipment != null) {
+            player.getEquipment().clear();
+        }
+
+        player.getInventory().clear();
+    }
+    //endregion
+
+    //region HELPER METHODS
     public void notify(NotificationType type, Sound sound, float volume, float pitch) {
         switch (type) {
             case GLOBAL -> getPlayersInGameWorld().forEach(player -> player.playSound(player.getLocation(), sound, volume, pitch));
-            case INGAME -> getPlayers().forEach(player -> player.playSound(player.getLocation(), sound, volume, pitch));
+            case INGAME -> getPlayersInGame().forEach(player -> player.playSound(player.getLocation(), sound, volume, pitch));
         }
     }
+
+    public void notify(NotificationType type, String msg) {
+
+        String message = SimpleColor.deserialize(msg);
+
+        switch (type) {
+            case GLOBAL -> getPlayersInGameWorld().forEach(player -> player.sendMessage(message));
+            case INGAME -> getPlayersInGame().forEach(player -> player.sendMessage(message));
+        }
+    }
+
+    public void clearPotionEffects(@NotNull Player player) {
+        player.getActivePotionEffects().forEach(effect ->
+                player.removePotionEffect(effect.getType()));
+    }
+
+    public void teleportPlayer(Player player, Vector loc) {
+
+        player.teleport(new Location(
+                gameManager.getArena().getWorld(),
+                loc.getX(),
+                loc.getY(),
+                loc.getZ()));
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1, 1);
+    }
+    //endregion
 }

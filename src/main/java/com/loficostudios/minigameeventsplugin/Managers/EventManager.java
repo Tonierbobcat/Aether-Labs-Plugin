@@ -2,15 +2,16 @@ package com.loficostudios.minigameeventsplugin.Managers;
 
 import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.Utils.Debug;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugError;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.log;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.logError;
 
 public class EventManager {
 
@@ -61,9 +62,9 @@ public class EventManager {
             if (event != null) {
                 try {
                     event.load();
-                    debug("loaded " + event.getId());
+                    log("loaded " + event.getId());
                 } catch (Exception e) {
-                    debugError(event.getClass().getName() + " could not load: " + e.getMessage());
+                    logError(event.getClass().getName() + " could not load: " + e.getMessage());
                     return null;
                 }
             }
@@ -75,7 +76,7 @@ public class EventManager {
     public void handleStart(BaseEvent e) {
         if (e != null) {
             e.start();
-            debug("started " + e.getId());
+            log("started " + e.getId());
 
             currentEvent = e;
 
@@ -84,18 +85,18 @@ public class EventManager {
                 public void run() {
                     e.run();
                 }
-            }.runTaskTimer(RandomEventsPlugin.getInstance(), 0, 5));
-            debug("running " + e.getId() + " task");
+            }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 5));
+            log("running " + e.getId() + " task");
         }
     }
 
     public Boolean handleEnd(BaseEvent e) {
         try {
             e.end();
-            debug("ended " + e.getId());
+            log("ended " + e.getId());
             return true;
         } catch (Exception ex) {
-            debugError("could not end event " + ex);
+            logError("could not end event " + ex);
             return false;
         }
     }
@@ -104,7 +105,7 @@ public class EventManager {
         if (e != null) {
             e.cancel();
             currentEvent = null;
-            debug("canceled " + e.getId());
+            log("canceled " + e.getId());
         }
     }
 
@@ -126,6 +127,9 @@ public class EventManager {
     }
 
     public void subscribe(BaseEvent e) {
+
+        Debug.log("Registered " + e.getName());
+
         events.put(e.getId(), e);
     }
 }

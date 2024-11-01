@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +10,9 @@ import java.util.Collection;
 
 import static com.loficostudios.minigameeventsplugin.GameEvents.Items.FISHERMANS_ROD;
 
-public class PlayerFishingRodEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerFishingRodEvent extends RandomPlayerSelectorEvent {
+
+
 
     @Override
     public boolean onSelect(Player selectedPlayer) {

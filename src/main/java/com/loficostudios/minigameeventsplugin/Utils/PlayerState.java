@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.Utils;
 
-public enum     PlayerState {
+public enum PlayerState {
     ALIVE,
     DEAD
 }

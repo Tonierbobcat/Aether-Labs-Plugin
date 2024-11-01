@@ -1,28 +1,30 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
+import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateInvisibleEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
+public class PlateInvisibleEvent extends RandomPlatformSelectorEvent {
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-        SpawnPlatform spawnPlatform = getArena().getSpawnPlatform(selectedPlayer);
+    protected boolean onSelect(SpawnPlatform selectedObject) {
 
-        spawnPlatform.setPlatform(Material.BARRIER);
+        Player player = selectedObject.getPlayer();
+
+        if (player != null) {
+            selectedObject.setPlatform(Material.BARRIER);
+            return true;
+        }
 
         return true;
     }
 
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
 
     @Override
     public @NotNull String getName() {

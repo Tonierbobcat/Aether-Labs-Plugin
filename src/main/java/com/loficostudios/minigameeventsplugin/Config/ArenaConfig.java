@@ -4,24 +4,24 @@ package com.loficostudios.minigameeventsplugin.Config;
 import com.loficostudios.melodyapi.libs.boostedyaml.YamlDocument;
 import com.loficostudios.melodyapi.libs.boostedyaml.block.implementation.Section;
 import com.loficostudios.melodyapi.utils.SimpleDocument;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.NumberConversions;
 
 import java.io.IOException;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debug;
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarning;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.log;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.logWarning;
 
 @SuppressWarnings("SameParameterValue")
 public class ArenaConfig {
 
     private final YamlDocument config;
 
-    private final RandomEventsPlugin plugin;
+    private final AetherLabsPlugin plugin;
 
-    public ArenaConfig(RandomEventsPlugin plugin) {
+    public ArenaConfig(AetherLabsPlugin plugin) {
         this.plugin = plugin;
 
         this.config = SimpleDocument.create(this.plugin, "arena-config.yml");
@@ -38,12 +38,18 @@ public class ArenaConfig {
     private static Location getLocationFromConfig(YamlDocument config, String path, boolean round) {
         Section loc = config.getSection(path);
 
+        if (loc.get("x") == null || loc.get("x") == null) {
+
+            log("location values are null.");
+            return null;
+        }
+
         double x = NumberConversions.floor((double) loc.get("x"));
         double y = NumberConversions.floor((double) loc.get("y"));
         double z = NumberConversions.floor((double) loc.get("z"));
 
         Location location = new Location(null, x, y, z);
-        debug("config. " + path + ": " + location);
+        log("config. " + path + ": " + location);
         return location;
     }
 
@@ -51,6 +57,8 @@ public class ArenaConfig {
 
         Section loc1 = config.getSection("pos1");
         Section loc2 = config.getSection("pos2");
+
+
 
         World defaultWorld = plugin.getServer().getWorlds().get(0);
 
@@ -69,7 +77,7 @@ public class ArenaConfig {
             config.save();
         }
         catch (IOException e) {
-            debugWarning(e.getMessage());
+            logWarning(e.getMessage());
         }
     }
 

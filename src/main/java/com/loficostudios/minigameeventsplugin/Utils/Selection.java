@@ -8,8 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Selection {
@@ -23,12 +22,28 @@ public class Selection {
 
     Map<Vector, Block> blocks = new HashMap<>();
 
+
+    public Collection<Block> getBlocks() {
+        return this.blocks.values();
+    }
+
     public static double randomDouble(double min, double max) {
         return min + ThreadLocalRandom.current().nextDouble(Math.abs(max - min + 1));
     }
 
     public int count() {
         return blocks.size();
+    }
+
+    public Selection(Set<Block> blocks) {
+        blocks.forEach(block -> {
+
+            int x = block.getX();
+            int y = block.getY();
+            int z = block.getZ();
+
+            this.blocks.put(new Vector(x, y, z), block);
+        });
     }
 
     public Selection(Location pos1, Location pos2) {
@@ -77,24 +92,6 @@ public class Selection {
         this.blocks.addAll(blocks);
     }*/
 
-    public Selection shrinkTowardsCenter(double shrinkFactor) {
-        // Calculate the center coordinates
-        int centerX = (pos1.getBlockX() + pos2.getBlockX()) / 2;
-        int centerZ = (pos1.getBlockZ() + pos2.getBlockZ()) / 2;
-
-        // Calculate the new corners based on the shrink factor
-        int newMinX = (int) Math.round(centerX - ((centerX - Math.min(pos1.getBlockX(), pos2.getBlockX())) * shrinkFactor));
-        int newMaxX = (int) Math.round(centerX + ((Math.max(pos1.getBlockX(), pos2.getBlockX()) - centerX) * shrinkFactor));
-        int newMinZ = (int) Math.round(centerZ - ((centerZ - Math.min(pos1.getBlockZ(), pos2.getBlockZ())) * shrinkFactor));
-        int newMaxZ = (int) Math.round(centerZ + ((Math.max(pos1.getBlockZ(), pos2.getBlockZ()) - centerZ) * shrinkFactor));
-
-        // Create new positions for the shrunk selection
-        Location newPos1 = new Location(world, newMinX, getMiddleY(), newMinZ);
-        Location newPos2 = new Location(world, newMaxX, getMiddleY(), newMaxZ);
-
-        return new Selection(newPos1, newPos2);
-    }
-
     public int getMiddleY() {
         int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
         int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
@@ -104,4 +101,95 @@ public class Selection {
     public @Nullable Block getBlock(int x, int y, int z) {
         return blocks.get(new Vector(x, y, z));
     }
+
+    public Selection adjustSelection(int distance) {
+        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX()) - distance;
+        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX()) + distance;
+        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY()) - distance;
+        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY()) + distance;
+        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ()) - distance;
+        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ()) + distance;
+
+        if (minX > maxX) minX = maxX;
+        if (minY > maxY) minY = maxY;
+        if (minZ > maxZ) minZ = maxZ;
+
+        Location newPos1 = new Location(world, minX, minY, minZ);
+        Location newPos2 = new Location(world, maxX, maxY, maxZ);
+
+        return new Selection(newPos1, newPos2);
+    }
+
+    public Selection getPerimeter(int distance) {
+        Set<Block> perimeterBlocks = new HashSet<>();
+
+        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX()) - distance;
+        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX()) + distance;
+        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY()) - distance;
+        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY()) + distance;
+        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ()) - distance;
+        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ()) + distance;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                perimeterBlocks.add(world.getBlockAt(x, y, minZ));
+                perimeterBlocks.add(world.getBlockAt(x, y, maxZ));
+            }
+        }
+
+        for (int y = minY; y <= maxY; y++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                perimeterBlocks.add(world.getBlockAt(minX, y, z));
+                perimeterBlocks.add(world.getBlockAt(maxX, y, z));
+            }
+        }
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                perimeterBlocks.add(world.getBlockAt(x, minY, z));
+                perimeterBlocks.add(world.getBlockAt(x, maxY, z));
+            }
+        }
+
+        return new Selection(perimeterBlocks);
+    }
+
+
+
+//    public Set<Block> getPerimeterBlocks() {
+//        Set<Block> perimeterBlocks = new HashSet<>();
+//
+//        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+//        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+//        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+//        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+//        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+//        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+//
+//        for (int x = minX; x <= maxX; x++) {
+//            for (int y = minY; y <= maxY; y++) {
+//                // Add blocks on the Z boundaries
+//                perimeterBlocks.add(world.getBlockAt(x, y, minZ));
+//                perimeterBlocks.add(world.getBlockAt(x, y, maxZ));
+//            }
+//        }
+//
+//        for (int y = minY; y <= maxY; y++) {
+//            for (int z = minZ; z <= maxZ; z++) {
+//                // Add blocks on the X boundaries
+//                perimeterBlocks.add(world.getBlockAt(minX, y, z));
+//                perimeterBlocks.add(world.getBlockAt(maxX, y, z));
+//            }
+//        }
+//
+//        for (int x = minX; x <= maxX; x++) {
+//            for (int z = minZ; z <= maxZ; z++) {
+//                // Add blocks on the Y boundaries
+//                perimeterBlocks.add(world.getBlockAt(x, minY, z));
+//                perimeterBlocks.add(world.getBlockAt(x, maxY, z));
+//            }
+//        }
+//
+//        return perimeterBlocks;
+//    }
 }

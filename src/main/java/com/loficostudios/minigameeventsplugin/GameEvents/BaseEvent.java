@@ -6,7 +6,7 @@ import com.loficostudios.melodyapi.utils.ItemCreator;
 import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.PlayerManager;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugError;
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.debugWarning;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.logError;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.logWarning;
 
 public abstract class BaseEvent {
 
     public static final int DEFAULT_WARNING_TIME = 3;
     public static final int DEFAULT_EVENT_DURATION = 3;
 
-    private RandomEventsPlugin plugin;
+    private AetherLabsPlugin plugin;
 
     private GameManager gameManager;
     private PlayerManager playerManager;
@@ -55,6 +55,8 @@ public abstract class BaseEvent {
     protected PlayerManager getPlayerManager() {
         return this.playerManager;
     }
+
+    public abstract @NotNull EventType getType();
 
     public @NotNull Integer getWarningTime() {
         return DEFAULT_WARNING_TIME;
@@ -118,10 +120,8 @@ public abstract class BaseEvent {
                 }
             }
             else {
-                debugWarning("vault not installed");
+                logWarning("vault not installed");
             }
-
-
 
         }, display, getId());
     }
@@ -144,13 +144,13 @@ public abstract class BaseEvent {
     }
 
     public void register() {
-        plugin = RandomEventsPlugin.getInstance();
+        plugin = AetherLabsPlugin.getInstance();
         gameManager = plugin.getGameManager();
 
         if (gameManager != null) {
             playerManager = gameManager.getPlayerManager();
         } else {
-            debugError("gameManager is null in register baseEvent ");
+            logError("gameManager is null in register baseEvent");
         }
 
         plugin.getEventManager()

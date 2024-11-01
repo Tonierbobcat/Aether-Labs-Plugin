@@ -1,17 +1,18 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents;
 
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlayerEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlayerColdEvent extends RandomPlayerSelectorEvent implements IPlayerEvent {
+public class PlayerColdEvent extends RandomPlayerSelectorEvent {
+
     @Override
     public boolean onSelect(Player selectedPlayer) {
-        selectedPlayer.setFreezeTicks(10 * 20);
+        selectedPlayer.setFreezeTicks(10 * 4 * 20);
         return true;
     }
 

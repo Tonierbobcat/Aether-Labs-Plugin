@@ -1,9 +1,9 @@
 package com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents;
 
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.GameEvents.EventType;
+import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.GameEvents.RandomPlayerSelectorEvent;
-import com.loficostudios.minigameeventsplugin.Interfaces.IPlateEvent;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.NotificationType;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,32 +13,27 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class PlateLightningEvent extends RandomPlayerSelectorEvent implements IPlateEvent {
+public class PlateLightningEvent extends RandomPlatformSelectorEvent {
+
     @Override
-    public boolean onSelect(Player selectedPlayer) {
+    protected boolean onSelect(SpawnPlatform selectedObject) {
 
-        SpawnPlatform spawnPlatform = getArena().getSpawnPlatform(selectedPlayer);
+        Player player = selectedObject.getPlayer();
 
-        if (spawnPlatform == null) {
-            return false;
-        }
+        if (player != null) {
+            Location location = selectedObject.getTeleportLocation();
 
-        Location location = spawnPlatform.getTeleportLocation();
-
-        for (int i = 0; i < 3; i++) {
-            getArena().getWorld().strikeLightning(location);
-            getPlayerManager().notify(
-                    NotificationType.GLOBAL,
-                    Sound.ENTITY_LIGHTNING_BOLT_IMPACT,
-                    0.5f, 1);
+            for (int i = 0; i < 3; i++) {
+                getArena().getWorld().strikeLightning(location);
+                getPlayerManager().notify(
+                        NotificationType.GLOBAL,
+                        Sound.ENTITY_LIGHTNING_BOLT_IMPACT,
+                        0.5f, 1);
+            }
+            return true;
         }
 
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
     }
 
     @Override
@@ -64,5 +59,10 @@ public class PlateLightningEvent extends RandomPlayerSelectorEvent implements IP
     @Override
     public Integer getMax() {
         return 3;
+    }
+
+    @Override
+    public @NotNull Integer getWarningTime() {
+        return 10;
     }
 }

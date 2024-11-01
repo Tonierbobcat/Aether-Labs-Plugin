@@ -1,13 +1,13 @@
 package com.loficostudios.minigameeventsplugin.Countdown;
 
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.RandomEventsPlugin;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.function.Consumer;
 
-import static com.loficostudios.minigameeventsplugin.Utils.DebugUtil.*;
+import static com.loficostudios.minigameeventsplugin.Utils.Debug.*;
 
 /*public class CountdownTimer {
 
@@ -68,47 +68,61 @@ public class Countdown {
 
     private final Consumer<Integer> onTick;
     private final Runnable onEnd;
+    boolean cancelled = false;
+    private final String id;
 
-    public Countdown(Consumer<Integer> onTick, Runnable onEnd) {
-
+    public Countdown(String id, Consumer<Integer> onTick, Runnable onEnd) {
+        this.id = id;
         this.onTick = onTick;
         this.onEnd = onEnd;
 
-        gameManager = RandomEventsPlugin.getInstance().getGameManager();
+        gameManager = AetherLabsPlugin.getInstance().getGameManager();
     }
 
-    public BukkitTask start(int time) {
+    public boolean cancel() {
+
         if (task != null) {
             task.cancel();
             task = null;
+            return true;
         }
-        debug("timer started");
-        return task = new BukkitRunnable() {
+
+        return false;
+    }
+
+    public BukkitTask start(int time) {
+        cancelled = false;
+        log(id + " timer started");
+        task = new BukkitRunnable() {
             int countdown = time;
 
             @Override
             public void run() {
-                if (countdown > 0) {
-                    if (onTick != null) {
-                        onTick.accept(countdown);
-                    }
+                if (!cancelled) {
+                    if (countdown > 0) {
+                        if (onTick != null) {
+                            onTick.accept(countdown);
+                        }
 
-                    countdown--;
-                } else {
-                    if (onEnd != null) {
-                        onEnd.run();
+                        countdown--;
+                    } else {
+                        this.cancel();
+
+                        if (onEnd != null) {
+                            onEnd.run();
+                        }
                     }
-                    this.cancel();
                 }
             }
-        }.runTaskTimer(RandomEventsPlugin.getInstance(), 0, 20);
-    }
 
-    public void stop() {
-        if (task != null) {
-            task.cancel();
-            task = null;
-        }
-        debug("timer stopped");
+            @Override
+            public synchronized void cancel() throws IllegalStateException {
+                super.cancel();
+                cancelled = true;
+                log(id + " timer cancelled");
+            }
+        }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 20);
+
+        return task;
     }
 }
