@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.gui;
 
-import com.loficostudios.melodyapi.icon.GuiIcon;
+import com.loficostudios.melodyapi.melodygui.GuiIcon;
 import com.loficostudios.melodyapi.utils.ItemCreator;
 import com.loficostudios.melodyapi.utils.MelodyGui;
 import com.loficostudios.melodyapi.utils.SimpleColor;
@@ -26,9 +26,12 @@ public class VoteGui extends MelodyGui {
         return "Vote for next game";
     }
 
-    public VoteGui() {
 
-        GameManager gameManager = AetherLabsPlugin.getInstance().getGameManager();
+    private final GameManager gameManager;
+
+    public VoteGui() {
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
+        this.gameManager = plugin.getGameManager();
         setSlot(2, getGuiIcon(gameManager.NORMAL));
         setSlot(4, getGuiIcon(gameManager.DIFFERENT_HEIGHTS));
         setSlot(6, getGuiIcon(gameManager.EGG_WARS));
@@ -52,7 +55,7 @@ public class VoteGui extends MelodyGui {
             if (voteManager == null)
                 return;
 
-            if (AetherLabsPlugin.getInstance().getGameManager().getCurrentState().equals(GameState.COUNTDOWN)) {
+            if (gameManager.getCurrentState().equals(GameState.COUNTDOWN)) {
 
                 int votes = voteManager.getVotes(mode);
 
@@ -69,7 +72,7 @@ public class VoteGui extends MelodyGui {
                 }
             }
             else {
-                player.sendMessage(SimpleColor.deserialize("&cThere is a currently a game active " + AetherLabsPlugin.getInstance().getGameManager().getCurrentState()));
+                player.sendMessage(SimpleColor.deserialize("&cThere is a currently a game active " + gameManager.getCurrentState()));
             }
         }, icon, mode.getId());
     }

@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
 import com.loficostudios.melodyapi.utils.Common;
+import com.loficostudios.melodyapi.utils.ItemCreator;
 import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
 import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
@@ -145,11 +146,9 @@ public class EggWarsMode extends BaseGameMode {
         Egg egg = spawns.get(player.getUniqueId());
 
         return egg != null;
-
     }
 
     @Override
     public void finalizeSetup(Collection<Player> participatingPlayers) {
-
     }
 }

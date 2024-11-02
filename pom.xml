@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.loficostudios</groupId>
-  <artifactId>MiniGameEventsPlugin</artifactId>
+  <artifactId>AetherLabsPlugin</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Mini Game Events Plugin</name>
+  <name>Aether Labs Plugin</name>
 
   <properties>
     <java.version>1.8</java.version>

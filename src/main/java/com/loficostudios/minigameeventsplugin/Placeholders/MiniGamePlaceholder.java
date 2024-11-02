@@ -20,7 +20,10 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
 
     public MiniGamePlaceholder(ProfileManager profileManager) {
         this.profileManager = profileManager;
-        gameManager = AetherLabsPlugin.getInstance().getGameManager();
+
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
+
+        gameManager = plugin.getGameManager();
     }
 
     @Override

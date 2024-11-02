@@ -76,7 +76,9 @@ public class Countdown {
         this.onTick = onTick;
         this.onEnd = onEnd;
 
-        gameManager = AetherLabsPlugin.getInstance().getGameManager();
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
+
+        gameManager = plugin.getGameManager();
     }
 
     public boolean cancel() {

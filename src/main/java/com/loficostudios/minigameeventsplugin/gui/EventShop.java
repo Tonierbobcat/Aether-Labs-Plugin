@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.gui;
 
-import com.loficostudios.melodyapi.icon.GuiIcon;
+import com.loficostudios.melodyapi.melodygui.GuiIcon;
 import com.loficostudios.melodyapi.utils.ItemCreator;
 import com.loficostudios.melodyapi.utils.MelodyGui;
 import com.loficostudios.melodyapi.utils.SimpleColor;
@@ -30,7 +30,10 @@ public class EventShop extends MelodyGui {
     }
 
     public EventShop(Player player) {
-        Collection<BaseEvent> baseEvents = AetherLabsPlugin.getInstance().getEventManager().getEvents();
+
+        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
+
+        Collection<BaseEvent> baseEvents = plugin.getEventManager().getEvents();
 
         GuiIcon playerEventsIcon = new GuiIcon((Player) -> {
 

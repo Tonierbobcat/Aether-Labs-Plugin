@@ -6,9 +6,9 @@ import org.bukkit.Material;
 public enum EventType {
 
     DEATH(Material.OMINOUS_TRIAL_KEY),
-    PLAYER(Material.PLAYER_HEAD),
-    PLATE(Material.STONE_PRESSURE_PLATE),
-    GLOBAL(Material.COMMAND_BLOCK);
+    PLAYER(Material.TOTEM_OF_UNDYING),
+    PLATE(Material.STONE_BRICKS),
+    GLOBAL(Material.RECOVERY_COMPASS);
 
     private final Material icon;
 

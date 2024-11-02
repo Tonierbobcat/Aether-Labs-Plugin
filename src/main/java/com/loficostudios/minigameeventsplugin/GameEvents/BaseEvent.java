@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.GameEvents;
 
 
-import com.loficostudios.melodyapi.icon.GuiIcon;
+import com.loficostudios.melodyapi.melodygui.GuiIcon;
 import com.loficostudios.melodyapi.utils.ItemCreator;
 import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;

@@ -1,6 +1,8 @@
 package com.loficostudios.minigameeventsplugin;
 
 import com.earth2me.essentials.IEssentials;
+import com.loficostudios.melodyapi.MelodyAPI;
+import com.loficostudios.melodyapi.MelodyPlugin;
 import com.loficostudios.melodyapi.utils.SimpleColor;
 
 import com.loficostudios.minigameeventsplugin.Config.ArenaConfig;
@@ -46,14 +48,17 @@ import static com.loficostudios.minigameeventsplugin.GameArena.GameArena.MIN_GAM
 import static com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager.GAME_COUNTDOWN;
 import static com.loficostudios.minigameeventsplugin.Utils.Debug.logWarning;
 
-public final class AetherLabsPlugin extends JavaPlugin {
+public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
-    public static final boolean DEBUG_ENABLED = true;
+    @Getter
+    public static AetherLabsPlugin instance;
+
+    public static final boolean DEBUG_ENABLED = false;
     private static final String COMMAND_PREFIX = "randomEventsPlugin.";
 
     //region Variables
-    @Getter
-    static AetherLabsPlugin instance;
+
+
 
     @Getter Collection<Player> onlinePlayers = new ArrayList<>();
 
@@ -78,6 +83,10 @@ public final class AetherLabsPlugin extends JavaPlugin {
     //endregion
 
 
+    public AetherLabsPlugin() {
+        instance = this;
+    }
+
     @Override
     public void onLoad() {
         loadConfigs();
@@ -85,7 +94,7 @@ public final class AetherLabsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        instance = this;
+        //instance = this;
 
         CommandAPI.onEnable();
 
@@ -120,7 +129,7 @@ public final class AetherLabsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        instance = null;
+        //instance = null;
 
         GameArena arena = gameManager.getArena();
 
