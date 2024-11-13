@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
 import com.loficostudios.melodyapi.utils.SimpleColor;
-import com.loficostudios.minigameeventsplugin.Managers.PlayerManager.PlayerManager;
+import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Material;

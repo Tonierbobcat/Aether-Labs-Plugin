@@ -1,17 +1,14 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
 import com.loficostudios.melodyapi.utils.Common;
-import com.loficostudios.melodyapi.utils.ItemCreator;
-import com.loficostudios.melodyapi.utils.SimpleColor;
-import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
-import com.loficostudios.minigameeventsplugin.GameArena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.GameTypes.BaseGameMode;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameState;
-import com.loficostudios.minigameeventsplugin.Utils.Selection;
+import com.loficostudios.minigameeventsplugin.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
+import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
+import com.loficostudios.minigameeventsplugin.utils.Selection;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;

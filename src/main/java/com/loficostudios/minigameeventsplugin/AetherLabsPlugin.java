@@ -1,31 +1,32 @@
 package com.loficostudios.minigameeventsplugin;
 
 import com.earth2me.essentials.IEssentials;
-import com.loficostudios.melodyapi.MelodyAPI;
 import com.loficostudios.melodyapi.MelodyPlugin;
 import com.loficostudios.melodyapi.utils.SimpleColor;
 
-import com.loficostudios.minigameeventsplugin.Config.ArenaConfig;
-import com.loficostudios.minigameeventsplugin.GameArena.GameArena;
-import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
-import com.loficostudios.minigameeventsplugin.GameEvents.PlateEvents.*;
-import com.loficostudios.minigameeventsplugin.GameEvents.PlayerEvents.*;
-import com.loficostudios.minigameeventsplugin.GameEvents.PlayerTreeEvent;
-import com.loficostudios.minigameeventsplugin.GameEvents.WorldEvents.WorldGhastEvent;
-import com.loficostudios.minigameeventsplugin.GameEvents.WorldEvents.WorldPlateRepairEvent;
-import com.loficostudios.minigameeventsplugin.Listeners.*;
-import com.loficostudios.minigameeventsplugin.Managers.VoteManager;
+import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
+import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
+import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
+import com.loficostudios.minigameeventsplugin.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.api.BaseEvent;
+import com.loficostudios.minigameeventsplugin.gameEvents.PlateEvents.*;
+import com.loficostudios.minigameeventsplugin.gameEvents.PlayerEvents.*;
+import com.loficostudios.minigameeventsplugin.gameEvents.PlayerEvents.PlayerTreeEvent;
+import com.loficostudios.minigameeventsplugin.gameEvents.WorldEvents.WorldGhastEvent;
+import com.loficostudios.minigameeventsplugin.gameEvents.WorldEvents.WorldPlateRepairEvent;
+import com.loficostudios.minigameeventsplugin.listeners.*;
+import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
-import com.loficostudios.minigameeventsplugin.Utils.Debug;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.gui.EventShop;
-import com.loficostudios.minigameeventsplugin.Managers.EventManager;
-import com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.Managers.ProfileManager;
-import com.loficostudios.minigameeventsplugin.Placeholders.MiniGamePlaceholder;
-import com.loficostudios.minigameeventsplugin.Utils.Selection;
-import com.loficostudios.minigameeventsplugin.Utils.WorldUtils;
+import com.loficostudios.minigameeventsplugin.managers.EventManager;
+import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.managers.ProfileManager;
+import com.loficostudios.minigameeventsplugin.placeholders.MiniGamePlaceholder;
+import com.loficostudios.minigameeventsplugin.utils.Selection;
+import com.loficostudios.minigameeventsplugin.utils.WorldUtils;
 import com.loficostudios.minigameeventsplugin.gui.VoteGui;
-import com.loficostudios.minigameeventsplugin.messages.Messages;
+import com.loficostudios.minigameeventsplugin.config.Messages;
 import dev.jorel.commandapi.*;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
@@ -38,15 +39,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.GameArena.GameArena.MIN_GAME_ARENA_AREA;
-import static com.loficostudios.minigameeventsplugin.Managers.GameManager.GameManager.GAME_COUNTDOWN;
-import static com.loficostudios.minigameeventsplugin.Utils.Debug.logWarning;
+import static com.loficostudios.minigameeventsplugin.arena.GameArena.MIN_GAME_ARENA_AREA;
+import static com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager.GAME_COUNTDOWN;
+import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
@@ -54,34 +54,34 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     public static AetherLabsPlugin instance;
 
     public static final boolean DEBUG_ENABLED = false;
-    private static final String COMMAND_PREFIX = "randomEventsPlugin.";
+    public static final String COMMAND_PREFIX = "randomEventsPlugin.";
 
     //region Variables
 
-
-
-    @Getter Collection<Player> onlinePlayers = new ArrayList<>();
-
+    @Getter
+    private Collection<Player> onlinePlayers = new ArrayList<>();
 
     @Getter
     private ArenaConfig arenaConfig = new ArenaConfig(this);
 
-    @Getter private final ProfileManager profileManager = new ProfileManager();
-    @Getter private final EventManager eventManager = new EventManager();
-    @Getter private final GameManager gameManager = new GameManager(this);
+    @Getter
+    private final ProfileManager profileManager = new ProfileManager();
+    @Getter
+    private final EventManager eventManager = new EventManager();
+    @Getter
+    private final GameManager gameManager = new GameManager(this);
 
-    @Getter private IEssentials essentials;
+    @Getter
+    private IEssentials essentials;
 
-    @Getter private Economy economy;
+    @Getter
+    private Economy economy;
 
     public boolean papiHook = false;
     public boolean essentialsHook = false;
     public boolean vaultHook = false;
 
-
-
     //endregion
-
 
     public AetherLabsPlugin() {
         instance = this;
@@ -94,11 +94,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
     @Override
     public void onEnable() {
-        //instance = this;
-
         CommandAPI.onEnable();
-
-
 
         if (!setupEconomy()) {
             logWarning("Could not load vault");
@@ -110,7 +106,6 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
         if (papiHook)
             new MiniGamePlaceholder(profileManager).register();
 
-
         try {
             registerCommands();
         } catch (Exception e) {
@@ -118,13 +113,8 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
             this.getPluginLoader().disablePlugin(this);
         }
 
-
         registerListeners();
         registerGameEvents();
-
-        //DEBUG WITH THIS BEFORE REGISTERCOMMANDS
-        //gameManager.createGameArena();
-
     }
 
     @Override
@@ -137,7 +127,6 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
             arena.clear();
             arena.removeEntities();
         }
-
     }
 
     private void loadConfigs() {
@@ -146,12 +135,6 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
         config.silentLogs(true);
 
         CommandAPI.onLoad(config);
-
-//        try {
-//            arenaConfig = new ArenaConfig(this);
-//        } catch (Exception e) {
-//            debugWarning("Could not INIT arenaConfig");
-//        }
     }
 
     //region Plugin Hooks
@@ -189,120 +172,11 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     //endregion
 
     private void registerCommands() {
+        new PlayerCommand(profileManager).get()
+                .forEach(ExecutableCommand::register);
 
-        new CommandAPICommand("optout")
-                .executesPlayer((player, args) -> {
-
-                    profileManager.getProfile(player.getUniqueId())
-                            .ifPresent(Profile::optOutOfGame);
-
-                    player.sendMessage(SimpleColor.deserialize(
-                            Messages.OPT_OUT
-                    ));
-
-                }).register();
-
-        new CommandAPICommand("shop")
-                .withPermission(COMMAND_PREFIX + "shopAccess")
-                .executesPlayer((player, args) -> {
-
-                    new EventShop(player).open(player);
-
-                }).register();
-
-        new CommandAPICommand("vote")
-                .withPermission(COMMAND_PREFIX + "vote")
-                .executesPlayer((player, args) -> {
-
-                    if (VoteManager.getInstance() == null) {
-                        player.sendMessage(SimpleColor.deserialize(
-                                Messages.UNABLE_TO_VOTE
-                        ));
-                        return;
-                    }
-
-                    new VoteGui().open(player);
-
-                }).register();
-
-
-        new CommandTree("arena")
-                .withPermission(COMMAND_PREFIX + "admin")
-                .then(new LiteralArgument("set")
-                        .then(new LocationArgument("pos1", LocationType.BLOCK_POSITION)
-                                .then(new LocationArgument("pos2", LocationType.BLOCK_POSITION)
-                                        .executesPlayer((player, args) -> {
-                                            Location pos1 = (Location) args.get("pos1");
-                                            Location pos2 = (Location) args.get("pos2");
-
-                                            if (pos1 == null || pos2 == null) {
-                                                player.sendMessage("&cSomething went wrong!");
-                                                return;
-                                            }
-
-                                            Selection selection = new Selection(pos1, pos2);
-
-                                            int selectionBlockCount = selection.count();
-
-                                            if (selectionBlockCount >= MIN_GAME_ARENA_AREA) {
-                                                gameManager.setGameArena(pos1, pos2);
-                                                String pos1Msg = pos1.getBlockX() + ", " + pos1.getBlockY() + ", " + pos1.getBlockZ();
-                                                String pos2Msg = pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ();
-
-                                                player.sendMessage(SimpleColor.deserialize("&aUpdated area to " + pos1Msg + " - " + pos2Msg + "!"));
-                                            }
-                                            else {
-                                                player.sendMessage(SimpleColor.deserialize("&cCannot set arena. Selection too small! (" +selectionBlockCount+ " blocks)"));
-                                            }
-
-                                        }))))
-                .then(new LiteralArgument("debug")
-                        .then(new LiteralArgument("outline")
-                                .executesPlayer((player, args) -> {
-
-                                    GameArena arena = getGameManager().getArena();
-
-                                    Selection selection = new Selection(arena.getPos1(), arena.getPos2());
-
-                                    Selection perimeter = selection.getPerimeter(1);
-
-                                    perimeter.getBlocks().forEach(block -> {
-                                        block.setType(Material.EMERALD_BLOCK);
-                                    });
-                                })
-                        )
-                        .then(new LiteralArgument("fill")
-                                .then(new LiteralArgument("start")
-                                        .executesPlayer((player, args) -> {
-                                            if (!getGameManager().inProgress()) {
-
-                                                GameArena arena = getGameManager().getArena();
-
-                                                arena.startLevelFillTask(Material.DIAMOND_BLOCK, 1);
-                                                player.sendMessage(SimpleColor.deserialize("&aStarted fill task successfully!"));
-                                            }
-                                            else {
-                                                player.sendMessage(SimpleColor.deserialize("&cYou cannot start this task while the game is running!"));
-                                            }
-                                        })
-                                ).then(new LiteralArgument("cancel")
-                                        .executesPlayer(((player, args) -> {
-                                            if (!getGameManager().inProgress()) {
-
-                                                GameArena arena = gameManager.getArena();
-                                                Selection selection = new Selection(arena.getPos1(), arena.getPos2());
-
-                                                getGameManager().getArena().cancelLavaFillTask();
-                                                WorldUtils.fillArea(selection, Material.AIR);
-
-                                                player.sendMessage(SimpleColor.deserialize("&aCancel task successfully!"));
-                                            }
-                                            else {
-                                                player.sendMessage(SimpleColor.deserialize("&cYou cannot cancel this task while the game is running!"));
-                                            }
-                                        }))))
-                ).register();
-
+        new ArenaCommand(gameManager).get()
+                .register();
 
         new CommandTree("start")
                 .withPermission(COMMAND_PREFIX + "admin")
@@ -321,21 +195,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                                         player.sendMessage(SimpleColor.deserialize("&cGame running! End it first."));
                                     }
                                 }))
-                ).register();
-
-
-
-//        new CommandAPICommand("stats")
-//                .executesPlayer((player, args) -> {
-//
-//
-//
-//                    profileManager
-//                            .getProfile(player.getUniqueId())
-//                            .ifPresent(profile -> player.sendMessage("wins: " + profile.getWins() + " kills: " + profile.getKills() + " deaths: " + profile.getDeaths()));
-//
-//                })
-//                .register();
+                );
     }
 
     private void registerGameEvents() {
@@ -388,8 +248,8 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                 new PlayerDeathListener(gameManager),
                 new EggListener(gameManager),
                 new ArenaListener(gameManager),
-                new MiniGameListener(gameManager),
-                new PlayerListener(profileManager)
+                new MiniGameListener(this, gameManager),
+                new PlayerListener(this, profileManager)
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 }

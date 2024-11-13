@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.gui;
 
 import com.loficostudios.melodyapi.utils.MelodyGui;
-import com.loficostudios.minigameeventsplugin.GameEvents.BaseEvent;
+import com.loficostudios.minigameeventsplugin.api.BaseEvent;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

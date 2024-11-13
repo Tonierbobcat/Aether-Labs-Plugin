@@ -1,15 +1,9 @@
 package com.loficostudios.minigameeventsplugin.interfaces;
 
-import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Random;
-import java.util.function.Consumer;
 
-import static com.loficostudios.minigameeventsplugin.Utils.Debug.*;
+import static com.loficostudios.minigameeventsplugin.utils.Debug.*;
 
 public interface IObjectSelector<Impl> {
     
