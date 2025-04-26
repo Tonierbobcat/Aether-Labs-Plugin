@@ -7,15 +7,14 @@ import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.events.PlateEvents.*;
-import com.loficostudios.minigameeventsplugin.game.events.PlayerEvents.*;
 import com.loficostudios.minigameeventsplugin.game.events.WorldEvents.WorldGhastEvent;
 import com.loficostudios.minigameeventsplugin.game.events.WorldEvents.WorldPlateRepairEvent;
 import com.loficostudios.minigameeventsplugin.listeners.*;
-import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.managers.EventRegistry;
-import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.placeholders.MiniGamePlaceholder;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
@@ -42,7 +41,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     @Getter
     public static AetherLabsPlugin instance;
 
-    public static final boolean DEBUG_ENABLED = false;
+    public static final boolean DEBUG_ENABLED = true;
     public static final String COMMAND_PREFIX = "randomEventsPlugin.";
 
     //region Variables
@@ -60,7 +59,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     private final EventRegistry events = new EventRegistry();
 
     @Getter
-    private final Game gameManager = new Game(this);
+    private final Game activeGame = new Game(this);
 
     @Getter
     private IEssentials essentials;
@@ -112,7 +111,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     public void onDisable() {
         //instance = null;
 
-        GameArena arena = gameManager.getArena();
+        GameArena arena = activeGame.getArena();
 
         if (arena != null) {
             arena.clear();
@@ -163,10 +162,10 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     //endregion
 
     private void registerCommands() {
-        new PlayerCommand(profileManager).get()
+        new PlayerCommand(profileManager, this).get()
                 .forEach(ExecutableCommand::register);
 
-        new ArenaCommand(gameManager).get()
+        new ArenaCommand(activeGame).get()
                 .register();
 
         new CommandTree("start")
@@ -174,9 +173,9 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                 .then(new LiteralArgument("countdown")
                         .then(new IntegerArgument("countdown", 3)
                                 .executesPlayer((player, args) -> {
-                                    if (!gameManager.inProgress()) {
+                                    if (!activeGame.inProgress()) {
                                         Integer countdown = (Integer) args.get("countdown");
-                                        if (gameManager.startCountdown(countdown != null ? countdown : GAME_COUNTDOWN)) {
+                                        if (activeGame.startCountdown(countdown != null ? countdown : GAME_COUNTDOWN)) {
                                             player.sendMessage(Component.text("§aSuccessfully started countdown!"));
                                         }
                                         else {
@@ -192,26 +191,26 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     private void registerGameEvents() {
         List.of(
                 //region Player Events
-                new PlayerBlindEvent(),
-                new PlayerBlocksEvent(),
-                new PlayerBowEvent(),
-                new PlayerCakeEvent(),
-                new PlayerColdEvent(),
-                new PlayerFishingRodEvent(),
-                new PlayerFloatEvent(),
-                new PlayerFlowerEvent(),
-                new PlayerGhostEvent(),
-                new PlayerGravityEvent(),
-                new PlayerHasteEvent(),
-                new PlayerRandomPlateEvent(),
-                new PlayerShearsEvent(),
-                new PlayerSickEvent(),
-                new PlayerSlowEvent(),
-                new PlayerSpeedEvent(),
-                new PlayerSpookyEvent(),
-                new PlayerSwapEvent(),
-                new PlayerSwordEvent(),
-                new PlayerTreeEvent(),
+//                new PlayerBlindEvent(),
+//                new PlayerBlocksEvent(),
+//                new PlayerBowEvent(),
+//                new PlayerCakeEvent(),
+//                new PlayerColdEvent(),
+//                new PlayerFishingRodEvent(),
+//                new PlayerFloatEvent(),
+//                new PlayerFlowerEvent(),
+//                new PlayerGhostEvent(),
+//                new PlayerGravityEvent(),
+//                new PlayerHasteEvent(),
+//                new PlayerRandomPlateEvent(),
+//                new PlayerShearsEvent(),
+//                new PlayerSickEvent(),
+//                new PlayerSlowEvent(),
+//                new PlayerSpeedEvent(),
+//                new PlayerSpookyEvent(),
+//                new PlayerSwapEvent(),
+//                new PlayerSwordEvent(),
+//                new PlayerTreeEvent(),
                 //endregion
 
                 //region Plate Events
@@ -236,10 +235,10 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     }
     private void registerListeners() {
         List.of(
-                new PlayerDeathListener(gameManager),
-                new EggListener(gameManager),
-                new ArenaListener(gameManager),
-                new MiniGameListener(this, gameManager),
+                new PlayerDeathListener(activeGame),
+                new EggListener(activeGame),
+                new ArenaListener(activeGame),
+                new MiniGameListener(this, activeGame),
                 new PlayerListener(this, profileManager)
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }

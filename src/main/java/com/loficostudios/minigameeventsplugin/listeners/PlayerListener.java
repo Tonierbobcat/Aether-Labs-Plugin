@@ -1,6 +1,8 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
+import com.loficostudios.melodyapi.gui.events.GuiCloseEvent;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.gui.VoteGui;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileAlreadyLoadedException;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileNotLoadedException;
@@ -31,6 +33,13 @@ public class PlayerListener implements Listener {
             profileManager.loadProfile(player.getUniqueId());
         } catch (ProfileAlreadyLoadedException exception) {
             logWarning("Profile for " + player.getName() + "is already loaded");
+        }
+    }
+
+    @EventHandler
+    private void onClose(GuiCloseEvent e) {
+        if (e.getGui() instanceof VoteGui gui) {
+            VoteGui.instances.remove(gui);
         }
     }
 

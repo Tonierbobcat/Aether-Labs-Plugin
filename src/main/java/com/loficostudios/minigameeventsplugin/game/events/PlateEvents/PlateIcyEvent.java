@@ -1,14 +1,11 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
 
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 public class PlateIcyEvent extends PlatformSelectorEvent {
     public PlateIcyEvent() {

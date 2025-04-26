@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 

@@ -3,11 +3,12 @@ package com.loficostudios.minigameeventsplugin.listeners;
 import com.loficostudios.minigameeventsplugin.api.bukkit.LavaLevelUpdatedEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.utils.Debug;
-import com.loficostudios.minigameeventsplugin.utils.Selection;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
+import com.loficostudios.minigameeventsplugin.utils.Selection;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -23,16 +24,16 @@ import java.util.Set;
 
 public class ArenaListener implements Listener {
 
-    private final Game gameManager;
+    private final Game game;
 
     public ArenaListener(Game gameManager) {
-        this.gameManager = gameManager;
+        this.game = gameManager;
     }
 
     @EventHandler
     private void onLavaChange(LavaLevelUpdatedEvent e) {
 
-        Set<SpawnPlatform> spawnPlatform = new HashSet<>(gameManager.getArena().getSpawnPlatforms());
+        Set<SpawnPlatform> spawnPlatform = new HashSet<>(game.getArena().getSpawnPlatforms());
 
         Debug.log("platforms count: " + spawnPlatform.size() + " Lava Level: " + e.getY());
         int levelLevel = e.getY();
@@ -44,23 +45,23 @@ public class ArenaListener implements Listener {
             //Debug.log("platform y: " + platformY + " Lava Level: " + levelLevel);
 
             if (levelLevel > platformY + 1) {
-                gameManager.getArena().removeSpawnPlatform(platform, false);
+                game.getArena().removeSpawnPlatform(platform, false);
             }
         }
 
-        if (!gameManager.getCurrentMode().equals(gameManager.EGG_WARS)) {
+        if (!game.getCurrentMode().equals(GameModes.EGG_WARS)) {
             return;
         }
-        EggWarsMode mode = gameManager.EGG_WARS;
+        EggWarsMode mode = GameModes.EGG_WARS;
 
-        List<Egg> eggs = new ArrayList<>(mode.getEggs());
+        List<Egg> eggs = new ArrayList<>(mode.getEggs(game));
 
         for (Egg egg : eggs) {
 
             int eggLevel = egg.getLocation().getBlockY();
 
             if (levelLevel == eggLevel) {
-                mode.removeEgg(egg);
+                mode.removeEgg(game, egg);
             }
         }
     }
@@ -99,7 +100,7 @@ public class ArenaListener implements Listener {
     }
 
     private boolean isArenaBorderBlock(Block block) {
-        GameArena arena = gameManager.getArena();
+        GameArena arena = game.getArena();
 
         if (arena == null)
             return false;

@@ -9,11 +9,7 @@ import org.bukkit.entity.Player;
 import java.util.Collection;
 
 public class RandomHeightsMode extends AbstractGameMode {
-
-
-    Game gameManager;
-    public RandomHeightsMode(Game gameManager) {
-        this.gameManager = gameManager;
+    public RandomHeightsMode() {
     }
 
     @Override
@@ -42,21 +38,18 @@ public class RandomHeightsMode extends AbstractGameMode {
     }
 
     @Override
-    public void prepareResources(Collection<Player> participatingPlayers) {
+    public void prepareResources(Game game, Collection<Player> participatingPlayers) {
 
     }
 
     @Override
-    public void initializeCore(Collection<Player> participatingPlayers) {
-//        gameManager.getArena()
-//                .InitializeSpawnPlatforms(participatingPlayers, SpawnPlatform.SpawnAlgorithm.RANDOM_HEIGHT);
-
+    public void initializeCore(Game game, Collection<Player> participatingPlayers) {
     }
 
     @Override
-    public void finalizeSetup(Collection<Player> participatingPlayers) {
+    public void finalizeSetup(Game game, Collection<Player> participatingPlayers) {
         for (Player player : participatingPlayers) {
-            SpawnPlatform spawnPlatform = gameManager.getArena().addSpawnPlatform(
+            SpawnPlatform platform = game.getArena().addSpawnPlatform(
                     player,
                     null,
                     null,
@@ -64,20 +57,5 @@ public class RandomHeightsMode extends AbstractGameMode {
                     SpawnPlatform::teleportCenter,
                     SpawnPlatform.SpawnAlgorithm.RANDOM_HEIGHT);
         }
-
-
-//
-//        for (int i = 0; i < 20; i++) {
-//
-//            gameManager.getArena().addSpawnPlatform(
-//                    null,
-//                    null,
-//                    null,
-//                    null,
-//                    SpawnPlatform.SpawnAlgorithm.RANDOM_HEIGHT);
-//
-//        }
-
-
     }
 }

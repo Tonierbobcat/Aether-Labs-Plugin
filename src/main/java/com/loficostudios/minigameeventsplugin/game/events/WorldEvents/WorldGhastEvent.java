@@ -1,8 +1,8 @@
 package com.loficostudios.minigameeventsplugin.game.events.WorldEvents;
 
+import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -24,6 +24,6 @@ public class WorldGhastEvent extends AbstractGameEvent {
     @Override
     public void start(Game game) {
         GameArena arena = game.getArena();
-        arena.spawnMob(EntityType.GHAST, arena.getRandomLocation());
+        arena.spawnEntity(EntityType.GHAST, arena.getRandomLocation());
     }
 }

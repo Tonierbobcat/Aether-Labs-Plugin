@@ -2,40 +2,36 @@ package com.loficostudios.minigameeventsplugin.managers;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
 import com.loficostudios.minigameeventsplugin.game.Game;
-
+import com.loficostudios.minigameeventsplugin.gamemode.GameMode;
+import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class VoteManager {
 
-    @Getter
-    private static VoteManager instance;
-
     private final Game gameManager;
 
-    private final Map<UUID, AbstractGameMode> votes = new HashMap<>();
-
-
+    private final Map<UUID, GameMode> votes = new HashMap<>();
 
     public VoteManager(Game gameManager) {
         this.gameManager = gameManager;
-        instance = this;
     }
 
-    public int getVotes(@NotNull AbstractGameMode type) {
+    public int getVotes(@NotNull GameMode type) {
         return (int) votes.values().stream()
-                .filter(gameType -> gameType.equals(type)).count();
+                .filter(t -> t.equals(type)).count();
     }
 
-    public @NotNull AbstractGameMode getVote(@NotNull Player player) {
+    public @NotNull GameMode getVote(@NotNull Player player) {
         return votes.get(player.getUniqueId());
     }
 
-    public Boolean castVote(@NotNull Player player, AbstractGameMode type) {
+    public Boolean castVote(@NotNull Player player, GameMode type) {
 
         UUID uuid = player.getUniqueId();
 
@@ -67,22 +63,26 @@ public class VoteManager {
         }
     }
 
-    public AbstractGameMode getMode() {
+    public GameMode getMode() {
+        List<GameMode> best = new ArrayList<>();
+        int highestVotes = -1;
 
-        int eggWarsVotes = getVotes(gameManager.EGG_WARS);
-        int differentHeightsVotes = getVotes(gameManager.DIFFERENT_HEIGHTS);
-        int normalVotes = getVotes(gameManager.NORMAL);
+        for (GameMode mode : GameModes.values()) {
+            int votes = getVotes(mode);
 
-        if (eggWarsVotes > differentHeightsVotes && eggWarsVotes > normalVotes) {
-            //Common.broadcast("Choose bedwars");
-            return gameManager.EGG_WARS;
-        } else if (differentHeightsVotes > eggWarsVotes && differentHeightsVotes > normalVotes) {
-            //Common.broadcast("Choose differentheights");
-            return gameManager.DIFFERENT_HEIGHTS;
-        } else {
-            //Common.broadcast("Choose normal");
-            return gameManager.NORMAL;
+            if (votes > highestVotes) {
+                highestVotes = votes;
+                best.clear();
+                best.add(mode);
+            } else if (votes == highestVotes) {
+                best.add(mode);
+            }
         }
-    }
 
+        if (best.isEmpty())
+            throw new IllegalArgumentException();
+
+        int randomIndex = ThreadLocalRandom.current().nextInt(best.size());
+        return best.get(randomIndex);
+    }
 }

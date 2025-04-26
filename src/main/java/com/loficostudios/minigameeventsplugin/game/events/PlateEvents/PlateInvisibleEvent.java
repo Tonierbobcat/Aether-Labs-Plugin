@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
 
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

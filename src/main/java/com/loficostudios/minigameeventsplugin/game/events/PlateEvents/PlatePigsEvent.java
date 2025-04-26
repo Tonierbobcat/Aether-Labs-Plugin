@@ -1,8 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
 
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
-
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -21,7 +20,7 @@ public class PlatePigsEvent extends PlatformSelectorEvent {
 
         if (player != null) {
             for (int i = 0; i < 4; i++) {
-                game.getArena().spawnMob(EntityType.PIG, platform.getTeleportLocation());
+                game.getArena().spawnEntity(EntityType.PIG, platform.getTeleportLocation());
             }
 
             return true;

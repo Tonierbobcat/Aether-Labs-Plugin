@@ -5,6 +5,7 @@ import com.loficostudios.minigameeventsplugin.game.events.IObjectSelector;
 import org.bukkit.boss.BossBar;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 public interface SelectorEvent<Impl> extends GameEvent, IObjectSelector<Impl> {
     boolean getDisplayedEnabled();
@@ -17,5 +18,5 @@ public interface SelectorEvent<Impl> extends GameEvent, IObjectSelector<Impl> {
 
     Collection<Impl> getObjects(Game game);
 
-    void selectObjects(Game game, BossBar bar);
+    void selectObjects(Game game, Consumer<Impl> onSelected, Consumer<Collection<Impl>> onComplete);
 }

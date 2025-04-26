@@ -1,12 +1,12 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
-import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
-import com.loficostudios.minigameeventsplugin.game.events.FallBackEvent;
-import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
+import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
+import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.events.FallBackEvent;
+import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import lombok.Getter;
 import org.bukkit.Sound;
@@ -60,7 +60,7 @@ public class RoundManager {
         }
 
         if (!valid) {
-            nextRound(new FallBackEvent(gameManager));
+            nextRound(new FallBackEvent());
         }
     }
 

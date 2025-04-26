@@ -7,10 +7,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.NumberConversions;
 
-import java.io.IOException;
-
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
-import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 @SuppressWarnings("SameParameterValue")
 public class ArenaConfig {

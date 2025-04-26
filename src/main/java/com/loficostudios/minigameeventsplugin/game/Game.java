@@ -1,43 +1,43 @@
 package com.loficostudios.minigameeventsplugin.game;
 
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
-import com.loficostudios.minigameeventsplugin.gamemode.RushMode;
-import com.loficostudios.minigameeventsplugin.managers.*;
-import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.config.Messages;
-import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
-import com.loficostudios.minigameeventsplugin.gamemode.NormalMode;
-import com.loficostudios.minigameeventsplugin.gamemode.RandomHeightsMode;
-import com.loficostudios.minigameeventsplugin.player.PlayerManager;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
+import com.loficostudios.minigameeventsplugin.config.Messages;
+import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
+import com.loficostudios.minigameeventsplugin.managers.*;
+import com.loficostudios.minigameeventsplugin.player.PlayerManager;
 import com.loficostudios.minigameeventsplugin.player.profile.Profile;
-import com.loficostudios.minigameeventsplugin.utils.*;
-
+import com.loficostudios.minigameeventsplugin.utils.Countdown;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
+import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import lombok.Getter;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
 public class Game {
 
-    public final RushMode RUSH = new RushMode();
     private final AetherLabsPlugin plugin;
 
     //region Variables
-    public final EggWarsMode EGG_WARS = new EggWarsMode(this);
-    public final NormalMode NORMAL = new NormalMode(this);
-    public final RandomHeightsMode DIFFERENT_HEIGHTS = new RandomHeightsMode(this);
 
-    public static int MIN_PLAYERS_TO_START = 1;
+    public static int MIN_PLAYERS_TO_START = 2;
 
     public static final int GAME_COUNTDOWN = 10;
     private static final int RESET_TIMER_AFTER_END_GAME = 3;
@@ -52,12 +52,16 @@ public class Game {
     @Getter
     private @NotNull GameState currentState = GameState.NONE;
 
+    private final HashMap<String, Object> persistentData = new HashMap<String, Object>();
 
     private com.loficostudios.minigameeventsplugin.gamemode.GameMode currentMode;
 
     @Getter
     private BossBar statusBar = Bukkit.createBossBar(null, BarColor.YELLOW, BarStyle.SOLID);
 
+    public HashMap<String, Object> getPersistentData() {
+        return persistentData;
+    }
 
     //endregion
 
@@ -90,7 +94,7 @@ public class Game {
     public @NotNull com.loficostudios.minigameeventsplugin.gamemode.GameMode getCurrentMode() {
 
         if (currentMode == null)
-            return NORMAL;
+            return GameModes.NORMAL;
 
         return currentMode;
 
@@ -103,7 +107,7 @@ public class Game {
 
 
         if (countdown.cancel()) {
-            Debug.log("Cancelled countdown");
+            log("Cancelled countdown");
 
             setState(GameState.NONE);
             statusBar.removeAll();
@@ -116,7 +120,7 @@ public class Game {
     }
 
     private Countdown countdown;
-
+    private VoteManager voting;
     public Boolean startCountdown(Integer time) {
         if (arena == null) {
             return false;
@@ -126,7 +130,7 @@ public class Game {
 
         setState(GameState.COUNTDOWN);
 
-        VoteManager voteManager = new VoteManager(this);
+        this.voting = new VoteManager(this);
 
         Collection<Player> playersInGameWorld = players.getPlayersInGameWorld();
 
@@ -138,30 +142,27 @@ public class Game {
 
         Collection<Player> participatingPlayers = getPlayers().getAvailablePlayers();
 
-        Debug.log("" + participatingPlayers);
-
+        log("Participating" + participatingPlayers);
 
         countdown = new Countdown("countdown",
                 (Integer countdown) -> {
                     progressBar.setTitle("In... " + countdown);
 
-                    if (countdown == 3) {
-                        players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
-                    } else if (countdown == 2) {
-                        players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1.5f);
-                    } else if (countdown == 1) {
-                        players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
+                    switch (countdown) {
+                        case 3 -> players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+                        case 2 -> players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1.5f);
+                        case 1 -> players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
                     }
                 },
                 () -> {
                     progressBar.removeAll();
 
-
                     if (!participatingPlayers.isEmpty()) {
                         if (participatingPlayers.size() >= MIN_PLAYERS_TO_START) {
                             statusBar.setTitle(Messages.STATUS_STARTING);
 
-                            com.loficostudios.minigameeventsplugin.gamemode.GameMode selected = voteManager.getMode();
+                            com.loficostudios.minigameeventsplugin.gamemode.GameMode selected = voting.getMode();
+                            this.voting = null;
                             if (setCurrentMode(selected)) {
                                 new SetupWizard(this).setup(selected, participatingPlayers);
                                 setState(GameState.SETUP);
@@ -212,17 +213,14 @@ public class Game {
     public void endGame(Player winner) {
         setState(GameState.ENDED);
         currentMode.end();
-        Debug.log("ended game");
+        persistentData.clear();
+        log("ended game");
 
 
         roundManager.cancelRound();
 
-        arena.cancelLavaFillTask();
+        arena.cancelFillTask();
         arena.removeEntities();
-
-
-
-        GameMode previousGamemode;
 
         players.restorePlayers();
 
@@ -231,32 +229,32 @@ public class Game {
         statusBar.setTitle(Messages.STATUS_PLAYER_WIN
                 .replace("{winner}", winner == null ? "NaN" : winner.getName()));
 
-
+        GameMode previousGM;
         if (winner != null) {
-            previousGamemode = winner.getGameMode();
+            previousGM = winner.getGameMode();
             winner.setGameMode(GameMode.SPECTATOR);
         } else {
-            previousGamemode = null;
+            previousGM = null;
         }
 
-        tasks.add(new Countdown("end", (Integer countdown) ->
-                players.notify(
-                        NotificationType.GLOBAL,
-                        Sound.ENTITY_FIREWORK_ROCKET_LAUNCH,
-                        1, 1),
-                () -> {
-                    tasks.forEach(BukkitTask::cancel);
+        var countdown = new Countdown("end",
+                (i) -> players.notify(NotificationType.GLOBAL, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1, 1),
+                () -> finalize(winner, previousGM));
+        tasks.add(countdown.start(RESET_TIMER_AFTER_END_GAME));
+    }
 
-                    if (winner != null) {
-                        winner.setGameMode(previousGamemode);
-                        plugin.getProfileManager().getProfile(winner.getUniqueId())
-                                .ifPresent(Profile::addWin);
-                    }
-                    players.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
+    private void finalize(Player winner, GameMode previous) {
+        tasks.forEach(BukkitTask::cancel);
 
-                    reset();
-                    startCountdown(GAME_COUNTDOWN);
-                }).start(RESET_TIMER_AFTER_END_GAME));
+        if (winner != null) {
+            winner.setGameMode(previous);
+            plugin.getProfileManager().getProfile(winner.getUniqueId())
+                    .ifPresent(Profile::addWin);
+        }
+        players.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
+
+        reset();
+        startCountdown(GAME_COUNTDOWN);
     }
 
     public void forceEnd() {
@@ -266,7 +264,7 @@ public class Game {
 
         tasks.forEach(BukkitTask::cancel);
 
-        arena.cancelLavaFillTask();
+        arena.cancelFillTask();
         arena.removeEntities();
 
         players.restorePlayers();
@@ -319,5 +317,9 @@ public class Game {
 
     public EventManager getEvents() {
         return events;
+    }
+
+    public @Nullable VoteManager getVoting() {
+        return voting;
     }
 }

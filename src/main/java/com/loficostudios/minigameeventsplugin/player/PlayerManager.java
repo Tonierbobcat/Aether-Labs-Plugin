@@ -1,11 +1,11 @@
 package com.loficostudios.minigameeventsplugin.player;
 
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameState;
-import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.managers.NotificationType;
+import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;

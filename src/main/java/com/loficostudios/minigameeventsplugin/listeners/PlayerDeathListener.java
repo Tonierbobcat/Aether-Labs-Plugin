@@ -1,114 +1,111 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
-import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.player.PlayerManager;
-import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
-import org.bukkit.Bukkit;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
+import com.loficostudios.minigameeventsplugin.player.PlayerManager;
+import com.loficostudios.minigameeventsplugin.player.profile.Profile;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.loficostudios.minigameeventsplugin.game.Game.PLAYER_KILL_MONEY_AMOUNT;
 
 public class PlayerDeathListener implements Listener {
 
-    private final Game gameManager;
+    private final Game game;
     private final AetherLabsPlugin plugin;
-    private final PlayerManager playerManager;
+    private final PlayerManager players;
     public PlayerDeathListener(Game gameManager) {
-        this.gameManager = gameManager;
+        this.game = gameManager;
         this.plugin = AetherLabsPlugin.getInstance();
-        playerManager = gameManager.getPlayers();
+        players = gameManager.getPlayers();
     }
 
+
     @EventHandler
-    private void onDeath(PlayerDeathEvent e) {
-        final Player player = e.getEntity();
+    private void onDeath(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player player))
+            return;
 
-        if (gameManager.inProgress() && playerManager.getPlayersInGame().contains(player)) {
+        var isDeath = player.getHealth() - e.getFinalDamage() <= 0;
+        if (!isDeath)
+            return;
+        if (!game.inProgress() || !players.getPlayersInGame().contains(player))
+            return;
+        e.setCancelled(true);
 
-            if (gameManager.getCurrentMode().equals(gameManager.EGG_WARS)) {
-                EggWarsMode mode = (EggWarsMode) gameManager.getCurrentMode();
-                Bukkit.getLogger().info("current mode is eggwars");
-                if (mode.hasSpawn(player)) {
-                    Bukkit.getLogger().info("player has spawn");
-                    Egg egg = mode.getEgg(player);
-
-                    if (egg != null) {
-                        Bukkit.getLogger().info("egg is not null");
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                player.sendMessage("Spawning back...");
-
-
-                                if (player.isValid()) {
-                                    egg.Spawn();
-                                }
-                            }
-                        }.runTaskLater(plugin, 5);
-                    }
-                    e.setDeathMessage(null);
-                }
-                else {
-                    e.setKeepInventory(true);
-                    playerManager.handlePlayerDeath(player);
-                }
+        if (e instanceof EntityDamageByEntityEvent event) {
+            if (event.getDamager() instanceof Player killer) {
+                handleKill(killer);
+            } else if (event.getDamager() instanceof Projectile projectile && projectile.getShooter() instanceof Player killer) {
+                handleKill(killer);
             }
-            else {
-                e.setKeepInventory(true);
-                playerManager.handlePlayerDeath(player);
+        }
+
+        if (game.getCurrentMode().equals(GameModes.EGG_WARS)) {
+            handleEggWars(player);
+        } else {
+            players.handlePlayerDeath(player);
+            respawn(player, () -> player.teleport(player.getWorld().getSpawnLocation()), getMaxHealth(player), 5);
+        }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                player.playSound(player, Sound.ENTITY_PLAYER_DEATH, 1,1);
             }
+        }.runTaskLater(plugin, 1);
+    }
 
+    private void handleKill(Player killer) {
+        plugin.getProfileManager().getProfile(killer.getUniqueId()).ifPresent(Profile::addKill);
 
-
-
-
-
-
-
-
-
-
-
-
-
-            final Player killer = player.getKiller();
-            if (killer != null) {
-                plugin.getProfileManager().getProfile(killer.getUniqueId()).ifPresent(Profile::addKill);
-
-                if (plugin.vaultHook) {
-                    plugin.getEconomy().depositPlayer(
-                            killer,
-                            PLAYER_KILL_MONEY_AMOUNT);
-                }
-            }
+        if (plugin.vaultHook) {
+            plugin.getEconomy().depositPlayer(
+                    killer,
+                    PLAYER_KILL_MONEY_AMOUNT);
         }
     }
 
-    //    @EventHandler
-//    private void onDeath(EntityDamageEvent e) {
-//        if (isCurrentGameOther())
-//            return;
-//        EggWarsMode mode = (EggWarsMode) gameManager.getCurrentMode();
-//
-//
-//        if (e.getEntity() instanceof Player player) {
-//            if (mode.hasSpawn(player)) {
-//                Egg egg = mode.getEgg(player);
-//
-//                if (egg != null) {
-//                    player.setHealth(20.0);
-//                    egg.Spawn();
-//                    e.setCancelled(true);
-//                }
-//            }
-//        }
-//    }
+    private void respawn(Player player, Runnable onSpawn, double health, long delay) {
+        onSpawn.run();
+        player.clearActivePotionEffects();
+        player.setFireTicks(0);
+        player.setHealth(health);
+        player.setFoodLevel(20);
+    }
 
+    private void handleEggWars(Player player) {
+        EggWarsMode mode = (EggWarsMode) game.getCurrentMode();
+
+        Egg egg = mode.getEgg(game, player);
+
+        if (egg == null) {
+            players.handlePlayerDeath(player);
+        }
+        respawn(player, () -> {
+            if (egg != null)
+                egg.spawn();
+            else player.teleport(player.getWorld().getSpawnLocation());
+        }, getMaxHealth(player), 5);
+    }
+
+    private double getMaxHealth(Player player) {
+        var attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+
+        double max = 20;
+        if (attribute != null) {
+            max = attribute.getValue();
+        }
+        return max;
+    }
 }

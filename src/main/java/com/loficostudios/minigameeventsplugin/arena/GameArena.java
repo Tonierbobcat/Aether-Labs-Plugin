@@ -1,11 +1,12 @@
 package com.loficostudios.minigameeventsplugin.arena;
 
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -21,9 +22,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.loficostudios.minigameeventsplugin.utils.Debug.*;
+import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
+import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 import static com.loficostudios.minigameeventsplugin.utils.Selection.randomDouble;
-import static com.loficostudios.minigameeventsplugin.utils.WorldUtils.fillArea;
 
 @SuppressWarnings("UnusedReturnValue")
 public class GameArena {
@@ -98,7 +99,7 @@ public class GameArena {
     //region Clean Up
 
     public void clear() {
-        cancelLavaFillTask();
+        cancelFillTask();
 
         Selection selection = new Selection(pos1, pos2);
 
@@ -250,15 +251,19 @@ public class GameArena {
         return playerSpawnPlatforms.get(player);
     }
 
-    public Entity spawnMob(EntityType type, Location location) {
+    public Entity spawnEntity(EntityType type, Location location) {
         return getWorld().spawnEntity(location, type);
     }
 
-    public void startLevelFillTask(Material fill, int speed) {
+    public void startFillTask(Material fill, int speed) {
         if (lavaTask != null) {
             logWarning("Unable to start lava fill task. already started");
             return;
         }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage("Fill Speed: " + speed);
+        }
+
 
         int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
         int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
@@ -267,7 +272,8 @@ public class GameArena {
         int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
         int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
 
-        int batch_size = (maxX - minX + 1);
+        int base = (maxX - minX + 1);
+        int batchSize = (int) (base * (1.0 + (speed - 1) * (1.0 / 9.0)));
 
         List<Block> blocks = new ArrayList<>();
 
@@ -282,15 +288,14 @@ public class GameArena {
             }
         }
 
-        new ArenaFillTask(this, fill, blocks, batch_size)
-                .runTaskTimer(plugin, 0, speed);
+        lavaTask = new ArenaFillTask(this, fill, blocks, batchSize)
+                .runTaskTimer(plugin, 0, 5 - (int) ((speed - 1) * (4.0 / 9.0)));
     }
 
-    public void cancelLavaFillTask() {
-        if (lavaTask != null) {
-            log("canceled lava task");
-            lavaTask.cancel();
-            lavaTask = null;
-        }
+    public void cancelFillTask() {
+        if (lavaTask == null)
+            return;
+        lavaTask.cancel();
+        lavaTask = null;
     }
 }

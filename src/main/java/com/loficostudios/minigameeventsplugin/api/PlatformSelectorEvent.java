@@ -9,13 +9,8 @@ import com.loficostudios.minigameeventsplugin.utils.Debug;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
-
-import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
-import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 public abstract class PlatformSelectorEvent extends AbstractSelectorEvent<SpawnPlatform> {
     protected PlatformSelectorEvent(String name, Material icon, int min, int max) {
@@ -34,7 +29,22 @@ public abstract class PlatformSelectorEvent extends AbstractSelectorEvent<SpawnP
 
     @Override
     public void start(Game game) {
-        selectObjects(game, game.getProgressBar());
+        var bar = game.getProgressBar();
+        var message = new StringBuilder();
+        selectObjects(game, (platform) -> {
+            if (onSelect(game, platform)) {
+                if (getDisplayedEnabled()) {
+                    var player = platform.getPlayer();
+                    message.append(" ").append(player != null ? player.getName() : "NaN");
+                    bar.setTitle(message.toString());
+                }
+
+                game.getPlayers().notify(
+                        NotificationType.GLOBAL,
+                        Sound.BLOCK_NOTE_BLOCK_PLING,
+                        1, 2);
+            }
+        },platforms -> onComplete(game, platforms));
     }
 
     @Override

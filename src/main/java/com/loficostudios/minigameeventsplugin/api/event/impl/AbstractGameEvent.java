@@ -1,11 +1,11 @@
 package com.loficostudios.minigameeventsplugin.api.event.impl;
 
 
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.api.Warning;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
-import com.loficostudios.minigameeventsplugin.api.Warning;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.scheduler.BukkitTask;

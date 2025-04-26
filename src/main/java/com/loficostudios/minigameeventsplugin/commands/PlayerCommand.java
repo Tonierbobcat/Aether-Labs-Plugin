@@ -1,11 +1,12 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
-import com.loficostudios.minigameeventsplugin.player.profile.Profile;
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.config.Messages;
 import com.loficostudios.minigameeventsplugin.gui.EventShop;
 import com.loficostudios.minigameeventsplugin.gui.VoteGui;
-import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
+import com.loficostudios.minigameeventsplugin.player.profile.Profile;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import dev.jorel.commandapi.CommandAPICommand;
 import net.kyori.adventure.text.Component;
 
@@ -17,8 +18,11 @@ public class PlayerCommand {
 
     private final ProfileManager profileManager;
 
-    public PlayerCommand(ProfileManager profileManager) {
+    private final AetherLabsPlugin plugin;
+
+    public PlayerCommand(ProfileManager profileManager, AetherLabsPlugin plugin) {
         this.profileManager = profileManager;
+        this.plugin = plugin;
     }
 
     public List<CommandAPICommand> get() {
@@ -44,13 +48,12 @@ public class PlayerCommand {
                 .withPermission(COMMAND_PREFIX + "vote")
                 .executesPlayer((player, args) -> {
 
-                    if (VoteManager.getInstance() == null) {
+                    if (plugin.getActiveGame().getVoting() == null) {
                         player.sendMessage(Component.text(Messages.UNABLE_TO_VOTE));
                         return;
                     }
 
                     new VoteGui().open(player);
-
                 })
         );
     }

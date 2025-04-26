@@ -1,8 +1,8 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
+import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameState;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
@@ -12,22 +12,23 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class EggWarsMode extends AbstractGameMode {
 
-    private final Game gameManager;
-
-    public EggWarsMode(Game gameManager) {
-        this.gameManager = gameManager;
+    public EggWarsMode() {
     }
+//    private final Map<UUID, Egg> spawns = new HashMap<>();
 
-    public Collection<Egg> getEggs() {
-        return spawns.values();
+    public Collection<Egg> getEggs(Game game) {
+        var spawns = game.getPersistentData().computeIfAbsent("egg-wars-spawns", string -> new HashMap<UUID, Egg>());
+        return ((Map<UUID, Egg>) spawns).values();
     }
 
     @Override
@@ -47,7 +48,6 @@ public class EggWarsMode extends AbstractGameMode {
 
     @Override
     public void end() {
-        spawns.clear();
     }
 
     @Override
@@ -56,23 +56,21 @@ public class EggWarsMode extends AbstractGameMode {
     }
 
     @Override
-    public void prepareResources(Collection<Player> participatingPlayers) {
+    public void prepareResources(Game game, Collection<Player> participatingPlayers) {
 
     }
 
-    Map<UUID, Egg> spawns = new HashMap<>();
+    public void handleEggBreak(Game game, @NotNull Egg egg) {
 
-
-    public void handleEggBreak(BlockBreakEvent e, @NotNull Egg egg) {
-
-        if (gameManager.getCurrentState().equals(GameState.SETUP))
+        if (game.getCurrentState().equals(GameState.SETUP))
             return;
 
-        removeEgg(egg);
+        removeEgg(game, egg);
 
     }
 
-    public void removeEgg(@NotNull Egg egg) {
+    public void removeEgg(Game game, @NotNull Egg egg) {
+        var spawns = ((Map<UUID, Egg>) game.getPersistentData().computeIfAbsent("egg-wars-spawns", string -> new HashMap<UUID, Egg>()));
 
         if (spawns.containsValue(egg)) {
             egg.breakEgg();
@@ -80,14 +78,14 @@ public class EggWarsMode extends AbstractGameMode {
         }
     }
 
-
-
-    public @Nullable Egg getEgg(@NotNull Player player) {
+    public @Nullable Egg getEgg(Game game, @NotNull Player player) {
+        var spawns = ((Map<UUID, Egg>) game.getPersistentData().computeIfAbsent("egg-wars-spawns", string -> new HashMap<UUID, Egg>()));
 
         return spawns.get(player.getUniqueId());
     }
 
-    public @Nullable Egg getEgg(@NotNull Block block) {
+    public @Nullable Egg getEgg(Game game, @NotNull Block block) {
+        var spawns = ((Map<UUID, Egg>) game.getPersistentData().computeIfAbsent("egg-wars-spawns", string -> new HashMap<UUID, Egg>()));
 
         for (Egg egg : spawns.values()) {
 
@@ -99,54 +97,39 @@ public class EggWarsMode extends AbstractGameMode {
     }
 
     @Override
-    public void initializeCore(Collection<Player> participatingPlayers) {
+    public void initializeCore(Game game, Collection<Player> participatingPlayers) {
+        var spawns = ((Map<UUID, Egg>) game.getPersistentData().computeIfAbsent("egg-wars-spawns", string -> new HashMap<UUID, Egg>()));
 
-        GameArena arena = gameManager.getArena();
+        GameArena arena = game.getArena();
 
         Selection bounds = new Selection(arena.getPos1(), arena.getPos2());
 
         for (Player player : participatingPlayers) {
-            gameManager.getArena().addSpawnPlatform(
-                    player,
-                    null,
-                    null,
-                    null,
-                    spawnPlatform -> {
+            game.getArena().addSpawnPlatform(player, null, null, null, spawnPlatform -> {
+                Location loc = spawnPlatform.getLocation();
 
+                World world = loc.getWorld();
 
-                        Location loc = spawnPlatform.getLocation();
+                if(world != null) {
+                    Block block = bounds.getBlock(loc.getBlockX(), loc.getBlockY() + 1, loc.getBlockZ());
 
-                        World world = loc.getWorld();
+                    if (block != null) {
+                        Egg egg = new Egg(player, block, game.getPlayers());
 
-                        if(world != null) {
-                            Block block = bounds.getBlock(loc.getBlockX(), loc.getBlockY() + 1, loc.getBlockZ());
+                        spawns.put(player.getUniqueId(), egg);
+                        player.sendMessage("Added egg");
+                    }
+                    else {
+                        Bukkit.getLogger().severe("egg is null");
+                    }
+                }
 
-                            if (block != null) {
-                                Egg egg = new Egg(player, block, gameManager.getPlayers());
-
-                                spawns.put(player.getUniqueId(), egg);
-                                player.sendMessage("Added egg");
-                            }
-                            else {
-                                Bukkit.getLogger().severe("egg is null");
-//                                Common.broadcast();
-                            }
-                        }
-
-                        spawnPlatform.teleportCenter();
-                    },
-                    SpawnPlatform.SpawnAlgorithm.EQUAL_HEIGHT);
+                spawnPlatform.teleportCenter();
+            }, SpawnPlatform.SpawnAlgorithm.EQUAL_HEIGHT);
         }
     }
 
-    public boolean hasSpawn(@NotNull Player player) {
-
-        Egg egg = spawns.get(player.getUniqueId());
-
-        return egg != null;
-    }
-
     @Override
-    public void finalizeSetup(Collection<Player> participatingPlayers) {
+    public void finalizeSetup(Game game, Collection<Player> participatingPlayers) {
     }
 }

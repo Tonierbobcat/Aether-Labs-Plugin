@@ -3,7 +3,8 @@ package com.loficostudios.minigameeventsplugin.game.events;
 import java.util.Collection;
 import java.util.Random;
 
-import static com.loficostudios.minigameeventsplugin.utils.Debug.*;
+import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
+import static com.loficostudios.minigameeventsplugin.utils.Debug.logError;
 
 public interface IObjectSelector<Impl> {
     

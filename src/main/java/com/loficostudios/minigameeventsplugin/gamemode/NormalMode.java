@@ -10,10 +10,8 @@ import java.util.Collection;
 
 public class NormalMode extends AbstractGameMode {
 
-    private final Game gameManager;
 
-    public NormalMode(Game gameManager) {
-        this.gameManager = gameManager;
+    public NormalMode() {
     }
 
     @Override
@@ -27,14 +25,14 @@ public class NormalMode extends AbstractGameMode {
     }
 
     @Override
-    public void prepareResources(Collection<Player> participatingPlayers) {
+    public void prepareResources(Game game, Collection<Player> participatingPlayers) {
 
     }
 
     @Override
-    public void initializeCore(Collection<Player> participatingPlayers) {
+    public void initializeCore(Game game, Collection<Player> participatingPlayers) {
         for (Player player : participatingPlayers) {
-            SpawnPlatform spawnPlatform = gameManager.getArena().addSpawnPlatform(
+            SpawnPlatform spawnPlatform = game.getArena().addSpawnPlatform(
                     player,
                     null,
                     null,
@@ -45,9 +43,9 @@ public class NormalMode extends AbstractGameMode {
     }
 
     @Override
-    public void finalizeSetup(Collection<Player> participatingPlayers) {
+    public void finalizeSetup(Game game, Collection<Player> participatingPlayers) {
         for (Player player : participatingPlayers) {
-            SpawnPlatform spawnPlatform = gameManager.getArena().getSpawnPlatform(player);
+            SpawnPlatform spawnPlatform = game.getArena().getSpawnPlatform(player);
 
             spawnPlatform.teleportCenter();
         }

@@ -8,14 +8,8 @@ import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-
-import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
 public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> {
     protected PlayerSelectorEvent(String id, String name, Material icon, double cost, int min, int max) {
@@ -37,7 +31,21 @@ public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> 
 
     @Override
     public void start(Game game) {
-        selectObjects(game, game.getProgressBar());
+        var bar = game.getProgressBar();
+        var message = new StringBuilder();
+        selectObjects(game, player -> {
+            if (onSelect(game, player)) {
+                if (getDisplayedEnabled()) {
+                    message.append(" ").append(player != null ? player.getName() : "NaN");
+                    bar.setTitle(message.toString());
+                }
+
+                game.getPlayers().notify(
+                        NotificationType.GLOBAL,
+                        Sound.BLOCK_NOTE_BLOCK_PLING,
+                        1, 2);
+            }
+        }, players -> onComplete(game, players));
     }
 
     @Override

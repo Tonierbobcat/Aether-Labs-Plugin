@@ -4,17 +4,14 @@ import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.managers.NotificationType;
 import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent implements SelectorEvent<Impl> {
 
@@ -69,7 +66,7 @@ public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent impl
     }
 
     @Override
-    public void selectObjects(Game game, BossBar bar) {
+    public void selectObjects(Game game, Consumer<Impl> onSelected, Consumer<Collection<Impl>> onComplete) {
         final int amount = getAmount(game);
 
         final List<Impl> objects = new ArrayList<>(getObjects(game));
@@ -97,24 +94,15 @@ public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent impl
 
                         selectedObjects.add(selectedObject);
 
-                        if (onSelect(game, selectedObject)) {
-                            if (getDisplayedEnabled()) {
-                                if (selectedObject instanceof Player player) { //todo change this
-                                    message.append(" ").append(player.getName());
-                                } else {
-                                    message.append(" ").append(selectedObject.getClass().getSimpleName());
-                                }
-                                bar.setTitle(message.toString());
-                            }
-
-                            game.getPlayers().notify(
-                                    NotificationType.GLOBAL,
-                                    Sound.BLOCK_NOTE_BLOCK_PLING,
-                                    1, 2);
+                        if (onSelected != null) {
+                            onSelected.accept(selectedObject);
                         }
                     }
                 }
                 else {
+                    if (onComplete != null) {
+                        onComplete.accept(selectedObjects);
+                    }
                     onComplete(game, selectedObjects);
                     this.cancel();
                 }

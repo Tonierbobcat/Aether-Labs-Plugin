@@ -1,13 +1,13 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameState;
-import com.loficostudios.minigameeventsplugin.player.PlayerManager;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
-import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
+import com.loficostudios.minigameeventsplugin.player.PlayerManager;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -23,6 +23,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -127,7 +128,7 @@ public class MiniGameListener implements Listener {
         //
         //}
 
-        VoteManager voteManager = VoteManager.getInstance();
+        VoteManager voteManager = AetherLabsPlugin.getInstance().getActiveGame().getVoting();
         if (voteManager != null) {
             voteManager.validateVotes();
         }
@@ -140,7 +141,7 @@ public class MiniGameListener implements Listener {
     private void onWorldChanged(PlayerChangedWorldEvent e) {
         final Player player = e.getPlayer();
 
-        VoteManager voteManager = VoteManager.getInstance();
+        VoteManager voteManager = AetherLabsPlugin.getInstance().getActiveGame().getVoting();
         if (voteManager != null) {
             voteManager.validateVotes();
         }
@@ -174,6 +175,15 @@ public class MiniGameListener implements Listener {
 
             handleEventDuringSetupGame(e);
         }
+    }
+
+    @EventHandler
+    private void onMove(PlayerMoveEvent e) {
+        if (e.isCancelled())
+            return;
+        if (e.getFrom().distance(e.getTo()) < 0.01)
+            return;
+        handleEventDuringSetupGame(e);
     }
 
     @EventHandler

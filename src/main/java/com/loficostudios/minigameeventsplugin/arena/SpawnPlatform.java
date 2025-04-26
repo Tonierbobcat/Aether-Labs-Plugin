@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.arena;
 
-import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.utils.Generator;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import lombok.Getter;
@@ -14,7 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
@@ -62,7 +64,7 @@ public class SpawnPlatform {
 
         this.radius = DEFAULT_PLATFORM_RADIUS;
 
-        this.arena = this.plugin.getGameManager().getArena();
+        this.arena = this.plugin.getActiveGame().getArena();
 
         this.spawnAlgorithm = spawnAlgorithm;
 
@@ -80,7 +82,7 @@ public class SpawnPlatform {
         this.plugin = AetherLabsPlugin.getInstance();
         this.radius = DEFAULT_PLATFORM_RADIUS;
 
-        this.arena = this.plugin.getGameManager().getArena();
+        this.arena = this.plugin.getActiveGame().getArena();
         this.spawnAlgorithm = spawnAlgorithm;
         this.type = type;
         this.material = material;

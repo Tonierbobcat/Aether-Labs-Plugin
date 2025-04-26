@@ -3,7 +3,6 @@ package com.loficostudios.minigameeventsplugin.utils;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

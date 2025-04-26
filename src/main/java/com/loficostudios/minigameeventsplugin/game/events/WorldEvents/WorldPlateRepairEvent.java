@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.WorldEvents;
 
-import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
+import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;

@@ -2,7 +2,7 @@ package com.loficostudios.minigameeventsplugin.gamemode;
 
 import org.bukkit.Material;
 
-public interface GameMode extends IInitializationReceiver {
+public interface GameMode extends IGameInitializationReceiver {
     Material getFillMaterial();
 
     int getFillSpeed();

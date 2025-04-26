@@ -76,7 +76,7 @@ public class ArenaCommand {
 
                                                 GameArena arena = gameManager.getArena();
 
-                                                arena.startLevelFillTask(Material.DIAMOND_BLOCK, 1);
+                                                arena.startFillTask(Material.DIAMOND_BLOCK, 1);
                                                 player.sendMessage(Component.text("&aStarted fill task successfully!"));
                                             }
                                             else {
@@ -90,7 +90,7 @@ public class ArenaCommand {
                                                 GameArena arena = gameManager.getArena();
                                                 Selection selection = new Selection(arena.getPos1(), arena.getPos2());
 
-                                                gameManager.getArena().cancelLavaFillTask();
+                                                gameManager.getArena().cancelFillTask();
                                                 WorldUtils.fillArea(selection, Material.AIR);
 
                                                 player.sendMessage(Component.text("&aCancel task successfully!"));

@@ -54,7 +54,7 @@ public class Egg {
 
     private static final Sound RESPAWN_SOUND = Sound.ITEM_TOTEM_USE;
 
-    public void Spawn() {
+    public void spawn() {
         playerManager.teleportPlayer(player, new Vector(
                 block.getX(),
                 block.getY() + 1,

@@ -7,8 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-
 public class PlateObsidianEvent extends PlatformSelectorEvent {
 
     public PlateObsidianEvent() {

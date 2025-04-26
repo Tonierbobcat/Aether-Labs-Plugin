@@ -1,8 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
 
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
-
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -26,7 +25,7 @@ public class PlateZombieEvent extends PlatformSelectorEvent {
         Player player = platform.getPlayer();
 
         if (player != null) {
-            game.getArena().spawnMob(EntityType.ZOMBIE, platform.getTeleportLocation());
+            game.getArena().spawnEntity(EntityType.ZOMBIE, platform.getTeleportLocation());
         }
 
         return true;
