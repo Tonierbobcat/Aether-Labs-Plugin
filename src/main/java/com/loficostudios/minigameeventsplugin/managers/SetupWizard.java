@@ -1,10 +1,10 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
@@ -25,9 +25,7 @@ public class SetupWizard {
                 .initializePlayers(participatingPlayers);
 
         BossBar progressBar = gameManager.getProgressBar();
-        progressBar.setTitle(SimpleColor.deserialize(
-                "-0"
-        ));
+        progressBar.setTitle("-0");
 
         new Countdown("setup (" + mode.getId() + ")", countDown -> {
 

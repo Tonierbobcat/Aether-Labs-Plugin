@@ -1,8 +1,0 @@
-name: AetherLabsPlugin
-version: '1.0-SNAPSHOT'
-main: com.loficostudios.minigameeventsplugin.AetherLabsPlugin
-api-version: '1.21'
-depend: [MelodyAPI]
-softdepend: [Essentials, PlaceholderAPI, Vault]
-author: tonierbobcat
-website: www.loficostudios.com

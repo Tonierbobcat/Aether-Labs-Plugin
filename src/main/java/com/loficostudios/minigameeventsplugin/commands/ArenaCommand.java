@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
@@ -9,6 +8,7 @@ import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -47,10 +47,10 @@ public class ArenaCommand {
                                                 String pos1Msg = pos1.getBlockX() + ", " + pos1.getBlockY() + ", " + pos1.getBlockZ();
                                                 String pos2Msg = pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ();
 
-                                                player.sendMessage(SimpleColor.deserialize("&aUpdated area to " + pos1Msg + " - " + pos2Msg + "!"));
+                                                player.sendMessage(Component.text("&aUpdated area to " + pos1Msg + " - " + pos2Msg + "!"));
                                             }
                                             else {
-                                                player.sendMessage(SimpleColor.deserialize("&cCannot set arena. Selection too small! (" +selectionBlockCount+ " blocks)"));
+                                                player.sendMessage(Component.text("&cCannot set arena. Selection too small! (" +selectionBlockCount+ " blocks)"));
                                             }
 
                                         }))))
@@ -77,10 +77,10 @@ public class ArenaCommand {
                                                 GameArena arena = gameManager.getArena();
 
                                                 arena.startLevelFillTask(Material.DIAMOND_BLOCK, 1);
-                                                player.sendMessage(SimpleColor.deserialize("&aStarted fill task successfully!"));
+                                                player.sendMessage(Component.text("&aStarted fill task successfully!"));
                                             }
                                             else {
-                                                player.sendMessage(SimpleColor.deserialize("&cYou cannot start this task while the game is running!"));
+                                                player.sendMessage(Component.text("&cYou cannot start this task while the game is running!"));
                                             }
                                         })
                                 ).then(new LiteralArgument("cancel")
@@ -93,10 +93,10 @@ public class ArenaCommand {
                                                 gameManager.getArena().cancelLavaFillTask();
                                                 WorldUtils.fillArea(selection, Material.AIR);
 
-                                                player.sendMessage(SimpleColor.deserialize("&aCancel task successfully!"));
+                                                player.sendMessage(Component.text("&aCancel task successfully!"));
                                             }
                                             else {
-                                                player.sendMessage(SimpleColor.deserialize("&cYou cannot cancel this task while the game is running!"));
+                                                player.sendMessage(Component.text("&cYou cannot cancel this task while the game is running!"));
                                             }
                                         }))))
                 );

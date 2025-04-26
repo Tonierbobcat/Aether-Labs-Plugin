@@ -1,12 +1,12 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,13 +34,13 @@ public class PlayerDeathListener implements Listener {
 
             if (gameManager.getCurrentMode().equals(gameManager.EGG_WARS)) {
                 EggWarsMode mode = (EggWarsMode) gameManager.getCurrentMode();
-                Common.broadcast("current mode is eggwars");
+                Bukkit.getLogger().info("current mode is eggwars");
                 if (mode.hasSpawn(player)) {
-                    Common.broadcast("player has spawn");
+                    Bukkit.getLogger().info("player has spawn");
                     Egg egg = mode.getEgg(player);
 
                     if (egg != null) {
-                        Common.broadcast("egg is not null");
+                        Bukkit.getLogger().info("egg is not null");
                         new BukkitRunnable() {
                             @Override
                             public void run() {

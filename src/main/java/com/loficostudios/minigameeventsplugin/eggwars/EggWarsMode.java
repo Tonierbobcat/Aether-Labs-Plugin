@@ -1,12 +1,12 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -128,7 +128,8 @@ public class EggWarsMode extends BaseGameMode {
                                 player.sendMessage("Added egg");
                             }
                             else {
-                                Common.broadcast("egg is null");
+                                Bukkit.getLogger().severe("egg is null");
+//                                Common.broadcast();
                             }
                         }
 

@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
@@ -11,6 +10,7 @@ import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.api.events.RoundSurvivedEvent;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -193,7 +193,7 @@ public class MiniGameListener implements Listener {
     private boolean handleEventDuringSetupGame(Event e) {
         if (gameManager.getCurrentState() == GameState.SETUP && e instanceof Cancellable cancellable) {
             cancellable.setCancelled(true);
-            Common.broadcast("cancelled " + e.getEventName());
+            Bukkit.getLogger().info("cancelled " + e.getEventName());
             return true;
         }
 

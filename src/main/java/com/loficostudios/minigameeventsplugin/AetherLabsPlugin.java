@@ -2,41 +2,31 @@ package com.loficostudios.minigameeventsplugin;
 
 import com.earth2me.essentials.IEssentials;
 import com.loficostudios.melodyapi.MelodyPlugin;
-import com.loficostudios.melodyapi.utils.SimpleColor;
-
+import com.loficostudios.minigameeventsplugin.api.BaseEvent;
+import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.api.BaseEvent;
 import com.loficostudios.minigameeventsplugin.gameEvents.PlateEvents.*;
 import com.loficostudios.minigameeventsplugin.gameEvents.PlayerEvents.*;
-import com.loficostudios.minigameeventsplugin.gameEvents.PlayerEvents.PlayerTreeEvent;
 import com.loficostudios.minigameeventsplugin.gameEvents.WorldEvents.WorldGhastEvent;
 import com.loficostudios.minigameeventsplugin.gameEvents.WorldEvents.WorldPlateRepairEvent;
 import com.loficostudios.minigameeventsplugin.listeners.*;
-import com.loficostudios.minigameeventsplugin.managers.VoteManager;
-import com.loficostudios.minigameeventsplugin.Profile.Profile;
-import com.loficostudios.minigameeventsplugin.utils.Debug;
-import com.loficostudios.minigameeventsplugin.gui.EventShop;
 import com.loficostudios.minigameeventsplugin.managers.EventManager;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.managers.ProfileManager;
 import com.loficostudios.minigameeventsplugin.placeholders.MiniGamePlaceholder;
-import com.loficostudios.minigameeventsplugin.utils.Selection;
-import com.loficostudios.minigameeventsplugin.utils.WorldUtils;
-import com.loficostudios.minigameeventsplugin.gui.VoteGui;
-import com.loficostudios.minigameeventsplugin.config.Messages;
-import dev.jorel.commandapi.*;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import dev.jorel.commandapi.CommandTree;
+import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.LocationArgument;
-import dev.jorel.commandapi.arguments.LocationType;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -44,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.arena.GameArena.MIN_GAME_ARENA_AREA;
 import static com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager.GAME_COUNTDOWN;
 import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
@@ -93,7 +82,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     }
 
     @Override
-    public void onEnable() {
+    protected void onStart() {
         CommandAPI.onEnable();
 
         if (!setupEconomy()) {
@@ -110,7 +99,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
             registerCommands();
         } catch (Exception e) {
             Debug.logError("Could not load commands. Disabling...");
-            this.getPluginLoader().disablePlugin(this);
+            getServer().getPluginManager().disablePlugin(this);
         }
 
         registerListeners();
@@ -186,13 +175,13 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                                     if (!gameManager.inProgress()) {
                                         Integer countdown = (Integer) args.get("countdown");
                                         if (gameManager.startCountdown(countdown != null ? countdown : GAME_COUNTDOWN)) {
-                                            player.sendMessage(SimpleColor.deserialize("&aSuccessfully started countdown!"));
+                                            player.sendMessage(Component.text("§aSuccessfully started countdown!"));
                                         }
                                         else {
-                                            player.sendMessage(SimpleColor.deserialize("&cArena is not setup! /arena set <pos1> <pos2>"));
+                                            player.sendMessage(Component.text("§cArena is not setup! /arena set <pos1> <pos2>"));
                                         }
                                     } else {
-                                        player.sendMessage(SimpleColor.deserialize("&cGame running! End it first."));
+                                        player.sendMessage(Component.text("§cGame running! End it first."));
                                     }
                                 }))
                 );

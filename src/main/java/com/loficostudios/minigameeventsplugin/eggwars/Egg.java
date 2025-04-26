@@ -1,8 +1,8 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -31,9 +31,7 @@ public class Egg {
 
         player.playSound(player.getLocation(), EGG_BREAK_SOUND, 1, 1);
 
-        player.sendMessage(SimpleColor.deserialize(
-                "&cYour egg broke! You can no longer respawn"
-        ));
+        player.sendMessage(Component.text("&cYour egg broke! You can no longer respawn"));
 
     }
 

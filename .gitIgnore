@@ -29,3 +29,5 @@ target/
 
 # Run directory
 /run/
+/target
+/target

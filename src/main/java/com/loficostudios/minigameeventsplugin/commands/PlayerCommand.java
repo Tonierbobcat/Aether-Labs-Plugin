@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.config.Messages;
 import com.loficostudios.minigameeventsplugin.gui.EventShop;
@@ -12,6 +11,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
@@ -36,18 +36,15 @@ public class PlayerCommand {
                             profileManager.getProfile(player.getUniqueId())
                                     .ifPresent(Profile::optOutOfGame);
 
-                            player.sendMessage(SimpleColor.deserialize(
-                                    Messages.OPT_OUT
-                            ));
+                            player.sendMessage(Component.text(Messages.OPT_OUT));
 
                         }),
 
         new CommandAPICommand("shop")
                 .withPermission(COMMAND_PREFIX + "shopAccess")
                 .executesPlayer((player, args) -> {
-
-                    new EventShop(player).open(player);
-
+                    new EventShop()
+                            .open(player);
                 }),
 
         new CommandAPICommand("vote")
@@ -55,9 +52,7 @@ public class PlayerCommand {
                 .executesPlayer((player, args) -> {
 
                     if (VoteManager.getInstance() == null) {
-                        player.sendMessage(SimpleColor.deserialize(
-                                Messages.UNABLE_TO_VOTE
-                        ));
+                        player.sendMessage(Component.text(Messages.UNABLE_TO_VOTE));
                         return;
                     }
 

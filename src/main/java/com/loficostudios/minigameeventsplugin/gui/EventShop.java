@@ -1,75 +1,56 @@
 package com.loficostudios.minigameeventsplugin.gui;
 
-import com.loficostudios.melodyapi.melodygui.GuiIcon;
-import com.loficostudios.melodyapi.utils.ItemCreator;
-import com.loficostudios.melodyapi.utils.MelodyGui;
-import com.loficostudios.melodyapi.utils.SimpleColor;
-import com.loficostudios.minigameeventsplugin.api.BaseEvent;
+import com.loficostudios.melodyapi.gui.MelodyGui;
+import com.loficostudios.melodyapi.gui.icon.GuiIcon;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.api.BaseEvent;
 import com.loficostudios.minigameeventsplugin.gameEvents.EventType;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class EventShop extends MelodyGui {
-
-    @NotNull
-    @Override
-    protected Integer getSize() {
-        return 9;
-    }
-
-    @Nullable
-    @Override
-    protected String getTitle() {
-        return "";
-    }
-
-    public EventShop(Player player) {
-
+    private final List<BaseEvent> baseEvents;
+    public EventShop() {
+        super(9);
         AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
-
         Collection<BaseEvent> baseEvents = plugin.getEventManager().getEvents();
+        this.baseEvents = new ArrayList<>(baseEvents);
+    }
 
-        GuiIcon playerEventsIcon = new GuiIcon((Player) -> {
+    @Override
+    public boolean open(@NotNull Player player) {
+        create();
+        return super.open(player);
+    }
 
-            new EventPage(player, baseEvents.stream().filter(event -> event.getType().equals(EventType.PLAYER)).toList())
-                    .open(player);
+    private void create() {
 
-        }, getEventIcon("Player Events", EventType.PLAYER.getIcon()), "playerEventIcon");
+        GuiIcon playerEventsIcon = new GuiIcon(EventType.PLAYER.getIcon(), Component.text("Player Events"), List.of(), (p, c) -> {
+            new EventPage(p, baseEvents.stream().filter(event -> event.getType().equals(EventType.PLAYER)).toList())
+                    .open(p);
+        });
 
         setSlot(2, playerEventsIcon);
 
-        GuiIcon plateEventsIcon = new GuiIcon((Player) -> {
-            new EventPage(player, baseEvents.stream().filter(event -> event.getType().equals(EventType.PLATE)).toList())
-                    .open(player);
-        }, getEventIcon("Plate Events", EventType.PLATE.getIcon()), "plateEventIcon");
+        GuiIcon plateEventsIcon = new GuiIcon(EventType.PLATE.getIcon(), Component.text("Plate Events"), List.of(), (p, c) -> {
+            new EventPage(p, baseEvents.stream().filter(event -> event.getType().equals(EventType.PLATE)).toList())
+                    .open(p);
+        });
 
         setSlot(4, plateEventsIcon);
 
-        GuiIcon globalEventsIcon = new GuiIcon((Player) -> {
-            new EventPage(player, baseEvents.stream().filter(event -> event.getType().equals(EventType.GLOBAL)).toList())
-                    .open(player);
-        }, getEventIcon("World Events", EventType.GLOBAL.getIcon()), "worldEventIcon");
+        GuiIcon globalEventsIcon = new GuiIcon(EventType.GLOBAL.getIcon(), Component.text("World Events"), List.of(), (p, c) -> {
+            new EventPage(p, baseEvents.stream().filter(event -> event.getType().equals(EventType.GLOBAL)).toList())
+                    .open(p);
+        });
 
         setSlot(6, globalEventsIcon);
-
-        ItemStack fillIcon = ItemCreator.createItem(Material.GRAY_STAINED_GLASS_PANE,
-                SimpleColor.deserialize(" "), null, null);
-
-        fill(
-                new GuiIcon(fillIcon, null),
-                0,
-                9,
-                false);
     }
-
-    private ItemStack getEventIcon(String name, Material material) {
-        return ItemCreator.createItem(material, SimpleColor.deserialize(name), null, null);
-    }
-
 }

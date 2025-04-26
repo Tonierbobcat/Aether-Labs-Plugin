@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.managers.PlayerManager;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
@@ -9,6 +8,7 @@ import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -283,7 +283,7 @@ public class PlayerManager {
 
     public void notify(NotificationType type, String msg) {
 
-        String message = SimpleColor.deserialize(msg);
+        var message = Component.text(msg);
 
         switch (type) {
             case GLOBAL -> getPlayersInGameWorld().forEach(player -> player.sendMessage(message));

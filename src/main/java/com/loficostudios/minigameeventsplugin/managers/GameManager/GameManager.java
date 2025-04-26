@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.managers.GameManager;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
@@ -19,6 +18,7 @@ import com.loficostudios.minigameeventsplugin.Profile.Profile;
 import com.loficostudios.minigameeventsplugin.utils.*;
 
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -135,9 +135,7 @@ public class GameManager {
 
         playersInGameWorld.forEach(statusBar::addPlayer);
 
-        statusBar.setTitle(SimpleColor.deserialize(
-                Messages.STATUS_COUNTDOWN
-        ));
+        statusBar.setTitle(Messages.STATUS_COUNTDOWN);
 
         BossBar progressBar = getProgressBar();
 
@@ -148,9 +146,7 @@ public class GameManager {
 
         countdown = new Countdown("countdown",
                 (Integer countdown) -> {
-                    progressBar.setTitle(SimpleColor.deserialize(
-                            "In... " + countdown
-                    ));
+                    progressBar.setTitle("In... " + countdown);
 
                     if (countdown == 3) {
                         playerManager.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
@@ -166,7 +162,7 @@ public class GameManager {
 
                     if (!participatingPlayers.isEmpty()) {
                         if (participatingPlayers.size() >= MIN_PLAYERS_TO_START) {
-                            statusBar.setTitle(SimpleColor.deserialize(Messages.STATUS_STARTING));
+                            statusBar.setTitle(Messages.STATUS_STARTING);
 
                             BaseGameMode selected = voteManager.getMode();
                             if (setCurrentMode(selected)) {
@@ -235,9 +231,8 @@ public class GameManager {
 
         statusBar.setColor(BarColor.PURPLE);
 
-        statusBar.setTitle(SimpleColor.deserialize(
-                Messages.STATUS_PLAYER_WIN
-                        .replace("{winner}", winner == null ? "NaN" : winner.getName())));
+        statusBar.setTitle(Messages.STATUS_PLAYER_WIN
+                .replace("{winner}", winner == null ? "NaN" : winner.getName()));
 
 
         if (winner != null) {

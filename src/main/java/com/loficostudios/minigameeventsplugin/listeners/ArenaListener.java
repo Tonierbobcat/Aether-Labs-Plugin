@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.api.events.LavaLevelUpdatedEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
@@ -9,6 +8,7 @@ import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -79,7 +79,7 @@ public class ArenaListener implements Listener {
 
     @EventHandler
     private void onArenaBlockExplode(BlockExplodeEvent e) {
-        Common.broadcast("exploaded");
+        Bukkit.getLogger().info("exploded");
         Block block = e.getBlock();
         e.setCancelled(true);
 

@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.arena;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.utils.Generator;
@@ -211,13 +210,13 @@ public class SpawnPlatform {
             String HOLOGRAM_NAME = "{name}'s plate";
 
             if (player != null) {
-                hologram = new Hologram(SimpleColor.deserialize(
-                        HOLOGRAM_NAME.replace("{name}", player.getName())),
+                hologram = new Hologram(
+                        HOLOGRAM_NAME.replace("{name}", player.getName()),
                         hologramLoc);
             }
             else {
-                hologram = new Hologram(SimpleColor.deserialize(
-                        HOLOGRAM_NAME.replace("{name}", "NaN")),
+                hologram = new Hologram(
+                        HOLOGRAM_NAME.replace("{name}", "NaN"),
                         hologramLoc);
             }
 

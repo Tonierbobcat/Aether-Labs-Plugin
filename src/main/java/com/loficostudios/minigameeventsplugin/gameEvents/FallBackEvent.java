@@ -1,6 +1,5 @@
 package com.loficostudios.minigameeventsplugin.gameEvents;
 
-import com.loficostudios.melodyapi.utils.SimpleColor;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.api.BaseEvent;
 import org.bukkit.Material;
@@ -23,7 +22,7 @@ public class FallBackEvent extends BaseEvent {
 
     @Override
     public @NotNull String getWarningMessage() {
-        return SimpleColor.deserialize("&cError loading next round. Ending game");
+        return "&cError loading next round. Ending game";
     }
 
     @Override

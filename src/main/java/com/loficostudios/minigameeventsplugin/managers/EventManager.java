@@ -1,10 +1,10 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.melodyapi.utils.Common;
 import com.loficostudios.minigameeventsplugin.api.BaseEvent;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -119,7 +119,8 @@ public class EventManager {
         try {
             event = events.get(id);
         } catch (Exception e) {
-            Common.broadcast("Failed to get event. " + e);
+            e.printStackTrace();
+            Bukkit.getLogger().severe("Failed to get event. " + e.getMessage());
             return null;
         }
 

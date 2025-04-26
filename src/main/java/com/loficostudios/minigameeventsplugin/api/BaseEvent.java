@@ -1,15 +1,14 @@
 package com.loficostudios.minigameeventsplugin.api;
 
 
-import com.loficostudios.melodyapi.melodygui.GuiIcon;
-import com.loficostudios.melodyapi.utils.ItemCreator;
-import com.loficostudios.melodyapi.utils.SimpleColor;
+import com.loficostudios.melodyapi.gui.icon.GuiIcon;
 import com.loficostudios.minigameeventsplugin.gameEvents.EventType;
 import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
 import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -20,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.loficostudios.minigameeventsplugin.utils.Debug.logError;
 import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
@@ -87,44 +87,37 @@ public abstract class BaseEvent {
         String nameColor = "&e";
         String descriptionColor = "&7";
 
-        ItemStack display = ItemCreator.createItem(getDisplayMaterial(), SimpleColor.deserialize(nameColor + getName()),
-                SimpleColor.deserialize(List.of(
-                        descriptionColor + description,
-                        "",
-                        "&7Cost: &e&l" + getPrice(),
-                        "",
-                        "&8" + getId()
-                )),
-                null);
-
-        return new GuiIcon(player -> {
-
+        return new GuiIcon(getDisplayMaterial(), Component.text(nameColor + getName()), Stream.of(
+                descriptionColor + description,
+                "",
+                "&7Cost: &e&l" + getPrice(),
+                "",
+                "&8" + getId()
+        ).map(Component::text).toList(), (p, c) -> {
             if (plugin.vaultHook) {
                 Economy economy = plugin.getEconomy();
 
-                if (economy != null && economy.getBalance(player) >= getPrice()) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
-                    player.sendMessage(SimpleColor.deserialize("&ePurchased event!"));
+                if (economy != null && economy.getBalance(p) >= getPrice()) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
+                    p.sendMessage(Component.text("&ePurchased event!"));
 
-                    if (plugin.getEventManager().queueEvent(player, this)) {
-                        player.sendMessage(SimpleColor.deserialize("&7Your event has been queued up to go next!"));
-                        economy.withdrawPlayer(player, getPrice());
+                    if (plugin.getEventManager().queueEvent(p, this)) {
+                        p.sendMessage(Component.text("&7Your event has been queued up to go next!"));
+                        economy.withdrawPlayer(p, getPrice());
                     }
                     else {
-                        player.sendMessage(SimpleColor.deserialize("&cYour event could not be queued!"));
+                        p.sendMessage(Component.text("&cYour event could not be queued!"));
                     }
-
                 }
                 else {
-                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
-                    player.sendMessage(SimpleColor.deserialize("&cYou don't have enough money to purchase this!"));
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
+                    p.sendMessage(Component.text("&cYou don't have enough money to purchase this!"));
                 }
             }
             else {
                 logWarning("vault not installed");
             }
-
-        }, display, getId());
+        });
     }
 
     public void load() {
