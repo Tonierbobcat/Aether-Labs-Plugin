@@ -2,9 +2,7 @@ package com.loficostudios.minigameeventsplugin.managers;
 
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import net.kyori.adventure.text.Component;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
@@ -12,23 +10,22 @@ import java.util.Collection;
 
 public class SetupWizard {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
     private final GameArena arena;
 
-    public SetupWizard(GameManager gameManager) {
+    public SetupWizard(Game gameManager) {
         this.gameManager = gameManager;
         this.arena = gameManager.getArena();
     }
 
-    public void setup(BaseGameMode mode, Collection<Player> participatingPlayers) {
-        gameManager.getPlayerManager()
+    public void setup(com.loficostudios.minigameeventsplugin.gamemode.GameMode mode, Collection<Player> participatingPlayers) {
+        gameManager.getPlayers()
                 .initializePlayers(participatingPlayers);
 
         BossBar progressBar = gameManager.getProgressBar();
         progressBar.setTitle("-0");
 
-        new Countdown("setup (" + mode.getId() + ")", countDown -> {
-
+        new Countdown("setup (" + mode.getName().toLowerCase().replace(" ", "_") + ")", countDown -> {
                 //First Round Of Setup; //for expensiveTasks
                 if (countDown == 5) {
                     arena.clear();
@@ -44,9 +41,7 @@ public class SetupWizard {
                 }
         }, () -> {
             gameManager.startGame();
-            gameManager.getArena().startLevelFillTask(
-                    mode.getFillMaterial(),
-                    mode.getFillSpeed());
+            gameManager.getArena().startLevelFillTask(mode.getFillMaterial(), mode.getFillSpeed());
         }).start(5);
     }
 }

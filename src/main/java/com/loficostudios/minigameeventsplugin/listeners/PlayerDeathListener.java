@@ -1,8 +1,8 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
-import com.loficostudios.minigameeventsplugin.Profile.Profile;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.player.PlayerManager;
+import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
@@ -13,17 +13,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import static com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager.PLAYER_KILL_MONEY_AMOUNT;
+import static com.loficostudios.minigameeventsplugin.game.Game.PLAYER_KILL_MONEY_AMOUNT;
 
 public class PlayerDeathListener implements Listener {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
     private final AetherLabsPlugin plugin;
     private final PlayerManager playerManager;
-    public PlayerDeathListener(GameManager gameManager) {
+    public PlayerDeathListener(Game gameManager) {
         this.gameManager = gameManager;
         this.plugin = AetherLabsPlugin.getInstance();
-        playerManager = gameManager.getPlayerManager();
+        playerManager = gameManager.getPlayers();
     }
 
     @EventHandler

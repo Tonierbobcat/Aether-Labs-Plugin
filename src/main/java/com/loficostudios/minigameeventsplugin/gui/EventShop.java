@@ -3,12 +3,10 @@ package com.loficostudios.minigameeventsplugin.gui;
 import com.loficostudios.melodyapi.gui.MelodyGui;
 import com.loficostudios.melodyapi.gui.icon.GuiIcon;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.api.BaseEvent;
-import com.loficostudios.minigameeventsplugin.gameEvents.EventType;
+import com.loficostudios.minigameeventsplugin.api.event.EventType;
+import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,11 +14,11 @@ import java.util.Collection;
 import java.util.List;
 
 public class EventShop extends MelodyGui {
-    private final List<BaseEvent> baseEvents;
+    private final List<GameEvent> baseEvents;
     public EventShop() {
         super(9);
         AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
-        Collection<BaseEvent> baseEvents = plugin.getEventManager().getEvents();
+        Collection<GameEvent> baseEvents = plugin.getEvents().getAll();
         this.baseEvents = new ArrayList<>(baseEvents);
     }
 
@@ -53,4 +51,6 @@ public class EventShop extends MelodyGui {
 
         setSlot(6, globalEventsIcon);
     }
+
+
 }

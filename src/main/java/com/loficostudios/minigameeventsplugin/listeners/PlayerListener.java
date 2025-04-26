@@ -1,9 +1,9 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.Profile.ProfileAlreadyLoadedException;
-import com.loficostudios.minigameeventsplugin.managers.ProfileManager;
-import com.loficostudios.minigameeventsplugin.Profile.ProfileNotLoadedException;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileAlreadyLoadedException;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileNotLoadedException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

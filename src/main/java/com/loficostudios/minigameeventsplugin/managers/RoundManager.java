@@ -1,13 +1,12 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.minigameeventsplugin.api.BaseEvent;
-import com.loficostudios.minigameeventsplugin.gameEvents.FallBackEvent;
+import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
+import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.events.FallBackEvent;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import com.loficostudios.minigameeventsplugin.api.SelectorEvent;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.PlayerManager.NotificationType;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.api.events.RoundSurvivedEvent;
+import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import lombok.Getter;
 import org.bukkit.Sound;
@@ -22,7 +21,7 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
 public class RoundManager {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
     private final EventManager eventManager;
 
     private static final int NEXT_ROUND_RETRY_ATTEMPTS = 1;
@@ -36,7 +35,7 @@ public class RoundManager {
 
     private Set<BukkitTask> tasks = new HashSet<>();
 
-    public RoundManager(GameManager gameManager, EventManager eventManager) {
+    public RoundManager(Game gameManager, EventManager eventManager) {
         this.gameManager = gameManager;
         this.eventManager = eventManager;
     }
@@ -50,7 +49,7 @@ public class RoundManager {
         boolean valid = false;
 
         while (!valid && attempts < NEXT_ROUND_RETRY_ATTEMPTS) {
-            BaseEvent nextEvent = eventManager.getNextEvent();
+            GameEvent nextEvent = eventManager.getNextEvent();
 
             if (nextEvent != null) {
                 valid = true;
@@ -65,24 +64,24 @@ public class RoundManager {
         }
     }
 
-    private void nextRound(BaseEvent nextEvent) {
+    private void nextRound(GameEvent nextEvent) {
 
         roundsElapsed++;
 
         String warningMessage;
 
         if (nextEvent instanceof SelectorEvent<?> selectorEvent) {
-            warningMessage = selectorEvent.getAmount() + " " + nextEvent.getWarningMessage();
+            warningMessage = selectorEvent.getAmount(gameManager) + " " + nextEvent.getWarning().message();
         }
         else {
-            warningMessage = nextEvent.getWarningMessage();
+            warningMessage = nextEvent.getWarning().message();
         }
 
         gameManager.getStatusBar().setTitle(warningMessage);
 
         progressBar = gameManager.getProgressBar();
 
-        gameManager.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
+        gameManager.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
 
         tasks.add(new Countdown("next round",
                 countdown -> {
@@ -92,16 +91,16 @@ public class RoundManager {
                     progressBar.setTitle("0 seconds");
                     progressBar.removeAll();
                     startRound(nextEvent);
-                }).start(nextEvent.getWarningTime()));
+                }).start((int) nextEvent.getWarning().time()));
     }
 
-    private void startRound(BaseEvent e) {
+    private void startRound(GameEvent e) {
         eventManager.handleStart(e);
         if (!gameManager.inProgress()) {
             return;
         }
 
-        gameManager.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
+        gameManager.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
 
         tasks.add(new Countdown("end round",
                 (Double) -> {
@@ -126,7 +125,7 @@ public class RoundManager {
                 .getServer()
                 .getPluginManager();
 
-        gameManager.getPlayerManager()
+        gameManager.getPlayers()
                 .getPlayersInGame(PlayerState.ALIVE)
                 .forEach(player -> pluginManager.callEvent(new RoundSurvivedEvent(player)));
 

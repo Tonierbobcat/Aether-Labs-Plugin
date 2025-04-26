@@ -2,19 +2,19 @@ package com.loficostudios.minigameeventsplugin;
 
 import com.earth2me.essentials.IEssentials;
 import com.loficostudios.melodyapi.MelodyPlugin;
-import com.loficostudios.minigameeventsplugin.api.BaseEvent;
+import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
-import com.loficostudios.minigameeventsplugin.gameEvents.PlateEvents.*;
-import com.loficostudios.minigameeventsplugin.gameEvents.PlayerEvents.*;
-import com.loficostudios.minigameeventsplugin.gameEvents.WorldEvents.WorldGhastEvent;
-import com.loficostudios.minigameeventsplugin.gameEvents.WorldEvents.WorldPlateRepairEvent;
+import com.loficostudios.minigameeventsplugin.game.events.PlateEvents.*;
+import com.loficostudios.minigameeventsplugin.game.events.PlayerEvents.*;
+import com.loficostudios.minigameeventsplugin.game.events.WorldEvents.WorldGhastEvent;
+import com.loficostudios.minigameeventsplugin.game.events.WorldEvents.WorldPlateRepairEvent;
 import com.loficostudios.minigameeventsplugin.listeners.*;
-import com.loficostudios.minigameeventsplugin.managers.EventManager;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.ProfileManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.managers.EventRegistry;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.placeholders.MiniGamePlaceholder;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import dev.jorel.commandapi.CommandAPI;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager.GAME_COUNTDOWN;
+import static com.loficostudios.minigameeventsplugin.game.Game.GAME_COUNTDOWN;
 import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
@@ -55,10 +55,12 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
     @Getter
     private final ProfileManager profileManager = new ProfileManager();
+
     @Getter
-    private final EventManager eventManager = new EventManager();
+    private final EventRegistry events = new EventRegistry();
+
     @Getter
-    private final GameManager gameManager = new GameManager(this);
+    private final Game gameManager = new Game(this);
 
     @Getter
     private IEssentials essentials;
@@ -230,7 +232,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                 new WorldPlateRepairEvent()
                 //endregion
 
-        ).forEach(BaseEvent::register);
+        ).forEach(GameEvent::register);
     }
     private void registerListeners() {
         List.of(

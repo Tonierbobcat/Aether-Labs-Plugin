@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -13,11 +13,11 @@ import java.util.UUID;
 public class SpawnManager {
 
 
-    GameManager gameManager;
+    Game gameManager;
 
     Map<UUID, Vector> spawns = new HashMap<>();
 
-    public SpawnManager(GameManager gameManager) {
+    public SpawnManager(Game gameManager) {
         this.gameManager = gameManager;
     }
 
@@ -53,7 +53,7 @@ public class SpawnManager {
 
             Vector loc = spawns.get(uuid);
 
-            gameManager.getPlayerManager().teleportPlayer(player, loc);
+            gameManager.getPlayers().teleportPlayer(player, loc);
             return true;
         }
         return false;

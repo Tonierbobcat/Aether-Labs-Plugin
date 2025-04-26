@@ -1,9 +1,9 @@
 package com.loficostudios.minigameeventsplugin.placeholders;
 
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.ProfileManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.Profile.Profile;
+import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
@@ -16,7 +16,7 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
 
     final ProfileManager profileManager;
 
-    final GameManager gameManager;
+    final Game gameManager;
 
     public MiniGamePlaceholder(ProfileManager profileManager) {
         this.profileManager = profileManager;
@@ -57,7 +57,7 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
             return "";
 
         if (params.equals("alive")) {
-            return String.valueOf(gameManager.getPlayerManager().getPlayersInGame(PlayerState.ALIVE).size());
+            return String.valueOf(gameManager.getPlayers().getPlayersInGame(PlayerState.ALIVE).size());
         }
 
         if (params.equals("rounds")) {

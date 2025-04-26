@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import com.loficostudios.minigameeventsplugin.utils.WorldUtils;
 import dev.jorel.commandapi.CommandTree;
@@ -17,9 +17,9 @@ import static com.loficostudios.minigameeventsplugin.arena.GameArena.MIN_GAME_AR
 
 public class ArenaCommand {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
 
-    public ArenaCommand(GameManager gameManager) {
+    public ArenaCommand(Game gameManager) {
         this.gameManager = gameManager;
     }
 

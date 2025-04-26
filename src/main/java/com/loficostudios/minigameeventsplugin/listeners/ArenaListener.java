@@ -1,9 +1,9 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
-import com.loficostudios.minigameeventsplugin.api.events.LavaLevelUpdatedEvent;
+import com.loficostudios.minigameeventsplugin.api.bukkit.LavaLevelUpdatedEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
@@ -23,9 +23,9 @@ import java.util.Set;
 
 public class ArenaListener implements Listener {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
 
-    public ArenaListener(GameManager gameManager) {
+    public ArenaListener(Game gameManager) {
         this.gameManager = gameManager;
     }
 

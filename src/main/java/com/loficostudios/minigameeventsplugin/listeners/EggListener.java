@@ -3,7 +3,7 @@ package com.loficostudios.minigameeventsplugin.listeners;
 
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,9 +14,9 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 public class EggListener implements Listener {
 
 
-    private final GameManager gameManager;
+    private final Game gameManager;
 
-    public EggListener(GameManager gameManager) {
+    public EggListener(Game gameManager) {
         this.gameManager = gameManager;
     }
 

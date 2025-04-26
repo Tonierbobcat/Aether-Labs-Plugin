@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
-import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
+import com.loficostudios.minigameeventsplugin.player.PlayerManager;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;

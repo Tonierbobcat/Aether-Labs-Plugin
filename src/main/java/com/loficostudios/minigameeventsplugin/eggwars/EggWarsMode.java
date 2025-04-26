@@ -2,9 +2,9 @@ package com.loficostudios.minigameeventsplugin.eggwars;
 
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
+import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameState;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,11 +18,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class EggWarsMode extends BaseGameMode {
+public class EggWarsMode extends AbstractGameMode {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
 
-    public EggWarsMode(GameManager gameManager) {
+    public EggWarsMode(Game gameManager) {
         this.gameManager = gameManager;
     }
 
@@ -122,7 +122,7 @@ public class EggWarsMode extends BaseGameMode {
                             Block block = bounds.getBlock(loc.getBlockX(), loc.getBlockY() + 1, loc.getBlockZ());
 
                             if (block != null) {
-                                Egg egg = new Egg(player, block, gameManager.getPlayerManager());
+                                Egg egg = new Egg(player, block, gameManager.getPlayers());
 
                                 spawns.put(player.getUniqueId(), egg);
                                 player.sendMessage("Added egg");

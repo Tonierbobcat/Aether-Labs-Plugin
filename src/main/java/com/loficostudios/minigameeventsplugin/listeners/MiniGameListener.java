@@ -1,13 +1,13 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
-import com.loficostudios.minigameeventsplugin.managers.PlayerManager.PlayerManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameState;
+import com.loficostudios.minigameeventsplugin.player.PlayerManager;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.api.events.RoundSurvivedEvent;
+import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -29,17 +29,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager.MIN_PLAYERS_TO_START;
+import static com.loficostudios.minigameeventsplugin.game.Game.MIN_PLAYERS_TO_START;
 
 public class MiniGameListener implements Listener {
 
     private final AetherLabsPlugin plugin;
-    private final GameManager gameManager;
+    private final Game gameManager;
     private final PlayerManager playerManager;
-    public MiniGameListener(AetherLabsPlugin plugin, GameManager gameManager) {
+    public MiniGameListener(AetherLabsPlugin plugin, Game gameManager) {
         this.gameManager = gameManager;
         this.plugin = plugin;
-        this.playerManager = gameManager.getPlayerManager();
+        this.playerManager = gameManager.getPlayers();
     }
 
 
@@ -107,11 +107,11 @@ public class MiniGameListener implements Listener {
             if (gameManager.inProgress()) {
                 gameManager.getStatusBar().addPlayer(player);
             }
-            else if (gameManager.getPlayerManager().getPlayersInGameWorld().size() >= MIN_PLAYERS_TO_START){
+            else if (gameManager.getPlayers().getPlayersInGameWorld().size() >= MIN_PLAYERS_TO_START){
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        gameManager.startCountdown(GameManager.GAME_COUNTDOWN);
+                        gameManager.startCountdown(Game.GAME_COUNTDOWN);
                     }
                 }.runTaskLater(plugin, 5);
             }
@@ -166,7 +166,10 @@ public class MiniGameListener implements Listener {
     @EventHandler
     private void onAttack(EntityDamageEvent e) {
         if ((e.getEntity() instanceof Player player)) {
-            if (player.getWorld() != gameManager.getArena().getWorld())
+            var arena = gameManager.getArena();
+            if (arena == null)
+                return;
+            if (player.getWorld() != arena.getWorld())
                 return;
 
             handleEventDuringSetupGame(e);

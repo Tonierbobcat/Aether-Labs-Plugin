@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.utils;
 
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -62,7 +62,7 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.*;
 }*/
 public class Countdown {
 
-    private final GameManager gameManager;
+    private final Game gameManager;
 
     private BukkitTask task;
 

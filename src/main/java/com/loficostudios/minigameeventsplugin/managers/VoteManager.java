@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
+import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
+import com.loficostudios.minigameeventsplugin.game.Game;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -15,27 +15,27 @@ public class VoteManager {
     @Getter
     private static VoteManager instance;
 
-    private final GameManager gameManager;
+    private final Game gameManager;
 
-    private final Map<UUID, BaseGameMode> votes = new HashMap<>();
+    private final Map<UUID, AbstractGameMode> votes = new HashMap<>();
 
 
 
-    public VoteManager(GameManager gameManager) {
+    public VoteManager(Game gameManager) {
         this.gameManager = gameManager;
         instance = this;
     }
 
-    public int getVotes(@NotNull BaseGameMode type) {
+    public int getVotes(@NotNull AbstractGameMode type) {
         return (int) votes.values().stream()
                 .filter(gameType -> gameType.equals(type)).count();
     }
 
-    public @NotNull BaseGameMode getVote(@NotNull Player player) {
+    public @NotNull AbstractGameMode getVote(@NotNull Player player) {
         return votes.get(player.getUniqueId());
     }
 
-    public Boolean castVote(@NotNull Player player, BaseGameMode type) {
+    public Boolean castVote(@NotNull Player player, AbstractGameMode type) {
 
         UUID uuid = player.getUniqueId();
 
@@ -67,7 +67,7 @@ public class VoteManager {
         }
     }
 
-    public BaseGameMode getMode() {
+    public AbstractGameMode getMode() {
 
         int eggWarsVotes = getVotes(gameManager.EGG_WARS);
         int differentHeightsVotes = getVotes(gameManager.DIFFERENT_HEIGHTS);

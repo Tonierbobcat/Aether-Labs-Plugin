@@ -3,16 +3,18 @@ package com.loficostudios.minigameeventsplugin.gui;
 import com.loficostudios.melodyapi.gui.MelodyGui;
 import com.loficostudios.melodyapi.gui.icon.GuiIcon;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.api.BaseGameMode;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameState;
+import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameState;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import net.kyori.adventure.text.Component;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class VoteGui extends MelodyGui {
-    private final GameManager gameManager;
+    private final Game gameManager;
 
     public VoteGui() {
         super(9, Component.text("Vote for next game"));
@@ -24,10 +26,17 @@ public class VoteGui extends MelodyGui {
         setSlot(2, getGuiIcon(gameManager.NORMAL));
         setSlot(4, getGuiIcon(gameManager.DIFFERENT_HEIGHTS));
         setSlot(6, getGuiIcon(gameManager.EGG_WARS));
+        setSlot(7, getGuiIcon(gameManager.RUSH));
     }
 
 
-    private GuiIcon getGuiIcon(BaseGameMode mode) {
+    @Override
+    public boolean open(@NotNull Player player) {
+        create();
+        return super.open(player);
+    }
+
+    private GuiIcon getGuiIcon(AbstractGameMode mode) {
         String name = mode.getName();
 
         return new GuiIcon(mode.getIcon(), Component.text(name), List.of(), (player,c) -> {

@@ -1,24 +1,17 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
-import com.loficostudios.minigameeventsplugin.Profile.Profile;
+import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.config.Messages;
 import com.loficostudios.minigameeventsplugin.gui.EventShop;
 import com.loficostudios.minigameeventsplugin.gui.VoteGui;
-import com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager;
-import com.loficostudios.minigameeventsplugin.managers.ProfileManager;
+import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.CommandTree;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.LiteralArgument;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.Command;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
 import static com.loficostudios.minigameeventsplugin.AetherLabsPlugin.COMMAND_PREFIX;
-import static com.loficostudios.minigameeventsplugin.managers.GameManager.GameManager.GAME_COUNTDOWN;
 
 public class PlayerCommand {
 

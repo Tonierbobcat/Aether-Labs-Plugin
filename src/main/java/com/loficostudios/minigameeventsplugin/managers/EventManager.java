@@ -1,12 +1,12 @@
 package com.loficostudios.minigameeventsplugin.managers;
 
-import com.loficostudios.minigameeventsplugin.api.BaseEvent;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.utils.Debug;
+import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -15,16 +15,23 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.logError;
 
 public class EventManager {
 
-    private final Map<String, BaseEvent> events = new HashMap<>();
-
     @Getter
-    private BaseEvent currentEvent;
+    private GameEvent currentEvent;
 
-    public Collection<BaseEvent> playerQueue = new ArrayList<>();
 
-    private BaseEvent lastEvent;
+    private List<BukkitTask> tasks = new ArrayList<>();
 
-    public Boolean queueEvent(Player player, BaseEvent e) {
+    public Collection<GameEvent> playerQueue = new ArrayList<>();
+
+    private GameEvent lastEvent;
+
+    private final Game game;
+
+    public EventManager(Game game) {
+        this.game = game;
+    }
+
+    public Boolean queueEvent(Player player, GameEvent e) {
         if (player != null) {
             return playerQueue.add(e);
         }
@@ -33,21 +40,20 @@ public class EventManager {
         }
     }
 
-    public BaseEvent getNextEvent() {
+    public GameEvent getNextEvent() {
         Random random = new Random();
 
-        List<BaseEvent> eventList = events.values().stream()
-                .toList();
+        List<GameEvent> eventList = new ArrayList<>(AetherLabsPlugin.getInstance().getEvents().getAll());
 
         if (!playerQueue.isEmpty()) {
 
-            BaseEvent e = playerQueue.stream().toList().getFirst();
+            GameEvent e = playerQueue.stream().toList().getFirst();
             playerQueue.remove(e);
 
             return e;
         }
         else {
-            BaseEvent event = null;
+            GameEvent event = null;
 
             boolean foundEvent = false;
             while(!foundEvent) {
@@ -61,7 +67,7 @@ public class EventManager {
 
             if (event != null) {
                 try {
-                    event.load();
+                    event.load(game);
                     log("loaded " + event.getId());
                 } catch (Exception e) {
                     logError(event.getClass().getName() + " could not load: " + e.getMessage());
@@ -73,26 +79,26 @@ public class EventManager {
         }
     }
 
-    public void handleStart(BaseEvent e) {
+    public void handleStart(GameEvent e) {
         if (e != null) {
-            e.start();
+            e.start(game);
             log("started " + e.getId());
 
             currentEvent = e;
 
-            e.getTasks().add(new BukkitRunnable() {
+            tasks.add(new BukkitRunnable() {
                 @Override
                 public void run() {
-                    e.run();
+                    e.run(game);
                 }
             }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 5));
             log("running " + e.getId() + " task");
         }
     }
 
-    public Boolean handleEnd(BaseEvent e) {
+    public Boolean handleEnd(GameEvent e) {
         try {
-            e.end();
+            e.end(game);
             log("ended " + e.getId());
             return true;
         } catch (Exception ex) {
@@ -101,35 +107,12 @@ public class EventManager {
         }
     }
 
-    public void handleCancel(BaseEvent e) {
+    public void handleCancel(GameEvent e) {
         if (e != null) {
-            e.cancel();
+            e.cancel(game);
             currentEvent = null;
             log("canceled " + e.getId());
         }
-    }
-
-    public Collection<BaseEvent> getEvents() {
-        return events.values();
-    }
-
-    public BaseEvent getEvent(String id) {
-        BaseEvent event;
-
-        try {
-            event = events.get(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Bukkit.getLogger().severe("Failed to get event. " + e.getMessage());
-            return null;
-        }
-
-        return event;
-    }
-
-    public void subscribe(BaseEvent e) {
-        Debug.log("Registered " + e.getName());
-        events.put(e.getId(), e);
     }
 }
 

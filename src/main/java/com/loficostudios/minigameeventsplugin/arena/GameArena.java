@@ -1,11 +1,11 @@
 package com.loficostudios.minigameeventsplugin.arena;
 
-import com.loficostudios.minigameeventsplugin.api.events.LavaLevelUpdatedEvent;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -14,8 +14,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,6 +41,10 @@ public class GameArena {
     @Getter private Location pos2;
 
     private World world;
+
+    @Setter
+    @Getter
+    private int lavaSpeed;
 
     private final Collection<Entity> mobs = new ArrayList<>();
 
@@ -96,6 +98,8 @@ public class GameArena {
     //region Clean Up
 
     public void clear() {
+        cancelLavaFillTask();
+
         Selection selection = new Selection(pos1, pos2);
 
         List<Block> blocks = new ArrayList<>(selection.getBlocks());
@@ -133,45 +137,6 @@ public class GameArena {
         log("Removed " + amountRemoved + " mobs");
     }
     //endregion
-
-//    public void InitializeSpawnPlatforms(Collection<Player> players, SpawnPlatform.SpawnAlgorithm algorithm) {
-//
-//        //Selection bounds = new Selection(getPos1(), getPos2());
-//
-//        Material defaultSpawnPlatMat = DEFAULT_PLATFORM_MATERIAL;
-//        SpawnPlatform.PlatformType type = DEFAULT_PLATFORM_TYPE;
-//
-//        int platformsCreated = 0;
-//
-//        for (Player player : players) {
-//
-//
-//
-//            SpawnPlatform spawnPlatform = new SpawnPlatform(player, type, defaultSpawnPlatMat);
-//
-//            if (spawnPlatform.create(null, algorithm)) {
-//                playerSpawnPlatforms.put(player, spawnPlatform);
-//                platformsCreated++;
-//            }
-//            else {
-//                logWarning("could not create platform for player " + player);
-//            }
-//        }
-//
-//
-//        if (DEFAULT_SPAWN_EXTRA_PLATFORMS) {
-//            for(int i = 0; i < EXTRA_PLATFORMS_AMOUNT; i++) {
-//                SpawnPlatform spawnPlatform = new SpawnPlatform(type, defaultSpawnPlatMat);
-//
-//                if (spawnPlatform.create(null, algorithm)) {
-//                    spawnPlatforms.add(spawnPlatform);
-//                    platformsCreated++;
-//                }
-//            }
-//        }
-//
-//        log("created " + platformsCreated + " platforms");
-//    }
 
     public SpawnPlatform addSpawnPlatform(@Nullable Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Runnable onAdd, @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
 
@@ -271,8 +236,6 @@ public class GameArena {
         playerSpawnPlatforms.clear();
     }
 
-
-
     public Collection<SpawnPlatform> getSpawnPlatforms() {
 
         Collection<SpawnPlatform> concat = new ArrayList<>();
@@ -287,96 +250,40 @@ public class GameArena {
         return playerSpawnPlatforms.get(player);
     }
 
-
     public Entity spawnMob(EntityType type, Location location) {
         return getWorld().spawnEntity(location, type);
     }
 
-    public void startLevelFillTask(Material fillMaterial, int speed) {
+    public void startLevelFillTask(Material fill, int speed) {
         if (lavaTask != null) {
             logWarning("Unable to start lava fill task. already started");
             return;
         }
 
-        Selection bounds = new Selection(pos1, pos2);
+        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+
+        int batch_size = (maxX - minX + 1);
+
         List<Block> blocks = new ArrayList<>();
 
-        final GameArena arena = this;
-        lavaTask = new BukkitRunnable() {
+        Selection bounds = new Selection(pos1, pos2);
 
-
-            @Override
-            public void run() {
-                int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
-                int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
-                int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
-                int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
-                int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
-                int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
-
-
-
-
-
-                for (int y = minY; y <= maxY; y++) {
-                    for (int z = minZ; z <= maxZ; z++) {
-                        for (int x = minX; x <= maxX; x++) {
-                            Block block = bounds.getBlock(x, y, z);
-                            blocks.add(block);
-                        }
-                    }
+        for (int y = minY; y <= maxY; y++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int x = minX; x <= maxX; x++) {
+                    Block block = bounds.getBlock(x, y, z);
+                    blocks.add(block);
                 }
-
-                int batch_size = (maxX - minX + 1);
-
-
-
-                //SETS the blocks
-                lavaTask = new BukkitRunnable() {
-
-                    int lavaLevel = 0;
-                    int currentYLevel = blocks.get(0).getY();
-                    int currentIndex = 0;
-
-                    @Override
-                    public void run() {
-
-
-                        if (currentIndex >= blocks.size()) {
-                            this.cancel();
-                            return;
-                        }
-
-
-
-
-                        for (int i = 0; i < batch_size && currentIndex < blocks.size(); i++) {
-                            Block block = blocks.get(currentIndex);
-
-                            try {
-                                block.setType(fillMaterial);
-
-                                if (block.getY() != currentYLevel) {
-                                    lavaLevel++;
-
-                                    currentYLevel = block.getY();
-                                    PluginManager pluginManager = plugin.getServer().getPluginManager();
-                                    pluginManager.callEvent(new LavaLevelUpdatedEvent(arena, currentYLevel, lavaLevel));
-                                }
-
-                            } catch (Exception e) {
-
-                                logError("could not fill arena with material: " + fillMaterial.name());
-                                this.cancel();
-                                return;
-                            }
-
-                            currentIndex++;
-                        }
-                    }
-                }.runTaskTimer(plugin, 0, speed);
             }
-        }.runTaskAsynchronously(plugin);
+        }
+
+        new ArenaFillTask(this, fill, blocks, batch_size)
+                .runTaskTimer(plugin, 0, speed);
     }
 
     public void cancelLavaFillTask() {
@@ -386,5 +293,4 @@ public class GameArena {
             lavaTask = null;
         }
     }
-
 }
