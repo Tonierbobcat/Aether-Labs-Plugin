@@ -55,7 +55,7 @@ public class RandomHeightsMode extends AbstractGameMode {
                     null,
                     null,
                     null,
-                    SpawnPlatform::teleportCenter,
+                    plat -> plat.teleport(player),
                     SpawnPlatformGenerator.SpawnAlgorithm.RANDOM_HEIGHT);
         }
     }

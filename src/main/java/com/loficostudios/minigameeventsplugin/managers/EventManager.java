@@ -49,11 +49,10 @@ public class EventManager {
         List<GameEvent> eventList = new ArrayList<>(AetherLabsPlugin.getInstance().getEvents().getAll());
 
         if (!playerQueue.isEmpty()) {
-
-            GameEvent e = playerQueue.stream().toList().getFirst();
-            playerQueue.remove(e);
-
-            return e;
+            GameEvent event = playerQueue.stream().toList().getFirst();
+            playerQueue.remove(event);
+            var initialized = initializeEvent(event);
+            return initialized ? event : null;
         }
         else {
             GameEvent event = null;
@@ -69,23 +68,28 @@ public class EventManager {
             }
 
             if (event != null) {
-                try {
-                    event.load(game);
-                    log("loaded " + event.getId());
-                } catch (Exception e) {
-                    logError(event.getClass().getName() + " could not load: " + e.getMessage());
-                    return null;
-                }
+                return initializeEvent(event) ? event : null;
             }
 
             return event;
         }
     }
 
+    private boolean initializeEvent(GameEvent event) {
+        try {
+            event.load(game);
+            log("loaded " + event.getIdentifier());
+            return true;
+        } catch (Exception e) {
+            logError(event.getClass().getName() + " could not load: " + e.getMessage());
+            return false;
+        }
+    }
+
     public void handleStart(GameEvent e) {
         if (e != null) {
             e.start(game);
-            log("started " + e.getId());
+            log("started " + e.getIdentifier());
 
             currentEvent = e;
 
@@ -95,14 +99,17 @@ public class EventManager {
                     e.run(game);
                 }
             }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 5));
-            log("running " + e.getId() + " task");
+            log("running " + e.getIdentifier() + " task");
         }
     }
 
     public Boolean handleEnd(GameEvent e) {
+        for (BukkitTask task : tasks) {
+            task.cancel();
+        }
         try {
             e.end(game);
-            log("ended " + e.getId());
+            log("ended " + e.getIdentifier());
             return true;
         } catch (Exception ex) {
             logError("could not end event " + ex);
@@ -111,10 +118,13 @@ public class EventManager {
     }
 
     public void handleCancel(GameEvent e) {
+        for (BukkitTask task : tasks) {
+            task.cancel();
+        }
         if (e != null) {
             e.cancel(game);
             currentEvent = null;
-            log("canceled " + e.getId());
+            log("canceled " + e.getIdentifier());
         }
     }
 }

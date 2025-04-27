@@ -13,7 +13,7 @@ public class EventRegistry {
 
     public void subscribe(GameEvent e) {
         Debug.log("Registered " + e.getName());
-        events.put(e.getId(), e);
+        events.put(e.getIdentifier(), e);
     }
 
     public Collection<GameEvent> getAll() {

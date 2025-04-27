@@ -4,6 +4,8 @@ import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.events.ObjectSelector;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
 import org.bukkit.Material;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -18,8 +20,7 @@ public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent impl
     private final int min;
     private final int max;
 
-    protected Integer amount = null;
-//    protected BossBar progressBar;
+//    private int amount;
 
     protected AbstractSelectorEvent(String id, String name, EventType type, Material icon, double cost, int min, int max) {
         super(id, name, type, icon, cost);
@@ -56,13 +57,27 @@ public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent impl
 
     @Override
     public int getAmount(Game game) {
-        if (amount == null) {
-            int calculatedAmount = calculateObjects(getObjects(game));
-            this.amount = calculatedAmount;
-            return calculatedAmount;
-        }
+        var amount = game.getPersistentData().get(getIdentifier() + "-selector-event-amount"); //todo make this round.getPersitentData
+        if (!(amount instanceof Integer))
+            throw new IllegalArgumentException();
+        return ((Integer) amount);
+    }
 
-        return this.amount;
+    @Override
+    public void end(Game game) {
+        game.getPersistentData().remove(getIdentifier() + "-selector-event-amount"); //todo make this round.getPersitentData
+    }
+
+    @Override
+    public void load(Game game) {
+        Debug.log("Loading " + getIdentifier());
+        int amount = Math.min(getObjects(game).size(), getMax());
+        try {
+            amount = ObjectSelector.calculate(getObjects(game), getMin(), getMax());
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        game.getPersistentData().put(getIdentifier() + "-selector-event-amount", amount); //todo make this round.getPersitentData
     }
 
     @Override
@@ -72,8 +87,6 @@ public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent impl
         final List<Impl> objects = new ArrayList<>(getObjects(game));
 
         final Collection<Impl> selectedObjects = new ArrayList<>();
-
-        StringBuilder message = new StringBuilder();
 
         tasks.add(new BukkitRunnable() {
             final Random random = new Random();

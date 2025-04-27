@@ -55,6 +55,7 @@ public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> 
 
     @Override
     public void end(Game game) {
+        super.end(game);
         game.getProgressBar().removeAll();
     }
 }

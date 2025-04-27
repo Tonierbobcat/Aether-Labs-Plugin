@@ -5,6 +5,8 @@ import com.loficostudios.melodyapi.MelodyPlugin;
 import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
+import com.loficostudios.minigameeventsplugin.commands.Command;
+import com.loficostudios.minigameeventsplugin.commands.DebugCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.game.Game;
@@ -19,12 +21,7 @@ import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
-import dev.jorel.commandapi.CommandTree;
-import dev.jorel.commandapi.ExecutableCommand;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.LiteralArgument;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -36,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.game.Game.GAME_COUNTDOWN;
 import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
@@ -111,7 +107,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
         }
 
         registerListeners();
-        registerGameEvents();
+        registerEvents();
     }
 
     @Override
@@ -169,33 +165,14 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     //endregion
 
     private void registerCommands() {
-        new PlayerCommand(profileManager, this).get()
-                .forEach(ExecutableCommand::register);
-
-        new ArenaCommand(activeGame).get()
-                .register();
-
-        new CommandTree("start")
-                .withPermission(COMMAND_PREFIX + "admin")
-                .then(new LiteralArgument("countdown")
-                        .then(new IntegerArgument("countdown", 3)
-                                .executesPlayer((player, args) -> {
-                                    if (!activeGame.inProgress()) {
-                                        Integer countdown = (Integer) args.get("countdown");
-                                        if (activeGame.startCountdown(countdown != null ? countdown : GAME_COUNTDOWN)) {
-                                            player.sendMessage(Component.text("§aSuccessfully started countdown!"));
-                                        }
-                                        else {
-                                            player.sendMessage(Component.text("§cArena is not setup! /arena set <pos1> <pos2>"));
-                                        }
-                                    } else {
-                                        player.sendMessage(Component.text("§cGame running! End it first."));
-                                    }
-                                }))
-                );
+        Arrays.asList(
+                new PlayerCommand(profileManager, this),
+                        new ArenaCommand(),
+                        new DebugCommand()
+        ).forEach(Command::register);
     }
 
-    private void registerGameEvents() {
+    private void registerEvents() {
         // player events
         Arrays.asList(
                 new PlayerBlindEvent(),

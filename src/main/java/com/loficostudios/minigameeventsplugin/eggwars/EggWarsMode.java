@@ -124,7 +124,7 @@ public class EggWarsMode extends AbstractGameMode {
                     }
                 }
 
-                spawnPlatform.teleportCenter();
+                spawnPlatform.teleport(player);
             }, SpawnPlatformGenerator.SpawnAlgorithm.EQUAL_HEIGHT);
         }
     }

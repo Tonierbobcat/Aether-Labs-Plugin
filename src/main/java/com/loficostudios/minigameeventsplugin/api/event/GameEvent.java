@@ -18,17 +18,22 @@ public interface GameEvent {
 
     int getDuration();
 
-    @NotNull String getId();
+    @NotNull String getIdentifier();
 
-    void load(Game game);
+    default void load(Game game) {
+    }
 
-    void start(Game game);
+    default void start(Game game) {
+    }
 
-    void end(Game game);
+    default void end(Game game) {
+    }
 
-    void run(Game game);
+    default void run(Game game) {
+    }
 
-    void cancel(Game game);
+    default void cancel(Game game) {
+    }
 
     void register();
 }

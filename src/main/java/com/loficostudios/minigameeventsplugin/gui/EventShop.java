@@ -23,7 +23,7 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 public class EventShop extends MelodyGui {
     private final List<GameEvent> baseEvents;
     public EventShop() {
-        super(9);
+        super(9, Component.text("Shop"));
         AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
         Collection<GameEvent> baseEvents = plugin.getEvents().getAll();
         this.baseEvents = new ArrayList<>(baseEvents);
@@ -88,7 +88,7 @@ public class EventShop extends MelodyGui {
                     "",
                     "§7Cost: §e§l" + event.getCost(),
                     "",
-                    "§8" + event.getId()).map(Component::text).toList();
+                    "§8" + event.getIdentifier()).map(Component::text).toList();
 
             AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
 

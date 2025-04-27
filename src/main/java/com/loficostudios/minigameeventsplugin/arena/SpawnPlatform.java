@@ -1,7 +1,6 @@
 package com.loficostudios.minigameeventsplugin.arena;
 
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -13,91 +12,99 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
-
+@SuppressWarnings({"LombokGetterMayBeUsed", "LombokSetterMayBeUsed"})
 public class SpawnPlatform {
 
-    public enum Type {
-        FLAT,
-        PILLAR
-    }
-
+    // Static constants
     private static final boolean ENABLE_TELEPORT_AFTER_PLATFORM_GENERATE = true;
-
     private static final int REMOVAL_TIME = 5;
-
-    @Getter
-    private final Player player;
-
-    @Getter
-    private Location location;
-
-
-    private Set<Block> blocks = new HashSet<>();
-
-    @Getter
-    private Material material;
-
-    private final Type type;
-
     private static final int DEFAULT_PLATFORM_RADIUS = 2;
 
-    private Hologram hologram;
+    private final Player player;
 
-    @Getter
+    private Location location;
+
+    private Material material;
+
     private int radius;
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public boolean setRadius(int i) {
+        if (i <= 0)
+            return false;
+        this.radius = i;
+        setPlatform(material, true);
+        return true;
+    }
+
+    private final Type type;
+    private Set<Block> blocks = new HashSet<>();
+    private SpawnPlatformGenerator generator;
+    private BukkitTask removalTask;
+    private Hologram hologram;
 
     public SpawnPlatform(@NotNull SpawnPlatform.Type type, @NotNull Material material) {
         this.player = null;
-
         this.radius = DEFAULT_PLATFORM_RADIUS;
-
         this.type = type;
         this.material = material;
     }
 
-    public SpawnPlatform(@NotNull Player player, @NotNull SpawnPlatform.Type type, @NotNull  Material material) {
+    public SpawnPlatform(@NotNull Player player, @NotNull SpawnPlatform.Type type, @NotNull Material material) {
         this.player = player;
-
         this.radius = DEFAULT_PLATFORM_RADIUS;
-
         this.type = type;
         this.material = material;
-    }
-
-    private void setHologram(Hologram holo) {
-        if (this.hologram != null) {
-            hologram.remove();
-        }
-        this.hologram = holo;
     }
 
     public void setLocation(Location center) {
         this.location = center;
-        createHologram();
+        updateHologram(this.location);
     }
 
-    public void createHologram() {
+    private void updateHologram(Location location) {
         Location hologramLoc = new Location(location.getWorld(),
-                this.location.getX() + 0.5,
-                this.location.getY() - 1,
-                this.location.getZ() + 0.5);
+                location.getX() + 0.5,
+                location.getY() - 1,
+                location.getZ() + 0.5);
 
-        String HOLOGRAM_NAME = "{name}'s plate";
+        if (hologram == null) {
+            String text = "{name}'s plate";
 
-        if (getPlayer() != null) {
-            setHologram(new Hologram(
-                    HOLOGRAM_NAME.replace("{name}", getPlayer().getName()),
-                    hologramLoc));
-        }
-        else {
-            setHologram(new Hologram(
-                    HOLOGRAM_NAME.replace("{name}", "NaN"),
-                    hologramLoc));
+            if (getPlayer() != null) {
+                this.hologram = new Hologram(
+                        text.replace("{name}", getPlayer().getName()),
+                        hologramLoc);
+            } else {
+                this.hologram = new Hologram(
+                        text.replace("{name}", "NaN"),
+                        hologramLoc);
+            }
+        } else {
+            hologram.teleport(location);
         }
     }
-    private SpawnPlatformGenerator generator;
+
     public void setBlocks(Set<Block> blocks) {
         this.blocks = blocks;
     }
@@ -106,32 +113,13 @@ public class SpawnPlatform {
         this.generator = generator;
     }
 
-    public void startRemovalTimer() {
-        removalTask = new Countdown("platform removal", countdown -> {
-
-            if (countdown % 2 == 0) {
-                setPlatform(Material.RED_STAINED_GLASS);
-            }
-            else {
-                setPlatform(Material.WHITE_STAINED_GLASS);
-            }
-        }, this::remove).start(REMOVAL_TIME);
-    }
-
-    public void handleBlockBreak(Block block) {
-        blocks.remove(block);
-    }
-
-    public @NotNull Location getTeleportLocation() {
-        return new Location(this.location.getWorld(), this.location.getX() + 0.5, this.location.getY() + 1, this.location.getZ() + 0.5);
-    }
-
-    public void teleportCenter() {
-        Location location = getTeleportLocation();
-
-        player.teleport(location);
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1, 1);
-    }
+//    public void setHologram(Hologram holo) {
+//        if (this.hologram != null) {
+//            hologram.remove();
+//        }
+//        this.hologram = holo;
+//        updateHologram(this.location);
+//    }
 
     public void setPlatform(Material material) {
         setPlatform(material, false);
@@ -148,7 +136,31 @@ public class SpawnPlatform {
         this.material = material;
     }
 
-    private BukkitTask removalTask;
+    public void startRemovalTimer() {
+        removalTask = new Countdown("platform removal", countdown -> {
+            if (countdown % 2 == 0) {
+                setPlatform(Material.RED_STAINED_GLASS);
+            } else {
+                setPlatform(Material.WHITE_STAINED_GLASS);
+            }
+        }, this::remove).start(REMOVAL_TIME);
+    }
+
+    public @NotNull Location getTeleportLocation() {
+        return new Location(this.location.getWorld(), this.location.getX() + 0.5, this.location.getY() + 1, this.location.getZ() + 0.5);
+    }
+
+    public void teleport(Player player) {
+        Location location = getTeleportLocation();
+        if (player != null) {
+            player.teleport(location);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1, 1);
+        }
+    }
+
+    public void handleBlockBreak(Block block) {
+        blocks.remove(block);
+    }
 
     public void remove() {
         if (removalTask != null) {
@@ -161,33 +173,13 @@ public class SpawnPlatform {
         }
         blocks.clear();
 
-        if (hologram != null)
+        if (hologram != null) {
             hologram.remove();
+        }
     }
 
-    public boolean shrink(int amount) {
-        if (radius == 0)
-            return false;
-
-        log("current radius " + radius);
-        radius -= amount;
-
-        setPlatform(material, true);
-
-        log("new radius " + radius);
-
-        log("shrunk to radius " + radius);
-
-        return true;
-    }
-
-    public boolean expand(int amount) {
-        radius += amount;
-
-        setPlatform(material, true);
-
-        log("expanded to radius " + radius);
-
-        return true;
+    public enum Type {
+        FLAT,
+        PILLAR
     }
 }

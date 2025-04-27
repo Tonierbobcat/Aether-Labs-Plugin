@@ -1,12 +1,12 @@
 package com.loficostudios.minigameeventsplugin.api.event;
 
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.game.events.IObjectSelector;
+import com.loficostudios.minigameeventsplugin.game.events.ObjectSelector;
 
 import java.util.Collection;
 import java.util.function.Consumer;
 
-public interface SelectorEvent<Impl> extends GameEvent, IObjectSelector<Impl> {
+public interface SelectorEvent<Impl> extends GameEvent, ObjectSelector {
     boolean getDisplayedEnabled();
 
     boolean onSelect(Game game, Impl selected);

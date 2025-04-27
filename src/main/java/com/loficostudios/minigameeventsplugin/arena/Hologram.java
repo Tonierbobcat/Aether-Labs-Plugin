@@ -26,6 +26,9 @@ public class Hologram {
 
     }
 
+    public boolean teleport(Location location) {
+        return hologramEntity.teleport(location);
+    }
 
     public void remove() {
         hologramEntity.remove();

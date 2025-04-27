@@ -21,7 +21,7 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
 public class RoundManager {
 
-    private final Game gameManager;
+    private final Game game;
     private final EventManager eventManager;
 
     private static final int NEXT_ROUND_RETRY_ATTEMPTS = 1;
@@ -36,12 +36,12 @@ public class RoundManager {
     private Set<BukkitTask> tasks = new HashSet<>();
 
     public RoundManager(Game gameManager, EventManager eventManager) {
-        this.gameManager = gameManager;
+        this.game = gameManager;
         this.eventManager = eventManager;
     }
 
     public void handleNextRound() {
-        if (!gameManager.inProgress()) {
+        if (!game.inProgress()) {
             return;
         }
 
@@ -70,18 +70,18 @@ public class RoundManager {
 
         String warningMessage;
 
-        if (nextEvent instanceof SelectorEvent<?> selectorEvent) {
-            warningMessage = selectorEvent.getAmount(gameManager) + " " + nextEvent.getWarning().message();
+        if (nextEvent instanceof SelectorEvent<?> selector) {
+            warningMessage = selector.getAmount(game) + " " + nextEvent.getWarning().message();
         }
         else {
             warningMessage = nextEvent.getWarning().message();
         }
 
-        gameManager.getStatusBar().setTitle(warningMessage);
+        game.getStatusBar().setTitle(warningMessage);
 
-        progressBar = gameManager.getProgressBar();
+        progressBar = game.getProgressBar();
 
-        gameManager.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
+        game.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
 
         tasks.add(new Countdown("next round",
                 countdown -> {
@@ -96,11 +96,11 @@ public class RoundManager {
 
     private void startRound(GameEvent e) {
         eventManager.handleStart(e);
-        if (!gameManager.inProgress()) {
+        if (!game.inProgress()) {
             return;
         }
 
-        gameManager.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
+        game.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
 
         tasks.add(new Countdown("end round",
                 (Double) -> {
@@ -125,7 +125,7 @@ public class RoundManager {
                 .getServer()
                 .getPluginManager();
 
-        gameManager.getPlayers()
+        game.getPlayers()
                 .getPlayersInGame(PlayerState.ALIVE)
                 .forEach(player -> pluginManager.callEvent(new RoundSurvivedEvent(player)));
 

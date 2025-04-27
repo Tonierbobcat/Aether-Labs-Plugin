@@ -57,7 +57,7 @@ public abstract class AbstractGameEvent implements GameEvent {
     }
 
     @Override
-    public @NotNull String getId() {
+    public @NotNull String getIdentifier() {
         return id;
     }
 
@@ -84,19 +84,6 @@ public abstract class AbstractGameEvent implements GameEvent {
     @Override
     public int getDuration() {
         return DEFAULT_EVENT_DURATION;
-    }
-
-    @Override
-    public void load(Game game) {
-    }
-    @Override
-    public void start(Game game) {
-    }
-    @Override
-    public void end(Game game) {
-    }
-    @Override
-    public void run(Game game) {
     }
 
     @Override

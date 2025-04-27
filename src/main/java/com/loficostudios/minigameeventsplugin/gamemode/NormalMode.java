@@ -48,7 +48,7 @@ public class NormalMode extends AbstractGameMode {
         for (Player player : participatingPlayers) {
             SpawnPlatform spawnPlatform = game.getArena().getSpawnPlatform(player);
 
-            spawnPlatform.teleportCenter();
+            spawnPlatform.teleport(player);
         }
     }
 

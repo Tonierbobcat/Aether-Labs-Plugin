@@ -7,13 +7,13 @@ import com.loficostudios.minigameeventsplugin.gui.VoteGui;
 import com.loficostudios.minigameeventsplugin.player.profile.Profile;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.executors.CommandArguments;
 import net.kyori.adventure.text.Component;
-
-import java.util.List;
+import org.bukkit.entity.Player;
 
 import static com.loficostudios.minigameeventsplugin.AetherLabsPlugin.COMMAND_PREFIX;
 
-public class PlayerCommand {
+public class PlayerCommand implements Command {
 
     private final ProfileManager profileManager;
 
@@ -24,36 +24,39 @@ public class PlayerCommand {
         this.plugin = plugin;
     }
 
-    public List<CommandAPICommand> get() {
-        return List.of(
-                new CommandAPICommand("optout")
-                        .executesPlayer((player, args) -> {
-
-                            profileManager.getProfile(player.getUniqueId())
-                                    .ifPresent(Profile::optOutOfGame);
-
-                            player.sendMessage(Component.text(Messages.OPT_OUT));
-
-                        }),
-
+    @Override
+    public void register() {
         new CommandAPICommand("shop")
                 .withPermission(COMMAND_PREFIX + "shopAccess")
-                .executesPlayer((player, args) -> {
-                    new EventShop()
-                            .open(player);
-                }),
+                .executesPlayer(this::shop).register();
 
         new CommandAPICommand("vote")
                 .withPermission(COMMAND_PREFIX + "vote")
-                .executesPlayer((player, args) -> {
+                .executesPlayer(this::vote).register();
 
-                    if (plugin.getActiveGame(player.getWorld()).getVoting() == null) {
-                        player.sendMessage(Component.text(Messages.UNABLE_TO_VOTE));
-                        return;
-                    }
+        new CommandAPICommand("optout")
+                .executesPlayer(this::optOut)
+                .register();
+    }
 
-                    new VoteGui().open(player);
-                })
-        );
+    private void optOut(Player player, CommandArguments args) {
+
+        profileManager.getProfile(player.getUniqueId())
+                .ifPresent(Profile::optOutOfGame);
+
+        player.sendMessage(Component.text(Messages.OPT_OUT));
+
+    }
+
+    private void vote(Player player, CommandArguments args) {
+        if (plugin.getActiveGame(player.getWorld()).getVoting() == null) {
+            player.sendMessage(Component.text(Messages.UNABLE_TO_VOTE));
+            return;
+        }
+
+        new VoteGui().open(player);
+    }
+    private void shop(Player player, CommandArguments args) {
+        new EventShop().open(player);
     }
 }

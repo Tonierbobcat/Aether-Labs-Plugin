@@ -20,10 +20,10 @@ public class PlateShrinkEvent extends AbstractGameEvent {
 
     @Override
     public void start(Game game) {
-        game.getArena().getSpawnPlatforms().forEach(spawnPlatform -> {
-            if (!spawnPlatform.shrink(1)) {
+        game.getArena().getSpawnPlatforms().forEach(platform -> {
+            if (!platform.setRadius(platform.getRadius() - 1)) {
                 log("removing platform");
-                game.getArena().removeSpawnPlatform(spawnPlatform, false);
+                game.getArena().removeSpawnPlatform(platform, false);
             }
         });
     }

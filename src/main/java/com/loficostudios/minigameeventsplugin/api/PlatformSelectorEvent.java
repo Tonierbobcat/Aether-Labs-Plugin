@@ -48,6 +48,7 @@ public abstract class PlatformSelectorEvent extends AbstractSelectorEvent<SpawnP
 
     @Override
     public void end(Game game) {
+        super.end(game);
         game.getProgressBar().removeAll();
     }
 }
