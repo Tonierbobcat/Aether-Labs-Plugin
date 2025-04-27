@@ -102,8 +102,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
         try {
             registerCommands();
         } catch (Exception e) {
-            Debug.logError("Could not load commands. Disabling...");
-            getServer().getPluginManager().disablePlugin(this);
+            throw new IllegalArgumentException("Could not load commands");
         }
 
         registerListeners();
