@@ -30,6 +30,11 @@ public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> 
     }
 
     @Override
+    public void onComplete(Game game, Collection<Player> selected) {
+    }
+
+    @Deprecated
+    @Override
     public void start(Game game) {
         var bar = game.getProgressBar();
         var message = new StringBuilder();

@@ -23,10 +23,6 @@ public class PlayerShearsEvent extends PlayerSelectorEvent {
     }
 
     @Override
-    public void onComplete(Game game, Collection<Player> selected) {
-    }
-
-    @Override
     public @NotNull String getWarningMessage() {
         return "player(s) will be given a broken pair of shears.";
     }

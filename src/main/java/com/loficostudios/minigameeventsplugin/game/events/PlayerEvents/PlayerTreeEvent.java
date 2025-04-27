@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,9 +12,9 @@ import java.util.Random;
 
 public class PlayerTreeEvent extends PlayerSelectorEvent {
 
-    Random random = new Random();
+    private final Random random = new Random();
 
-    ItemStack[] saplings = new ItemStack[] {
+    private final ItemStack[] saplings = new ItemStack[] {
             new ItemStack(Material.OAK_SAPLING),
             new ItemStack(Material.SPRUCE_SAPLING),
             new ItemStack(Material.BIRCH_SAPLING),
@@ -23,15 +24,18 @@ public class PlayerTreeEvent extends PlayerSelectorEvent {
             new ItemStack(Material.CHERRY_SAPLING)
     };
 
-    ItemStack[] items = new ItemStack[] {
+    private final ItemStack[] items = new ItemStack[] {
             saplings[random.nextInt(saplings.length)],
             new ItemStack(Material.BONE_MEAL, random.nextInt(4, 6)),
             new ItemStack(Material.DIRT)
     };
 
-    @Override
-    public boolean onSelect(Player selectedPlayer) {
+    public PlayerTreeEvent() {
+        super("Player Tree Event", Material.OAK_SAPLING, 2, 4);
+    }
 
+    @Override
+    public boolean onSelect(Game game, Player selectedPlayer) {
         for (ItemStack item : items) {
             selectedPlayer.getInventory().addItem(item);
         }
@@ -39,32 +43,7 @@ public class PlayerTreeEvent extends PlayerSelectorEvent {
     }
 
     @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return "Player Tree Event";
-    }
-
-    @Override
     public @NotNull String getWarningMessage() {
         return "player(s) will start a small tree farm";
-    }
-
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.OAK_SAPLING;
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

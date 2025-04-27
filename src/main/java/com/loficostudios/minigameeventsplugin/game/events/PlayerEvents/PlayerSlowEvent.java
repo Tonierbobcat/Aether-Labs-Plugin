@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -12,43 +13,18 @@ import static com.loficostudios.minigameeventsplugin.utils.EventUtils.*;
 
 public class PlayerSlowEvent extends PlayerSelectorEvent {
 
+    public PlayerSlowEvent() {
+        super("Slowness", Material.SOUL_SAND, 1, 3);
+    }
+
     @Override
-    public boolean onSelect(Player selectedPlayer) {
+    public boolean onSelect(Game game, Player selectedPlayer) {
         effectPlayer(selectedPlayer, PotionEffectType.SLOWNESS, 15, 2);
         return true;
     }
 
     @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-
-
-
-
-    @Override
-    public @NotNull String getName() {
-        return "Slowness";
-    }
-
-    @Override
     public @NotNull String getWarningMessage() {
         return "players(s) will be a bit slower than normal.";
-    }
-
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.SOUL_SAND;
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

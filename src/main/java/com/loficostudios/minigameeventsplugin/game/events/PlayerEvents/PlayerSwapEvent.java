@@ -16,7 +16,7 @@ import java.util.Random;
 public class PlayerSwapEvent extends PlayerSelectorEvent {
 
     public PlayerSwapEvent() {
-        super("Swap Event", Material.ENDER_PEARL, 1, 1);
+        super("Swap Event", Material.ENDER_PEARL, 1, 2);
     }
 
     @Override
@@ -41,10 +41,6 @@ public class PlayerSwapEvent extends PlayerSelectorEvent {
         selectedPlayer.teleport(cache);
 
         return true;
-    }
-
-    @Override
-    public void onComplete(Game game, Collection<Player> selected) {
     }
 
     @Override

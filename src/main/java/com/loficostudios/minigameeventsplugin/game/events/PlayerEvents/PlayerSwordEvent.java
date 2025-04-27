@@ -2,6 +2,7 @@ package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,10 +23,8 @@ public class PlayerSwordEvent extends PlayerSelectorEvent {
             new ItemStack(Material.WOODEN_SWORD)
     };
 
-
-    @Override
-    public @NotNull String getName() {
-        return "Random Sword Event";
+    public PlayerSwordEvent() {
+        super("Random Sword Event", Material.DIAMOND_SWORD, 1, 2);
     }
 
     @Override
@@ -34,28 +33,9 @@ public class PlayerSwordEvent extends PlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull Material getIcon() {
-        return Material.DIAMOND_SWORD;
-    }
-
-    @Override
-    public boolean onSelect(Player selectedPlayer) {
+    public boolean onSelect(Game game, Player selectedPlayer) {
         selectedPlayer.getInventory()
                 .addItem(swords[random.nextInt(swords.length)]);
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

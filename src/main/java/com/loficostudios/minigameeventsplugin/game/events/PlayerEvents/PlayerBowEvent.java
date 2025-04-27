@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -12,11 +13,12 @@ import java.util.Collection;
 
 public class PlayerBowEvent extends PlayerSelectorEvent {
 
-
+    public PlayerBowEvent() {
+        super("Player Bow Event", Material.BOW, 1, 3);
+    }
 
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-
+    public boolean onSelect(Game game, Player selectedPlayer) {
         selectedPlayer.getInventory().addItem(new ItemStack(Material.BOW));
         selectedPlayer.getInventory().addItem(new ItemStack(Material.ARROW, 3));
 
@@ -24,33 +26,7 @@ public class PlayerBowEvent extends PlayerSelectorEvent {
     }
 
     @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-
-    @Override
-    public @NotNull String getName() {
-        return "Player Bow Event";
-    }
-
-    @Override
     public @NotNull String getWarningMessage() {
         return "player(s) will find a bow on the ground";
-    }
-
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.BOW;
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

@@ -2,6 +2,7 @@ package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -14,26 +15,16 @@ import java.util.Collection;
 public class PlayerCakeEvent extends AbstractGameEvent {
 
     public PlayerCakeEvent() {
-        super();
+        super("Cake Event", EventType.PLAYER, Material.CAKE);
     }
 
     @Override
-    public @NotNull EventType getType() {
-        return EventType.PLAYER;
-    }
-
-    @Override
-    public void start() {
-        Collection<Player> playersAlive = getPlayerManager().getPlayersInGame(PlayerState.ALIVE);
+    public void start(Game game) {
+        Collection<Player> playersAlive = game.getPlayers().getPlayersInGame(PlayerState.ALIVE);
 
         playersAlive.forEach(player -> {
             player.getInventory().addItem(new ItemStack(Material.CAKE));
         });
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return "Cake Event";
     }
 
     @Override
@@ -42,17 +33,10 @@ public class PlayerCakeEvent extends AbstractGameEvent {
     }
 
     @Override
-    public @NotNull Material getIcon() {
-        return Material.CAKE;
-    }
-
-    @Override
-    public void run() {
-        getPlayerManager().getPlayersInGame(PlayerState.ALIVE).forEach(player ->
+    public void run(Game game) {
+        game.getPlayers().getPlayersInGame(PlayerState.ALIVE).forEach(player ->
                 player.getWorld().spawnParticle(
                         Particle.HEART,
                         player.getLocation().add(0, 1, 0), 10));
     }
-
-
 }

@@ -2,6 +2,7 @@ package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
 
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,9 +12,8 @@ import java.util.Collection;
 
 public class PlayerBlocksEvent extends PlayerSelectorEvent {
 
-    @Override
-    public @NotNull String getName() {
-        return "Flammable Block Event";
+    public PlayerBlocksEvent() {
+        super("Flammable Block Event", Material.WHITE_WOOL, 1, 3);
     }
 
     @Override
@@ -22,31 +22,10 @@ public class PlayerBlocksEvent extends PlayerSelectorEvent {
     }
 
     @Override
-    public @NotNull Material getIcon() {
-        return Material.WHITE_WOOL;
-    }
-
-
-    @Override
-    public boolean onSelect(Player selectedPlayer) {
+    public boolean onSelect(Game game, Player selectedPlayer) {
         selectedPlayer.getInventory()
                 .addItem(new ItemStack(Material.WHITE_WOOL, 32));
 
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

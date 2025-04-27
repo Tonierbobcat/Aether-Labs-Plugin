@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -11,40 +12,18 @@ import java.util.Collection;
 import static com.loficostudios.minigameeventsplugin.utils.EventUtils.effectPlayer;
 
 public class PlayerFloatEvent extends PlayerSelectorEvent {
+    public PlayerFloatEvent() {
+        super("Player float event", Material.ELYTRA, 1, 3);
+    }
+
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-        effectPlayer(selectedPlayer, PotionEffectType.LEVITATION, 10, 1);
+    public boolean onSelect(Game game, Player player) {
+        effectPlayer(player, PotionEffectType.LEVITATION, 10, 1);
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return "Player float event";
     }
 
     @Override
     public @NotNull String getWarningMessage() {
         return "player(s) will start floating to the sky!";
-    }
-
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.ELYTRA;
-
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

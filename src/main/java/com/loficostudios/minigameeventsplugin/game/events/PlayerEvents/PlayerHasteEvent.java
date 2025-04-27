@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -11,40 +12,18 @@ import java.util.Collection;
 import static com.loficostudios.minigameeventsplugin.utils.EventUtils.effectPlayer;
 
 public class PlayerHasteEvent extends PlayerSelectorEvent {
-    @Override
-    public boolean onSelect(Player selectedPlayer) {
+    public PlayerHasteEvent() {
+        super("Haste Event", Material.GOLDEN_PICKAXE, 1, 3);
+    }
 
-        effectPlayer(selectedPlayer, PotionEffectType.HASTE, 30, 2);
+    @Override
+    public boolean onSelect(Game game, Player player) {
+        effectPlayer(player, PotionEffectType.HASTE, 30, 2);
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return "Haste Event";
     }
 
     @Override
     public @NotNull String getWarningMessage() {
         return "player(s) will have quicker arms.";
-    }
-
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.GOLDEN_PICKAXE;
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
     }
 }

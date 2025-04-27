@@ -2,6 +2,7 @@ package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -13,11 +14,8 @@ import static com.loficostudios.minigameeventsplugin.utils.EventUtils.effectPlay
 
 public class PlayerGravityEvent extends PlayerSelectorEvent {
 
-
-
-    @Override
-    public @NotNull String getName() {
-        return "Gravity Event";
+    public PlayerGravityEvent() {
+        super("Gravity Event", Material.FEATHER, 1, 3);
     }
 
     @Override
@@ -25,33 +23,13 @@ public class PlayerGravityEvent extends PlayerSelectorEvent {
         return "player(s) will feel lighter than usual";
     }
 
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.FEATHER;
-    }
-
 
     @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 3;
-    }
-
-    @Override
-    public boolean onSelect(Player selectedPlayer) {
-        effectPlayer(selectedPlayer, PotionEffectType.JUMP_BOOST, 5940, 1);
-        effectPlayer(selectedPlayer, PotionEffectType.SLOW_FALLING, 5940, 1);
+    public boolean onSelect(Game game, Player player) {
+        effectPlayer(player, PotionEffectType.JUMP_BOOST, 5940, 1);
+        effectPlayer(player, PotionEffectType.SLOW_FALLING, 5940, 1);
 
         return true;
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
     }
 }
 

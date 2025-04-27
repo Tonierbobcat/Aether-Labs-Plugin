@@ -8,6 +8,7 @@ import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.events.PlayerEvents.*;
 import com.loficostudios.minigameeventsplugin.game.events.plate.*;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldGhastEvent;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldPlateRepairEvent;
@@ -30,6 +31,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -189,31 +191,32 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     }
 
     private void registerGameEvents() {
-        List.of(
-                //region Player Events
-//                new PlayerBlindEvent(),
-//                new PlayerBlocksEvent(),
-//                new PlayerBowEvent(),
-//                new PlayerCakeEvent(),
-//                new PlayerColdEvent(),
-//                new PlayerFishingRodEvent(),
-//                new PlayerFloatEvent(),
-//                new PlayerFlowerEvent(),
-//                new PlayerGhostEvent(),
-//                new PlayerGravityEvent(),
-//                new PlayerHasteEvent(),
-//                new PlayerRandomPlateEvent(),
-//                new PlayerShearsEvent(),
-//                new PlayerSickEvent(),
-//                new PlayerSlowEvent(),
-//                new PlayerSpeedEvent(),
-//                new PlayerSpookyEvent(),
-//                new PlayerSwapEvent(),
-//                new PlayerSwordEvent(),
-//                new PlayerTreeEvent(),
-                //endregion
+        // player events
+        Arrays.asList(
+                new PlayerBlindEvent(),
+                new PlayerBlocksEvent(),
+                new PlayerBowEvent(),
+                new PlayerCakeEvent(),
+                new PlayerColdEvent(),
+                new PlayerFishingRodEvent(),
+                new PlayerFloatEvent(),
+                new PlayerFlowerEvent(),
+                new PlayerGhostEvent(),
+                new PlayerGravityEvent(),
+                new PlayerHasteEvent(),
+                new PlayerRandomPlateEvent(),
+                new PlayerShearsEvent(),
+                new PlayerSickEvent(),
+                new PlayerSlowEvent(),
+                new PlayerSpeedEvent(),
+                new PlayerSpookyEvent(),
+                new PlayerSwapEvent(),
+                new PlayerSwordEvent(),
+                new PlayerTreeEvent()
+        ).forEach(GameEvent::register);
 
-                //region Plate Events
+        // plate events
+        Arrays.asList(
                 new PlateDirtEvent(),
                 new PlateExpandEvent(),
                 new PlateIcyEvent(),
@@ -223,14 +226,13 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                 new PlatePigsEvent(),
                 new PlateShrinkEvent(),
                 new PlateSlimeEvent(),
-                new PlateZombieEvent(),
-                //endregion
+                new PlateZombieEvent()
+        ).forEach(GameEvent::register);
 
-                //region World Events
+        // world events
+        Arrays.asList(
                 new WorldGhastEvent(),
                 new WorldPlateRepairEvent()
-                //endregion
-
         ).forEach(GameEvent::register);
     }
     private void registerListeners() {

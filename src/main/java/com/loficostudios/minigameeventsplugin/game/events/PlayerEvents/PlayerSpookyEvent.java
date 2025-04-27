@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
+import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -12,52 +13,19 @@ import static com.loficostudios.minigameeventsplugin.game.events.Items.SPOOKY_PU
 
 public class PlayerSpookyEvent extends PlayerSelectorEvent {
 
+    public PlayerSpookyEvent() {
+        super("spooky pumpkin", Material.CARVED_PUMPKIN, 1, 2);
+    }
 
     @Override
-    public boolean onSelect(Player selectedPlayer) {
-
+    public boolean onSelect(Game game, Player selectedPlayer) {
         EntityEquipment equipment = selectedPlayer.getEquipment();
-
-        if (equipment != null) {
-            equipment.setHelmet(SPOOKY_PUMPKIN);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    @Override
-    public void onComplete(Collection<Player> selectedPlayers) {
-
-    }
-
-
-
-
-
-    @Override
-    public @NotNull String getName() {
-        return "spooky pumpkin";
+        equipment.setHelmet(SPOOKY_PUMPKIN);
+        return true;
     }
 
     @Override
     public @NotNull String getWarningMessage() {
         return "player(s) will become spooky.";
-    }
-
-    @Override
-    public @NotNull Material getIcon() {
-        return Material.CARVED_PUMPKIN;
-    }
-
-    @Override
-    public Integer getMin() {
-        return 1;
-    }
-
-    @Override
-    public Integer getMax() {
-        return 1;
     }
 }
