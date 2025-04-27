@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
+package com.loficostudios.minigameeventsplugin.game.events.player;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
@@ -6,9 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
-
 
 
 public class PlayerBowEvent extends PlayerSelectorEvent {

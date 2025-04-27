@@ -1,12 +1,10 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
+package com.loficostudios.minigameeventsplugin.game.events.player;
 
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 import static com.loficostudios.minigameeventsplugin.game.events.Items.BROKEN_SHEARS;
 

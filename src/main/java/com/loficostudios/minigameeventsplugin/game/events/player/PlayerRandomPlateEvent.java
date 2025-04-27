@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
+package com.loficostudios.minigameeventsplugin.game.events.player;
 
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.api.PlayerSelectorEvent;
@@ -7,10 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerRandomPlateEvent extends PlayerSelectorEvent {

@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlayerEvents;
+package com.loficostudios.minigameeventsplugin.game.events.player;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;

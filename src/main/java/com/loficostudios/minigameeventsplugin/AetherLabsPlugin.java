@@ -8,7 +8,7 @@ import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.game.events.PlayerEvents.*;
+import com.loficostudios.minigameeventsplugin.game.events.player.*;
 import com.loficostudios.minigameeventsplugin.game.events.plate.*;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldGhastEvent;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldPlateRepairEvent;
