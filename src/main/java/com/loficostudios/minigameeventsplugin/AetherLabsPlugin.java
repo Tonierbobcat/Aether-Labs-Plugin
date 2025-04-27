@@ -8,8 +8,8 @@ import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.game.events.player.*;
 import com.loficostudios.minigameeventsplugin.game.events.plate.*;
+import com.loficostudios.minigameeventsplugin.game.events.player.*;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldGhastEvent;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldPlateRepairEvent;
 import com.loficostudios.minigameeventsplugin.listeners.*;
@@ -27,6 +27,7 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -60,7 +61,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     @Getter
     private final EventRegistry events = new EventRegistry();
 
-    @Getter
+
     private final Game activeGame = new Game(this);
 
     @Getter
@@ -77,6 +78,10 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
     public AetherLabsPlugin() {
         instance = this;
+    }
+
+    public Game getActiveGame(World world) {
+        return activeGame;
     }
 
     @Override
@@ -240,7 +245,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
                 new PlayerDeathListener(activeGame),
                 new EggListener(activeGame),
                 new ArenaListener(activeGame),
-                new MiniGameListener(this, activeGame),
+                new MiniGameListener(this),
                 new PlayerListener(this, profileManager)
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }

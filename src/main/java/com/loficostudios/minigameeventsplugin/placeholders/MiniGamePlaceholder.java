@@ -16,14 +16,8 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
 
     final ProfileManager profileManager;
 
-    final Game gameManager;
-
     public MiniGamePlaceholder(ProfileManager profileManager) {
         this.profileManager = profileManager;
-
-        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
-
-        gameManager = plugin.getActiveGame();
     }
 
     @Override
@@ -56,12 +50,14 @@ public class MiniGamePlaceholder extends PlaceholderExpansion {
         if (player == null)
             return "";
 
+        Game game = AetherLabsPlugin.instance.getActiveGame(player.getWorld());
+
         if (params.equals("alive")) {
-            return String.valueOf(gameManager.getPlayers().getPlayersInGame(PlayerState.ALIVE).size());
+            return String.valueOf(game.getPlayers().getPlayersInGame(PlayerState.ALIVE).size());
         }
 
         if (params.equals("rounds")) {
-            return String.valueOf(gameManager.getRoundManager().getRoundsElapsed());
+            return String.valueOf(game.getRoundManager().getRoundsElapsed());
         }
 
         Optional<Profile> optionalProfile = profileManager.getProfile(player.getUniqueId());

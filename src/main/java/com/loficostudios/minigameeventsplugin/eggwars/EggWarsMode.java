@@ -2,7 +2,7 @@ package com.loficostudios.minigameeventsplugin.eggwars;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
 import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatformGenerator;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameState;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
@@ -125,7 +125,7 @@ public class EggWarsMode extends AbstractGameMode {
                 }
 
                 spawnPlatform.teleportCenter();
-            }, SpawnPlatform.SpawnAlgorithm.EQUAL_HEIGHT);
+            }, SpawnPlatformGenerator.SpawnAlgorithm.EQUAL_HEIGHT);
         }
     }
 

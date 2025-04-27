@@ -14,7 +14,7 @@ public class WorldPlateRepairEvent extends AbstractGameEvent {
     @Override
     public void start(Game game) {
         game.getArena().getSpawnPlatforms().forEach(spawnPlatform -> {
-            spawnPlatform.recreate(spawnPlatform.getMaterial());
+            spawnPlatform.setPlatform(spawnPlatform.getMaterial(), true);
         });
     }
 

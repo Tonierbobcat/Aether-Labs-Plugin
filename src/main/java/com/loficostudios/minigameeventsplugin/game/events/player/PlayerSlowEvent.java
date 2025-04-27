@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-import static com.loficostudios.minigameeventsplugin.utils.EventUtils.*;
+import static com.loficostudios.minigameeventsplugin.utils.EventUtils.effectPlayer;
 
 
 public class PlayerSlowEvent extends PlayerSelectorEvent {

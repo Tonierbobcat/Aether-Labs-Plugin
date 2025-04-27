@@ -100,7 +100,7 @@ public class EventShop extends MelodyGui {
                         p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
                         p.sendMessage(Component.text("§ePurchased event!"));
 
-                        if (plugin.getActiveGame().getEvents().queueEvent(p, event)) {
+                        if (plugin.getActiveGame(p.getWorld()).getEvents().queueEvent(p, event)) {
                             p.sendMessage(Component.text("§7Your event has been queued up to go next!"));
                             economy.withdrawPlayer(p, event.getCost());
                         }

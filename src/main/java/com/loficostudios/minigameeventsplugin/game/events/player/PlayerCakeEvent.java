@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.events.player;
 
-import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
+import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import org.bukkit.Material;

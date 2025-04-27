@@ -163,7 +163,7 @@ public class PlayerManager {
         savedPlayerEquipment.clear();
     }
 
-    public void handlePlayerQuit(final Player player) {
+    public void handleQuit(final Player player) {
         GameState currentState = gameManager.getCurrentState();
 
         switch (currentState) {

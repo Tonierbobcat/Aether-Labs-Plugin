@@ -2,6 +2,7 @@ package com.loficostudios.minigameeventsplugin.gamemode;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.arena.SpawnPlatformGenerator;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,7 +39,7 @@ public class NormalMode extends AbstractGameMode {
                     null,
                     null,
                     null,
-                    SpawnPlatform.SpawnAlgorithm.EQUAL_HEIGHT);
+                    SpawnPlatformGenerator.SpawnAlgorithm.EQUAL_HEIGHT);
         }
     }
 

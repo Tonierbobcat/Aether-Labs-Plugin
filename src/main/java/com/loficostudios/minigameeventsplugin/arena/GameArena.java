@@ -31,7 +31,7 @@ public class GameArena {
 
     public static final int MIN_GAME_ARENA_AREA = 146068;
     public static final Material DEFAULT_PLATFORM_MATERIAL = Material.STONE;
-    public static final SpawnPlatform.PlatformType DEFAULT_PLATFORM_TYPE = SpawnPlatform.PlatformType.FLAT;
+    public static final SpawnPlatform.Type DEFAULT_PLATFORM_TYPE = SpawnPlatform.Type.FLAT;
     private static final Boolean DEFAULT_SPAWN_EXTRA_PLATFORMS = true;
     private static final Integer EXTRA_PLATFORMS_AMOUNT = 25;
 
@@ -139,23 +139,24 @@ public class GameArena {
     }
     //endregion
 
-    public SpawnPlatform addSpawnPlatform(@Nullable Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Runnable onAdd, @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
+    public SpawnPlatform addSpawnPlatform(@Nullable Location location, @Nullable SpawnPlatform.Type type, @Nullable Material material, @Nullable Runnable onAdd, @NotNull SpawnPlatformGenerator.SpawnAlgorithm spawnAlgorithm) {
 
         SpawnPlatform spawnPlatform = new SpawnPlatform(
                 type != null ? type : DEFAULT_PLATFORM_TYPE,
-                material != null ? material : DEFAULT_PLATFORM_MATERIAL,
-                spawnAlgorithm);
+                material != null ? material : DEFAULT_PLATFORM_MATERIAL);
 
-        boolean isCreated = false;
+        boolean isCreated;
+
+        var gen = new SpawnPlatformGenerator(spawnPlatform, this);
 
         if (location != null) {
-            isCreated = spawnPlatform.create(location, onGenerate -> {
+            isCreated = gen.create(location, onGenerate -> {
                 if (onAdd != null)
                     onAdd.run();
             });
         }
         else {
-            isCreated = spawnPlatform.create(onGenerate -> {
+            isCreated = gen.create(spawnAlgorithm, onGenerate -> {
                 if (onAdd != null)
                     onAdd.run();
             });
@@ -170,29 +171,28 @@ public class GameArena {
         }
     }
 
-    public SpawnPlatform addSpawnPlatform(@NotNull Player player, @Nullable Location location, @Nullable SpawnPlatform.PlatformType type, @Nullable Material material, @Nullable Consumer<SpawnPlatform> onAdd, @NotNull SpawnPlatform.SpawnAlgorithm spawnAlgorithm) {
+    public SpawnPlatform addSpawnPlatform(@NotNull Player player, @Nullable Location location, @Nullable SpawnPlatform.Type type, @Nullable Material material, @Nullable Consumer<SpawnPlatform> onAdd, @NotNull SpawnPlatformGenerator.SpawnAlgorithm spawnAlgorithm) {
 
         SpawnPlatform spawnPlatform = new SpawnPlatform(player,
                 type != null ? type : DEFAULT_PLATFORM_TYPE,
-                material != null ? material : DEFAULT_PLATFORM_MATERIAL,
-                spawnAlgorithm);
+                material != null ? material : DEFAULT_PLATFORM_MATERIAL);
 
         boolean isCreated = false;
 
+        var gen = new SpawnPlatformGenerator(spawnPlatform, this);
+
         if (location != null) {
-            isCreated = spawnPlatform.create(location, onGenerate -> {
+            isCreated = gen.create(location, onGenerate -> {
                 if (onAdd != null)
                     onAdd.accept(spawnPlatform);
             });
         }
         else {
-            isCreated = spawnPlatform.create(onGenerate -> {
+            isCreated = gen.create(spawnAlgorithm, onGenerate -> {
                 if (onAdd != null)
                     onAdd.accept(spawnPlatform);
             });
         }
-
-
 
         if (!isCreated) {
             return null;

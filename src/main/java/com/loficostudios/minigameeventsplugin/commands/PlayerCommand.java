@@ -47,7 +47,7 @@ public class PlayerCommand {
                 .withPermission(COMMAND_PREFIX + "vote")
                 .executesPlayer((player, args) -> {
 
-                    if (plugin.getActiveGame().getVoting() == null) {
+                    if (plugin.getActiveGame(player.getWorld()).getVoting() == null) {
                         player.sendMessage(Component.text(Messages.UNABLE_TO_VOTE));
                         return;
                     }

@@ -18,7 +18,7 @@ public class PlateObsidianEvent extends PlatformSelectorEvent {
         Player player = platform.getPlayer();
 
         if (player != null) {
-            platform.recreate(Material.OBSIDIAN);
+            platform.setPlatform(Material.OBSIDIAN, true);
             return true;
         }
 

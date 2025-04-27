@@ -6,6 +6,8 @@ import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
+import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
+
 public class PlateShrinkEvent extends AbstractGameEvent {
     public PlateShrinkEvent() {
         super("Platform Shrink Event", EventType.PLATE, Material.CRACKED_STONE_BRICKS);
@@ -20,6 +22,7 @@ public class PlateShrinkEvent extends AbstractGameEvent {
     public void start(Game game) {
         game.getArena().getSpawnPlatforms().forEach(spawnPlatform -> {
             if (!spawnPlatform.shrink(1)) {
+                log("removing platform");
                 game.getArena().removeSpawnPlatform(spawnPlatform, false);
             }
         });
