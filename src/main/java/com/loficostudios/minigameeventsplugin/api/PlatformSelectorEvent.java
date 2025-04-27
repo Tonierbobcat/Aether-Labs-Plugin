@@ -8,7 +8,6 @@ import com.loficostudios.minigameeventsplugin.managers.NotificationType;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.Player;
 
 import java.util.Collection;
 

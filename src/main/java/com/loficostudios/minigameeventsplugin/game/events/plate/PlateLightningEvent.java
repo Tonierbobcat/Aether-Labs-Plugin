@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
+package com.loficostudios.minigameeventsplugin.game.events.plate;
 
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;

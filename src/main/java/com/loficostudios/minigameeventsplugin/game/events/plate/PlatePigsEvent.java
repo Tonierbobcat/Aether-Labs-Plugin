@@ -1,21 +1,17 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
+package com.loficostudios.minigameeventsplugin.game.events.plate;
 
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class PlateDirtEvent extends PlatformSelectorEvent {
+public class PlatePigsEvent extends PlatformSelectorEvent {
 
-    public PlateDirtEvent() {
-        super("Random Dirt Platform", Material.DIRT, 2, 3);
-    }
-
-    @Override
-    public @NotNull String getWarningMessage() {
-        return "plate(s) will get a bit dirty";
+    public PlatePigsEvent() {
+        super("Pig event", Material.PIG_SPAWN_EGG, 1, 3);
     }
 
     @Override
@@ -23,10 +19,18 @@ public class PlateDirtEvent extends PlatformSelectorEvent {
         Player player = platform.getPlayer();
 
         if (player != null) {
-            platform.setPlatform(Material.DIRT);
+            for (int i = 0; i < 4; i++) {
+                game.getArena().spawnEntity(EntityType.PIG, platform.getTeleportLocation());
+            }
+
             return true;
         }
 
         return true;
+    }
+
+    @Override
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will get raided by pigs!";
     }
 }

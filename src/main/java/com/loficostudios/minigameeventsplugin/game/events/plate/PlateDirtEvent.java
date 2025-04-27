@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.game.events.PlateEvents;
+package com.loficostudios.minigameeventsplugin.game.events.plate;
 
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
 import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
@@ -7,10 +7,15 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class PlateInvisibleEvent extends PlatformSelectorEvent {
+public class PlateDirtEvent extends PlatformSelectorEvent {
 
-    public PlateInvisibleEvent() {
-        super("Invisible Plate Event", Material.GLASS, 1, 3);
+    public PlateDirtEvent() {
+        super("Random Dirt Platform", Material.DIRT, 2, 3);
+    }
+
+    @Override
+    public @NotNull String getWarningMessage() {
+        return "plate(s) will get a bit dirty";
     }
 
     @Override
@@ -18,15 +23,10 @@ public class PlateInvisibleEvent extends PlatformSelectorEvent {
         Player player = platform.getPlayer();
 
         if (player != null) {
-            platform.setPlatform(Material.BARRIER);
+            platform.setPlatform(Material.DIRT);
             return true;
         }
 
         return true;
-    }
-
-    @Override
-    public @NotNull String getWarningMessage() {
-        return "plate(s) will become completely transparent.";
     }
 }

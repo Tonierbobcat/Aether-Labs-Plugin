@@ -2,7 +2,6 @@ package com.loficostudios.minigameeventsplugin.api.event;
 
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.events.IObjectSelector;
-import org.bukkit.boss.BossBar;
 
 import java.util.Collection;
 import java.util.function.Consumer;
