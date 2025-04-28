@@ -94,7 +94,7 @@ public abstract class AbstractGameEvent implements GameEvent {
 
     @Override
     public void register() {
-        plugin = AetherLabsPlugin.getInstance();
+        plugin = AetherLabsPlugin.inst();
         plugin.getEvents().subscribe(this);
     }
 }

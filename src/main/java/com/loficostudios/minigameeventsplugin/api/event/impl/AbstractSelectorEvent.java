@@ -120,6 +120,6 @@ public abstract class AbstractSelectorEvent<Impl> extends AbstractGameEvent impl
                     this.cancel();
                 }
             }
-        }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 15));
+        }.runTaskTimer(AetherLabsPlugin.inst(), 0, 15));
     }
 }

@@ -22,7 +22,7 @@ public class EventShop extends MelodyGui {
     private final List<GameEvent> baseEvents;
     public EventShop() {
         super(9, Component.text("Shop"));
-        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
+        AetherLabsPlugin plugin = AetherLabsPlugin.inst();
         Collection<GameEvent> baseEvents = plugin.getEvents().getAll();
         this.baseEvents = new ArrayList<>(baseEvents);
     }
@@ -88,7 +88,7 @@ public class EventShop extends MelodyGui {
                     "",
                     "§8" + event.getIdentifier()).map(Component::text).toList();
 
-            AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
+            AetherLabsPlugin plugin = AetherLabsPlugin.inst();
 
             return new GuiIcon(event.getIcon(), Component.text("§e" + event.getName()), description, (p, c) -> {
                 if (Economy.getBalance(p) >= event.getCost()) {

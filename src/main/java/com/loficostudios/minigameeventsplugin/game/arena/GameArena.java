@@ -37,8 +37,8 @@ public class GameArena {
 
     private final AetherLabsPlugin plugin;
 
-    @Getter private Location pos1;
-    @Getter private Location pos2;
+    @Getter private Location min;
+    @Getter private Location max;
 
     @Getter
     private World world;
@@ -54,27 +54,34 @@ public class GameArena {
 
     private BukkitTask lavaTask;
 
+    private final ArenaConfig config;
+
+    @Getter
+    private final Selection bounds;
+
     public GameArena(AetherLabsPlugin plugin, ArenaConfig config) {
         this.plugin = plugin;
-        this.pos1 = config.getMin().toLocation(config.getWorld());
-        this.pos2 = config.getMax().toLocation(config.getWorld());
+        this.min = config.getMin().toLocation(config.getWorld());
+        this.max = config.getMax().toLocation(config.getWorld());
         this.world = config.getWorld();
+        this.config = config;
+        this.bounds = new Selection(min, max);
     }
 
     public Location getRandomLocation() {
-        double minX = Math.min(pos1.getX(), pos2.getX());
-        double minY = Math.min(pos1.getY(), pos2.getY());
-        double minZ = Math.min(pos1.getZ(), pos2.getZ());
+        double minX = Math.min(min.getX(), max.getX());
+        double minY = Math.min(min.getY(), max.getY());
+        double minZ = Math.min(min.getZ(), max.getZ());
 
-        double maxX = Math.max(pos1.getX(), pos2.getX());
-        double maxY = Math.max(pos1.getY(), pos2.getY());
-        double maxZ = Math.max(pos1.getZ(), pos2.getZ());
+        double maxX = Math.max(min.getX(), max.getX());
+        double maxY = Math.max(min.getY(), max.getY());
+        double maxZ = Math.max(min.getZ(), max.getZ());
 
         long x = Math.round(randomDouble(minX, maxX));
         long y = Math.round(randomDouble(minY, maxY));
         long z = Math.round(randomDouble(minZ, maxZ));
 
-        return new Location(pos1.getWorld(), x, y, z);
+        return new Location(min.getWorld(), x, y, z);
     }
 
     //region Clean Up
@@ -82,9 +89,7 @@ public class GameArena {
     public void clear() {
         cancelFillTask();
 
-        Selection selection = new Selection(pos1, pos2);
-
-        List<Block> blocks = new ArrayList<>(selection.getBlocks());
+        List<Block> blocks = new ArrayList<>(bounds.getBlocks());
 
         blocks.forEach(block -> {
             block.setType(Material.AIR);
@@ -94,12 +99,12 @@ public class GameArena {
     public void removeEntities() {
         int amountRemoved = 0;
 
-        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
-        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
-        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
-        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
-        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
-        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+        int minX = Math.min(min.getBlockX(), max.getBlockX());
+        int maxX = Math.max(min.getBlockX(), max.getBlockX());
+        int minY = Math.min(min.getBlockY(), max.getBlockY());
+        int maxY = Math.max(min.getBlockY(), max.getBlockY());
+        int minZ = Math.min(min.getBlockZ(), max.getBlockZ());
+        int maxZ = Math.max(min.getBlockZ(), max.getBlockZ());
 
 
         for (LivingEntity entity : world.getLivingEntities()) {
@@ -137,7 +142,7 @@ public class GameArena {
             });
         }
         else {
-            isCreated = gen.create(spawnAlgorithm, onGenerate -> {
+            isCreated = gen.generate(spawnAlgorithm, onGenerate -> {
                 if (onAdd != null)
                     onAdd.run();
             });
@@ -169,7 +174,7 @@ public class GameArena {
             });
         }
         else {
-            isCreated = gen.create(spawnAlgorithm, onGenerate -> {
+            isCreated = gen.generate(spawnAlgorithm, onGenerate -> {
                 if (onAdd != null)
                     onAdd.accept(spawnPlatform);
             });
@@ -245,20 +250,17 @@ public class GameArena {
             player.sendMessage("Fill Speed: " + speed);
         }
 
-
-        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
-        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
-        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
-        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
-        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
-        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+        int minX = Math.min(min.getBlockX(), max.getBlockX());
+        int maxX = Math.max(min.getBlockX(), max.getBlockX());
+        int minY = Math.min(min.getBlockY(), max.getBlockY());
+        int maxY = Math.max(min.getBlockY(), max.getBlockY());
+        int minZ = Math.min(min.getBlockZ(), max.getBlockZ());
+        int maxZ = Math.max(min.getBlockZ(), max.getBlockZ());
 
         int base = (maxX - minX + 1);
         int batchSize = (int) (base * (1.0 + (speed - 1) * (1.0 / 9.0)));
 
         List<Block> blocks = new ArrayList<>();
-
-        Selection bounds = new Selection(pos1, pos2);
 
         for (int y = minY; y <= maxY; y++) {
             for (int z = minZ; z <= maxZ; z++) {

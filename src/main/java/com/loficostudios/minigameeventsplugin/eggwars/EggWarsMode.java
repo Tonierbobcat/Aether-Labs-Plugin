@@ -102,7 +102,7 @@ public class EggWarsMode extends AbstractGameMode {
 
         GameArena arena = game.getArena();
 
-        Selection bounds = new Selection(arena.getPos1(), arena.getPos2());
+        Selection bounds = arena.getBounds();
 
         for (Player player : participatingPlayers) {
             game.getArena().addSpawnPlatform(player, null, null, null, spawnPlatform -> {

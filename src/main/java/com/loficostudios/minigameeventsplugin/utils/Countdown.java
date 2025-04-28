@@ -60,7 +60,7 @@ public class Countdown {
                 super.cancel();
                 cancelled = true;
             }
-        }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 20);
+        }.runTaskTimer(AetherLabsPlugin.inst(), 0, 20);
 
         return task;
     }

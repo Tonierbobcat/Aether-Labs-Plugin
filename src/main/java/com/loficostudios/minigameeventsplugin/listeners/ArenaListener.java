@@ -120,7 +120,7 @@ public class ArenaListener implements Listener {
         if (arena == null)
             return false;
 
-        Selection selection = new Selection(arena.getPos1(), arena.getPos2());
+        Selection selection = arena.getBounds();
         Selection perimeter = selection.getPerimeter(1);
 
         Block arenaBlock = perimeter.getBlock(block.getX(), block.getY(), block.getZ());

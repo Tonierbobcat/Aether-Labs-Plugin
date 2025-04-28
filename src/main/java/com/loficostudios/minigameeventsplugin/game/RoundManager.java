@@ -21,17 +21,16 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
 public class RoundManager {
 
-    private final Game game;
-    private final EventManager eventManager;
-
     private static final int NEXT_ROUND_RETRY_ATTEMPTS = 1;
     private static final int MAX_ROUNDS = 100;
 
-    @Getter int roundsElapsed;
+    private final Game game;
+    private final EventManager eventManager;
 
-    //private Countdown timer;
+    private final Set<BukkitTask> tasks = new HashSet<>();
 
-    private Set<BukkitTask> tasks = new HashSet<>();
+    @Getter
+    private int roundsElapsed;
 
     public RoundManager(Game gameManager, EventManager eventManager) {
         this.game = gameManager;
@@ -113,7 +112,7 @@ public class RoundManager {
             eventManager.handleCancel(eventManager.getCurrentEvent());
         }
 
-        PluginManager pluginManager = AetherLabsPlugin.getInstance()
+        PluginManager pluginManager = AetherLabsPlugin.inst()
                 .getServer()
                 .getPluginManager();
 

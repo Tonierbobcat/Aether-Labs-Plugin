@@ -1,8 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.arena;
 
-import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
@@ -28,56 +27,50 @@ public class SpawnPlatformGenerator {
     private static final int MIN_SPACING = 7;
 
     public boolean create(Location center, Consumer<Collection<Block>> onGenerate) {
-        calculateBlocks(center, calculatedBlocks -> {
-            for (Block block : calculatedBlocks) {
-                block.setType(plate.getMaterial());
-            }
-            onGenerate.accept(calculatedBlocks);
-            plate.setBlocks(calculatedBlocks);
-        });
+        var calculatedBlocks = calculateBlocks(center);
+
+        for (Block block : calculatedBlocks) {
+            block.setType(plate.getMaterial());
+        }
+        onGenerate.accept(calculatedBlocks);
+        plate.setBlocks(calculatedBlocks);
 
         return true;
     }
 
-    public boolean create(SpawnAlgorithm algorithm, Consumer<Collection<Block>> onGenerate) {
-        Selection bounds = new Selection(arena.getPos1(), arena.getPos2()).adjustSelection(-10);
+    public boolean generate(SpawnAlgorithm algorithm, Consumer<Collection<Block>> onGenerate) {
+        Selection bounds = arena.getBounds().adjustSelection(-10);
 
         Location center = null;
 
         boolean isCreated = false;
         int attempts = 0;
-
+        Set<Block> blocks = null;
         while (!isCreated && attempts < 50) {
-
             center = bounds.getRandomLocation();
             center.setY(bounds.getMiddleY());
 
-            if (isLocationValid(center)) {
-                if (algorithm.equals(SpawnAlgorithm.RANDOM_HEIGHT)) {
-
-                    int y = bounds.getRandomLocation().getBlockY();
-
-                    //center.setY(y);
-
-                    center = new Location(center.getWorld(), center.getBlockX(), y, center.getBlockZ());
-                }
-
-                calculateBlocks(center, calculatedBlocks -> {
-                    for (Block block : calculatedBlocks) {
-                        block.setType(plate.getMaterial());
-                    }
-                    onGenerate.accept(calculatedBlocks);
-
-                    plate.setBlocks(calculatedBlocks);
-                });
-
-                isCreated = true;
+            if (!isLocationValid(center)) {
+                attempts++;
+                continue;
             }
-            attempts++;
+
+            if (algorithm.equals(SpawnAlgorithm.RANDOM_HEIGHT)) {
+                int y = bounds.getRandomLocation().getBlockY();
+                center = new Location(center.getWorld(), center.getBlockX(), y, center.getBlockZ());
+            }
+
+            blocks = calculateBlocks(center);
+            blocks.forEach(block -> block.setType(plate.getMaterial()));
+            plate.setBlocks(blocks);
+
+            isCreated = true;
         }
 
         if (isCreated) {
             plate.setLocation(center);
+            onGenerate.accept(blocks);
+
             logWarning("attempts to create " + attempts);
             return true;
         }
@@ -101,29 +94,27 @@ public class SpawnPlatformGenerator {
         return true;
     }
 
-    public void calculateBlocks(Location center, Consumer<Set<Block>> callback) {
+    public Set<Block> calculateBlocks(Location center) {
         var radius = plate.getRadius();
-        Set<Block> blocksToSet = new HashSet<>();
-        Bukkit.getScheduler().runTaskAsynchronously(AetherLabsPlugin.getInstance(), () -> {
-            Selection selection = new Selection(arena.getPos1(), arena.getPos2());
+        Debug.log("Calculating blocks... radius: " + radius);
 
+        var blocks = new HashSet<Block>();
 
-            // Calculate the start position to center the platform based on the radius
-            int startX = center.getBlockX() - radius;
-            int startZ = center.getBlockZ() - radius;
-            int y = center.getBlockY();
+        var bounds = arena.getBounds();
 
-            // Place blocks in a 3x3 area, based on radius
-            for (int x = startX; x < startX + 2 * radius + 1; x++) {
-                for (int z = startZ; z < startZ + 2 * radius + 1; z++) {
-                    Block block = selection.getBlock(x, y, z);
+        int startX = center.getBlockX() - radius;
+        int startZ = center.getBlockZ() - radius;
+        int y = center.getBlockY();
 
-                    if (block != null)
-                        blocksToSet.add(block);
-                }
+        for (int x = startX; x < startX + 2 * radius + 1; x++) {
+            for (int z = startZ; z < startZ + 2 * radius + 1; z++) {
+                Block block = bounds.getBlock(x, y, z);
+
+                if (block != null)
+                    blocks.add(block);
             }
+        }
 
-            Bukkit.getScheduler().runTask(AetherLabsPlugin.getInstance(), () -> callback.accept(blocksToSet));
-        });
+        return blocks;
     }
 }

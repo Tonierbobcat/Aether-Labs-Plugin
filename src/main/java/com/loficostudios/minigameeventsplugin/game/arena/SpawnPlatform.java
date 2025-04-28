@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
+import com.loficostudios.minigameeventsplugin.utils.Debug;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -78,6 +79,7 @@ public class SpawnPlatform {
     }
 
     public void setLocation(Location center) {
+        Debug.log("Setting location for platform " + this);
         this.location = center;
         updateHologram(this.location);
     }
@@ -128,8 +130,12 @@ public class SpawnPlatform {
     public void setPlatform(Material material, boolean recreate) {
         if (recreate) {
             blocks.forEach(block -> block.setType(Material.AIR));
-            generator.calculateBlocks(location, this::setBlocks);
+            blocks.clear();
+
+            blocks.addAll(generator.calculateBlocks(location));
+            blocks.forEach(block -> block.setType(material));
         }
+
         for (Block block : blocks) {
             block.setType(material);
         }

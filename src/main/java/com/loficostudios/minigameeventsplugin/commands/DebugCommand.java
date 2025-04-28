@@ -35,12 +35,12 @@ public class DebugCommand implements Command {
     }
 
     private void start(Player player, CommandArguments args) {
-        var plugin = AetherLabsPlugin.getInstance();
+        var plugin = AetherLabsPlugin.inst();
         var activeGame = plugin.getActiveGame(player.getWorld());
 
         if (activeGame == null || !activeGame.inProgress()) {
             Integer countdown = (Integer) args.get("countdown");
-            var game = new Game(plugin, new GameArena(plugin, plugin.getArenaManager().getConfig(player.getWorld())));
+            var game = new Game(new GameArena(plugin, plugin.getArenaManager().getConfig(player.getWorld())));
             gameManager.startCountdown(game, countdown != null ? countdown : GAME_COUNTDOWN);
         } else {
             player.sendMessage(Component.text("§cGame running! End it first."));

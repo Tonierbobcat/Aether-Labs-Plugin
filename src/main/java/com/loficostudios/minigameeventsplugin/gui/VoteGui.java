@@ -25,7 +25,7 @@ public class VoteGui extends MelodyGui {
 
     private void create(Player player) {
         clear();
-        var game = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld());
+        var game = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
         setSlot(2, getGMIcon(game, GameModes.NORMAL));
         setSlot(4, getGMIcon(game, GameModes.DIFFERENT_HEIGHTS));
         setSlot(6, getGMIcon(game, GameModes.EGG_WARS));

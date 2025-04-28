@@ -26,15 +26,14 @@ import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
 public class Game {
 
-    private final AetherLabsPlugin plugin;
-
-    //region Variables
-
     public static int MIN_PLAYERS_TO_START = 2;
-
     public static final int GAME_COUNTDOWN = 10;
     private static final int RESET_TIMER_AFTER_END_GAME = 3;
     public static final int PLAYER_KILL_MONEY_AMOUNT = 100;
+
+    private final Set<BukkitTask> tasks = new HashSet<>();
+    private final HashMap<String, Object> persistentData = new HashMap<String, Object>();
+    private final EventManager events = new EventManager(this);
 
     @Getter
     private final RoundManager rounds;
@@ -42,29 +41,19 @@ public class Game {
     private final PlayerManager playerManager;
     @Getter
     private final GameArena arena;
+
+    private VoteManager voting;
+    private GameMode mode;
+
     @Getter
     private @NotNull GameState currentState = GameState.NONE;
-
-    private final HashMap<String, Object> persistentData = new HashMap<String, Object>();
-
-    private com.loficostudios.minigameeventsplugin.gamemode.GameMode mode;
-
-
-    public HashMap<String, Object> getPersistentData() {
-        return persistentData;
-    }
 
     @Getter
     private final GameIndicator indicator = new GameIndicator(this);
 
-    //endregion
-
-    private final EventManager events = new EventManager(this);
-
-    public Game(AetherLabsPlugin plugin, GameArena arena) {
+    public Game(GameArena arena) {
         this.rounds = new RoundManager(this, events);
-        this.playerManager = new PlayerManager(this, plugin.getProfileManager());
-        this.plugin = plugin;
+        this.playerManager = new PlayerManager(this, AetherLabsPlugin.inst().getProfileManager());
         this.arena = arena;
     }
 
@@ -79,11 +68,8 @@ public class Game {
         return mode;
     }
 
-    private VoteManager voting;
-
-    public VoteManager startVoting() {
+    public void startVote() {
         this.voting = new VoteManager(this);
-        return voting;
     }
 
     public @Nullable VoteManager getVoting() {
@@ -149,6 +135,10 @@ public class Game {
         }).start(5);
     }
 
+    public HashMap<String, Object> getPersistentData() {
+        return persistentData;
+    }
+
     public void endGame(Player winner) {
         setState(GameState.ENDED);
         mode.end();
@@ -182,7 +172,7 @@ public class Game {
 
         if (winner != null) {
             winner.setGameMode(previous);
-            plugin.getProfileManager().getProfile(winner.getUniqueId())
+            AetherLabsPlugin.inst().getProfileManager().getProfile(winner.getUniqueId())
                     .ifPresent(PlayerProfile::addWin);
         }
         playerManager.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
@@ -209,8 +199,6 @@ public class Game {
         reset();
     }
 
-    private final Set<BukkitTask> tasks = new HashSet<>();
-
     private void reset(){
         setState(GameState.NONE);
 
@@ -225,7 +213,6 @@ public class Game {
 
         log("reset game");
     }
-    //endregion
 
     private void resetArena() {
         arena.clear();

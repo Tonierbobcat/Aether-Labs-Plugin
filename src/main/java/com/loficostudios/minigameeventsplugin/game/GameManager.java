@@ -8,7 +8,6 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -34,7 +33,7 @@ public class GameManager {
 
         game.getIndicator().show(GameIndicator.IndicatorType.STATUS);
 
-        game.startVoting();
+        game.startVote();
 
         game.getIndicator().status(Messages.STATUS_COUNTDOWN);
 

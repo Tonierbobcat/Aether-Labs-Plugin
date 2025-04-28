@@ -46,7 +46,7 @@ public class EventManager {
     public GameEvent getNextEvent() {
         Random random = new Random();
 
-        List<GameEvent> eventList = new ArrayList<>(AetherLabsPlugin.getInstance().getEvents().getAll());
+        List<GameEvent> eventList = new ArrayList<>(AetherLabsPlugin.inst().getEvents().getAll());
 
         if (!playerQueue.isEmpty()) {
             GameEvent event = playerQueue.stream().toList().getFirst();
@@ -98,7 +98,7 @@ public class EventManager {
                 public void run() {
                     e.run(game);
                 }
-            }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 5));
+            }.runTaskTimer(AetherLabsPlugin.inst(), 0, 5));
             log("running " + e.getIdentifier() + " task");
         }
     }

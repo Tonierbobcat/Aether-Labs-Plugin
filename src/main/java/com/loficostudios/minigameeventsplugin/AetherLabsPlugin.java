@@ -28,8 +28,7 @@ import java.util.List;
 
 public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
-    @Getter
-    public static AetherLabsPlugin instance;
+    private static AetherLabsPlugin instance;
 
     public static final boolean DEBUG_ENABLED = true;
     public static final String COMMAND_PREFIX = "randomEventsPlugin.";
@@ -48,9 +47,14 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 //    private Game activeGame;
 
     public AetherLabsPlugin() {
-        instance = this;
+        instance = instance == null ? this: instance;
     }
 
+    public static AetherLabsPlugin inst() {
+        return instance;
+    }
+
+    @Deprecated
     public Game getActiveGame(World world) {
         return gameManager.getGame(world);
     }

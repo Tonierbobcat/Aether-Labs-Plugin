@@ -26,7 +26,7 @@ public class PlayerDeathListener implements Listener {
     private final AetherLabsPlugin plugin;
     public PlayerDeathListener(GameManager gameManager) {
         this.gameManager = gameManager;
-        this.plugin = AetherLabsPlugin.getInstance();
+        this.plugin = AetherLabsPlugin.inst();
     }
 
     @EventHandler

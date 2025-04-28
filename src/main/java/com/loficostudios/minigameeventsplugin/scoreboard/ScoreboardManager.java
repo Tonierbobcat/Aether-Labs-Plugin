@@ -14,7 +14,7 @@ public class ScoreboardManager {
     private final Map<UUID, FloralScoreboard> activeScoreboards = new HashMap<>();
 
     public ScoreboardManager() {
-         Bukkit.getScheduler().runTaskTimer(AetherLabsPlugin.getInstance(), () -> {
+         Bukkit.getScheduler().runTaskTimer(AetherLabsPlugin.inst(), () -> {
             var entries = new ArrayList<>(activeScoreboards.entrySet());
             for (Map.Entry<UUID, FloralScoreboard> entry : entries) {
                 var uuid = entry.getKey();

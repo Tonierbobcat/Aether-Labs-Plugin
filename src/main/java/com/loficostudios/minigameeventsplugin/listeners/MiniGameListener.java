@@ -13,6 +13,7 @@ import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -30,6 +31,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MiniGameListener implements Listener {
     private static final int ROUND_SURVIVED_MONEY_AMOUNT = 10;
@@ -96,32 +98,32 @@ public class MiniGameListener implements Listener {
 
     @EventHandler
     private void onJoin(final PlayerJoinEvent e) {
-        final Player player = e.getPlayer();
-        var game = plugin.getActiveGame(player.getWorld());
+        var player = e.getPlayer();
 
-        if (game == null) {
-            Debug.log("Creating new game");
-            var config = plugin.getArenaManager().getConfig(player.getWorld());
-            if (config == null)
-                return;
-            var arena = new GameArena(plugin, config);
-            if (arena.getWorld().getPlayerCount() < Game.MIN_PLAYERS_TO_START)
-                return;
-            Bukkit.getScheduler().runTaskLater(plugin, () -> gameManager.startCountdown(new Game(plugin, arena), Game.GAME_COUNTDOWN), 5);
-            return;
-        }
+        var existing = plugin.getActiveGame(player.getWorld());
+
+        var game = existing != null ? existing : createGame(player.getWorld()).orElseThrow();
 
         var arena = game.getArena();
 
         if (arena == null || !inArena(player, arena))
             return;
-
         if (game.inProgress()) {
             game.getIndicator().update(player, GameIndicator.IndicatorType.STATUS);
             return;
         }
-
         Bukkit.getScheduler().runTaskLater(plugin, () -> gameManager.startCountdown(game, Game.GAME_COUNTDOWN), 5);
+    }
+
+    private Optional<Game> createGame(World world) {
+        Debug.log("Creating new game");
+        var config = plugin.getArenaManager().getConfig(world);
+        if (config == null)
+            return Optional.empty();
+        var arena = new GameArena(plugin, config);
+        if (arena.getWorld().getPlayerCount() < Game.MIN_PLAYERS_TO_START)
+            return Optional.empty();
+        return Optional.of(new Game(arena));
     }
 
     private boolean inArena(Player player, GameArena arena) {
@@ -133,7 +135,7 @@ public class MiniGameListener implements Listener {
         Player player = e.getPlayer();
         var game = plugin.getActiveGame(player.getWorld());
 
-        VoteManager voteManager = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld()).getVoting();
+        VoteManager voteManager = AetherLabsPlugin.inst().getActiveGame(player.getWorld()).getVoting();
         if (voteManager != null) {
             voteManager.validateVotes();
         }
@@ -146,7 +148,7 @@ public class MiniGameListener implements Listener {
         Player player = e.getPlayer();
         var game = plugin.getActiveGame(player.getWorld());
 
-        VoteManager voteManager = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld()).getVoting();
+        VoteManager voteManager = AetherLabsPlugin.inst().getActiveGame(player.getWorld()).getVoting();
         if (voteManager != null) {
             voteManager.validateVotes();
         }

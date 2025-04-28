@@ -45,7 +45,7 @@ public class ArenaCommand implements Command {
     }
 
     private void set(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld());
+        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
         Location pos1 = (Location) args.get("pos1");
         Location pos2 = (Location) args.get("pos2");
 
@@ -61,7 +61,7 @@ public class ArenaCommand implements Command {
         if (selectionBlockCount >= MIN_GAME_ARENA_AREA) {
             var config = new ArenaConfig(pos1.toVector(), pos2.toVector(), player.getWorld());
 
-            AetherLabsPlugin.getInstance().getArenaManager().setConfig(player.getWorld(), config);
+            AetherLabsPlugin.inst().getArenaManager().setConfig(player.getWorld(), config);
 
             String pos1Msg = pos1.getBlockX() + ", " + pos1.getBlockY() + ", " + pos1.getBlockZ();
             String pos2Msg = pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ();
@@ -74,11 +74,11 @@ public class ArenaCommand implements Command {
     }
 
     private void outline(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld());
+        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
 
         GameArena arena = activeGame.getArena();
 
-        Selection selection = new Selection(arena.getPos1(), arena.getPos2());
+        Selection selection = arena.getBounds();
 
         Selection perimeter = selection.getPerimeter(1);
 
@@ -88,7 +88,7 @@ public class ArenaCommand implements Command {
     }
 
     private void start(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld());
+        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
 
         if (!activeGame.inProgress()) {
 
@@ -103,12 +103,12 @@ public class ArenaCommand implements Command {
     }
 
     private void cancel(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld());
+        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
 
         if (!activeGame.inProgress()) {
 
             GameArena arena = activeGame.getArena();
-            Selection selection = new Selection(arena.getPos1(), arena.getPos2());
+            Selection selection = arena.getBounds();
 
             activeGame.getArena().cancelFillTask();
             WorldUtils.fillArea(selection, Material.AIR);

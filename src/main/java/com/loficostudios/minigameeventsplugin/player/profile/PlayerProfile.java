@@ -46,7 +46,7 @@ public class PlayerProfile {
 		this.uuid = uuid;
 
 
-		this.file = new YamlFile("players/" + uuid + ".yml", AetherLabsPlugin.getInstance());
+		this.file = new YamlFile("players/" + uuid + ".yml", AetherLabsPlugin.inst());
 		var conf = file.getConfig();
 
 		this.wins = conf.getInt("wins");
