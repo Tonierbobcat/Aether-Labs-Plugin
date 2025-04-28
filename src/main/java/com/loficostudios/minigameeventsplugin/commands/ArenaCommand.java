@@ -1,7 +1,7 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
+import com.loficostudios.minigameeventsplugin.game.arena.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import com.loficostudios.minigameeventsplugin.utils.WorldUtils;

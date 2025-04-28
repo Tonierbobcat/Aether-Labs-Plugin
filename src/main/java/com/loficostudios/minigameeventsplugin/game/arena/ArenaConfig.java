@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.config;
+package com.loficostudios.minigameeventsplugin.game.arena;
 
 import org.bukkit.World;
 import org.bukkit.util.Vector;

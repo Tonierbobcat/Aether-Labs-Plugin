@@ -1,7 +1,6 @@
 package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.melodyapi.file.impl.YamlFile;
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.util.Vector;

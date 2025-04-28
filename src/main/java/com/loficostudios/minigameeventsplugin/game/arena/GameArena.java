@@ -1,7 +1,6 @@
 package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import lombok.Getter;
