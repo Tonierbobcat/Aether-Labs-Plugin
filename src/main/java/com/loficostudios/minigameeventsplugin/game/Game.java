@@ -95,9 +95,11 @@ public class Game {
         var opt = Optional.ofNullable(voting);
         this.voting = null;
 
-        setup(participating, opt.isPresent()
+        var selected = opt.isPresent()
                 ? opt.get().getMode()
-                : GameModes.NORMAL);
+                : GameModes.NORMAL;
+
+        setup(participating, selected);
         return true;
     }
 

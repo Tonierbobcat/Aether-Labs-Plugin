@@ -31,8 +31,8 @@ public class WorldUtils {
 
     public static void fillArea(Selection selection, Material material) {
 
-        Location pos1 =selection.pos1;
-        Location pos2 = selection.pos2;
+        Location pos1 =selection.min;
+        Location pos2 = selection.max;
 
         int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
         int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());

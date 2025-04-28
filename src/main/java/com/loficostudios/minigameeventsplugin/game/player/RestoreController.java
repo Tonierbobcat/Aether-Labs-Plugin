@@ -2,12 +2,11 @@ package com.loficostudios.minigameeventsplugin.game.player;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
@@ -21,11 +20,24 @@ public class RestoreController {
 
     private final Map<UUID, Double> savedHealth = new HashMap<>();
 
+    private final Consumer<Player> onSave;
+
+    public RestoreController() {
+        this(player -> {
+            player.getEquipment().clear();
+            player.getInventory().clear();
+            player.clearActivePotionEffects();
+
+            player.setGameMode(GameMode.SURVIVAL);
+        });
+    }
+
+    public RestoreController(Consumer<Player> onSave) {
+        this.onSave = onSave;
+    }
+
     public void save(final Player player) {
         var uuid = player.getUniqueId();
-
-        clearInventory(player);
-        clearPotionEffects(player);
 
         var equipment = player.getEquipment();
 
@@ -35,6 +47,9 @@ public class RestoreController {
         savedPlayerEquipment.put(uuid, equipment.getArmorContents().clone());
         savedPotionEffects.put(uuid, new ArrayList<>(player.getActivePotionEffects()));
         savedGameModes.put(uuid, player.getGameMode());
+
+        if (onSave != null)
+            onSave.accept(player);
     }
 
     public void restore(final Player player) {
@@ -61,16 +76,5 @@ public class RestoreController {
             player.setGameMode(gm);
 
         log("Restored player " + player.getName());
-    }
-
-    private void clearInventory(@NotNull final Player player) {
-        EntityEquipment equipment = player.getEquipment();
-        equipment .clear();
-        player.getInventory().clear();
-    }
-
-    private void clearPotionEffects(@NotNull Player player) {
-        player.getActivePotionEffects().forEach(effect ->
-                player.removePotionEffect(effect.getType()));
     }
 }

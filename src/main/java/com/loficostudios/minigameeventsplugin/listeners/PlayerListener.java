@@ -33,22 +33,33 @@ public class PlayerListener implements Listener {
         this.profileManager = profileManager;
         this.plugin = plugin;
 
-        this.scoreboard = new FloralScoreboard("game", Component.text("&b&LAether Labs"), player -> {
+        this.scoreboard = new FloralScoreboard("game", Component.text("§b§LAether Labs"), player -> {
             var game = plugin.getActiveGame(player.getWorld());
             var opt = plugin.getProfileManager().getProfile(player.getUniqueId());
             if (opt.isEmpty())
                 return new ArrayList<>(8);
             var profile = opt.get();
-            return List.of(
-                    "Money: " + Economy.getBalance(player),
-                    " ",
-                    "Alive: " + (game != null ? game.getPlayerManager().getPlayersInGame(PlayerState.ALIVE).size() : "NaN"),
-                    "Rounds: " + (game != null ? game.getRounds().getRoundsElapsed() : "NaN"),
-                    " ",
-                    "Wins: " + profile.getWins(),
-                    "Kills: " + profile.getKills(),
-                    "Deaths: " + profile.getDeaths()
-            );
+
+            if (game != null && game.inProgress()) {
+                return List.of(
+                        "Money: " + Economy.getBalance(player),
+                        " ",
+                        "Alive: " + game.getPlayerManager().getPlayersInGame(PlayerState.ALIVE).size(),
+                        "Rounds: " + game.getRounds().getRoundsElapsed(),
+                        " ",
+                        "Wins: " + profile.getWins(),
+                        "Kills: " + profile.getKills(),
+                        "Deaths: " + profile.getDeaths()
+                );
+            } else {
+                return List.of(
+                        "Money: " + Economy.getBalance(player),
+                        " ",
+                        "Wins: " + profile.getWins(),
+                        "Kills: " + profile.getKills(),
+                        "Deaths: " + profile.getDeaths()
+                );
+            }
         });
         this.scoreboards = new ScoreboardManager();
     }

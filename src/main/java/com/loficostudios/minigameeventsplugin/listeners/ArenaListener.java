@@ -1,22 +1,22 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
+import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.bukkit.LavaLevelUpdatedEvent;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
-import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameManager;
-import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,57 +70,61 @@ public class ArenaListener implements Listener {
         }
     }
 
-    @EventHandler
-    private void onArenaBlockBreak(BlockBreakEvent e) {
-
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onBlockBreak(BlockBreakEvent e) {
         Block block = e.getBlock();
-        var game = gameManager.getGame(block.getWorld());
-
-        if (game == null)
-            return;
-
-        if (e.getPlayer().isOp())
-            return;
-
-        if (isArenaBorderBlock(game, block)) {
+        if (isArenaBorderBlock(block))
             e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onBlockInteract(PlayerInteractEvent e) {
+        var block = e.getClickedBlock();
+        if (block != null && isArenaBorderBlock(block))
+            e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onBlockBreak(EntityChangeBlockEvent e) {
+        Block block = e.getBlock();
+        if (isArenaBorderBlock(block))
+            e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onEntityExplode(EntityExplodeEvent e) {
+        e.blockList().removeIf(this::isArenaBorderBlock);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onBlockExplode(BlockExplodeEvent e) {
+        Block block = e.getBlock();
+        if (isArenaBorderBlock(block))
+            e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onPiston(BlockPistonExtendEvent e) {
+        for (Block block : e.getBlocks()) {
+            if (isArenaBorderBlock(block))
+                e.setCancelled(true);
         }
     }
 
-    @EventHandler
-    private void onArenaBlockExplode(BlockExplodeEvent e) {
-        Bukkit.getLogger().info("exploded");
-        Block block = e.getBlock();
-        e.setCancelled(true);
-        var game = gameManager.getGame(block.getWorld());
-
-        if (game == null)
-            return;
-
-        if (isArenaBorderBlock(game, block)) {
-            e.setCancelled(true);
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onPiston(BlockPistonRetractEvent e) {
+        for (Block block : e.getBlocks()) {
+            if (isArenaBorderBlock(block))
+                e.setCancelled(true);
         }
     }
 
-    @EventHandler
-    private void onArenaBlockChanged(EntityChangeBlockEvent e) {
-        Block block = e.getBlock();
-        var game = gameManager.getGame(block.getWorld());
-
-        if (game == null)
-            return;
-        if (isArenaBorderBlock(game, block)) {
-            e.setCancelled(true);
-        }
-    }
-
-    private boolean isArenaBorderBlock(Game game, Block block) {
-        GameArena arena = game.getArena();
-
-        if (arena == null)
+    private boolean isArenaBorderBlock(Block block) {
+        var conf = AetherLabsPlugin.inst().getArenaManager().getConfig(block.getWorld());
+        if (conf == null)
             return false;
 
-        Selection selection = arena.getBounds();
+        Selection selection = conf.getBounds();
         Selection perimeter = selection.getPerimeter(1);
 
         Block arenaBlock = perimeter.getBlock(block.getX(), block.getY(), block.getZ());

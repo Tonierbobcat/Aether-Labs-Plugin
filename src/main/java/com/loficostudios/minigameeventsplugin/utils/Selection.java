@@ -13,9 +13,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Selection {
 
     @Getter
-    Location pos1;
+    Location min;
     @Getter
-    Location pos2;
+    Location max;
 
     World world;
 
@@ -46,8 +46,8 @@ public class Selection {
     }
 
     public Selection(Location pos1, Location pos2) {
-        this.pos1 = pos1;
-        this.pos2 = pos2;
+        this.min = pos1;
+        this.max = pos2;
 
         this.world = pos1.getWorld();
 
@@ -72,13 +72,13 @@ public class Selection {
     public Location getRandomLocation() {
 
 
-        double minX = Math.min(pos1.getX(), pos2.getX());
-        double minY = Math.min(pos1.getY(), pos2.getY());
-        double minZ = Math.min(pos1.getZ(), pos2.getZ());
+        double minX = Math.min(min.getX(), max.getX());
+        double minY = Math.min(min.getY(), max.getY());
+        double minZ = Math.min(min.getZ(), max.getZ());
 
-        double maxX = Math.max(pos1.getX(), pos2.getX());
-        double maxY = Math.max(pos1.getY(), pos2.getY());
-        double maxZ = Math.max(pos1.getZ(), pos2.getZ());
+        double maxX = Math.max(min.getX(), max.getX());
+        double maxY = Math.max(min.getY(), max.getY());
+        double maxZ = Math.max(min.getZ(), max.getZ());
 
         long x = Math.round(randomDouble(minX, maxX));
         long y = Math.round(randomDouble(minY, maxY));
@@ -92,8 +92,8 @@ public class Selection {
     }*/
 
     public int getMiddleY() {
-        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
-        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+        int minY = Math.min(min.getBlockY(), max.getBlockY());
+        int maxY = Math.max(min.getBlockY(), max.getBlockY());
         return (minY + maxY) / 2; // Floors the value if there's no exact middle
     }
 
@@ -102,12 +102,12 @@ public class Selection {
     }
 
     public Selection adjustSelection(int distance) {
-        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX()) - distance;
-        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX()) + distance;
-        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY()) - distance;
-        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY()) + distance;
-        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ()) - distance;
-        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ()) + distance;
+        int minX = Math.min(min.getBlockX(), max.getBlockX()) - distance;
+        int maxX = Math.max(min.getBlockX(), max.getBlockX()) + distance;
+        int minY = Math.min(min.getBlockY(), max.getBlockY()) - distance;
+        int maxY = Math.max(min.getBlockY(), max.getBlockY()) + distance;
+        int minZ = Math.min(min.getBlockZ(), max.getBlockZ()) - distance;
+        int maxZ = Math.max(min.getBlockZ(), max.getBlockZ()) + distance;
 
         if (minX > maxX) minX = maxX;
         if (minY > maxY) minY = maxY;
@@ -122,12 +122,12 @@ public class Selection {
     public Selection getPerimeter(int distance) {
         Set<Block> perimeterBlocks = new HashSet<>();
 
-        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX()) - distance;
-        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX()) + distance;
-        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY()) - distance;
-        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY()) + distance;
-        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ()) - distance;
-        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ()) + distance;
+        int minX = Math.min(min.getBlockX(), max.getBlockX()) - distance;
+        int maxX = Math.max(min.getBlockX(), max.getBlockX()) + distance;
+        int minY = Math.min(min.getBlockY(), max.getBlockY()) - distance;
+        int maxY = Math.max(min.getBlockY(), max.getBlockY()) + distance;
+        int minZ = Math.min(min.getBlockZ(), max.getBlockZ()) - distance;
+        int maxZ = Math.max(min.getBlockZ(), max.getBlockZ()) + distance;
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {

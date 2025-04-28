@@ -52,7 +52,8 @@ public class MiniGameListener implements Listener {
         int time = 20;
 
         var game = plugin.getActiveGame(e.getPlayer().getWorld());
-
+        if (game == null)
+            return;
         if (game.inProgress() && block.getType().equals(Material.WHITE_WOOL)) {
 
             new BukkitRunnable() {
@@ -102,7 +103,16 @@ public class MiniGameListener implements Listener {
 
         var existing = plugin.getActiveGame(player.getWorld());
 
-        var game = existing != null ? existing : createGame(player.getWorld()).orElseThrow();
+        Game game;
+
+        if (existing == null) {
+            var opt = createGame(player.getWorld());
+            if (opt.isEmpty())
+                return;
+            game = opt.get();
+        } else {
+            game = existing;
+        }
 
         var arena = game.getArena();
 
@@ -134,8 +144,10 @@ public class MiniGameListener implements Listener {
     private void onQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
         var game = plugin.getActiveGame(player.getWorld());
+        if (game == null)
+            return;
 
-        VoteManager voteManager = AetherLabsPlugin.inst().getActiveGame(player.getWorld()).getVoting();
+        VoteManager voteManager = game.getVoting();
         if (voteManager != null) {
             voteManager.validateVotes();
         }
@@ -147,8 +159,10 @@ public class MiniGameListener implements Listener {
     private void onWorldChanged(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
         var game = plugin.getActiveGame(player.getWorld());
+        if (game == null)
+            return;
 
-        VoteManager voteManager = AetherLabsPlugin.inst().getActiveGame(player.getWorld()).getVoting();
+        VoteManager voteManager = game.getVoting();
         if (voteManager != null) {
             voteManager.validateVotes();
         }

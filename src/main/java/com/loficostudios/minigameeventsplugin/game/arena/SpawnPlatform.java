@@ -51,7 +51,7 @@ public class SpawnPlatform {
     }
 
     public boolean setRadius(int i) {
-        if (i <= 0)
+        if (i < 0)
             return false;
         this.radius = i;
         setPlatform(material, true);

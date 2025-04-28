@@ -77,8 +77,33 @@ public class FloralScoreboard {
 
         if (objective == null)
             return;
-        for (int i = 0; i < lines.size(); i++)
-            b(sb.getTeam("line_" + i), lines.get(i));
+
+        for (int i = 0; i < lines.size(); i++) {
+            String entry = ChatColor.values()[i] + "";
+            String teamName = "line_" + i;
+            Team team = sb.getTeam(teamName);
+
+            if (team == null) {
+                team = sb.registerNewTeam(teamName);
+                team.addEntry(entry);
+            }
+
+            b(team, lines.get(i));
+
+            // Always set score, not only when creating
+            objective.getScore(entry).setScore(lines.size() - i);
+        }
+
+        // Remove any extra teams/scores
+        for (int i = lines.size(); ; i++) {
+            Team team = sb.getTeam("line_" + i);
+
+            if (team == null)
+                break;
+
+            sb.resetScores(ChatColor.values()[i] + "");
+            team.unregister();
+        }
     }
 
     private void b(Team team, String line) {

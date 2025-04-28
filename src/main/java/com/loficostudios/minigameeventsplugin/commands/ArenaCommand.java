@@ -11,6 +11,7 @@ import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.executors.CommandArguments;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -45,7 +46,6 @@ public class ArenaCommand implements Command {
     }
 
     private void set(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
         Location pos1 = (Location) args.get("pos1");
         Location pos2 = (Location) args.get("pos2");
 
@@ -74,49 +74,26 @@ public class ArenaCommand implements Command {
     }
 
     private void outline(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
-
-        GameArena arena = activeGame.getArena();
-
-        Selection selection = arena.getBounds();
-
-        Selection perimeter = selection.getPerimeter(1);
-
-        perimeter.getBlocks().forEach(block -> {
-            block.setType(Material.EMERALD_BLOCK);
-        });
+        throw new NotImplementedException();
     }
 
     private void start(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
+        var world = player.getWorld();
+        var game = AetherLabsPlugin.inst().getActiveGame(world);
 
-        if (!activeGame.inProgress()) {
-
-            GameArena arena = activeGame.getArena();
-
-            arena.startFillTask(Material.DIAMOND_BLOCK, 1);
-            player.sendMessage(Component.text("&aStarted fill task successfully!"));
-        }
-        else {
+        if (game != null && game.inProgress()) {
             player.sendMessage(Component.text("&cYou cannot start this task while the game is running!"));
+            return;
         }
+        throw new NotImplementedException();
     }
 
     private void cancel(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
-
-        if (!activeGame.inProgress()) {
-
-            GameArena arena = activeGame.getArena();
-            Selection selection = arena.getBounds();
-
-            activeGame.getArena().cancelFillTask();
-            WorldUtils.fillArea(selection, Material.AIR);
-
-            player.sendMessage(Component.text("&aCancel task successfully!"));
-        }
-        else {
+        var game = AetherLabsPlugin.inst().getActiveGame(player.getWorld());
+        if (game != null && game.inProgress()) {
             player.sendMessage(Component.text("&cYou cannot cancel this task while the game is running!"));
+            return;
         }
+        throw new NotImplementedException();
     }
 }

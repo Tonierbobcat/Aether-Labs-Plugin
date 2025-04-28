@@ -60,11 +60,13 @@ public class GameArena {
 
     public GameArena(AetherLabsPlugin plugin, ArenaConfig config) {
         this.plugin = plugin;
-        this.min = config.getMin().toLocation(config.getWorld());
-        this.max = config.getMax().toLocation(config.getWorld());
+        this.bounds = config.getBounds();
+
+        this.min = bounds.getMin();
+        this.max = bounds.getMax();
+
         this.world = config.getWorld();
         this.config = config;
-        this.bounds = new Selection(min, max);
     }
 
     public Location getRandomLocation() {
@@ -191,7 +193,6 @@ public class GameArena {
 
     public void removeSpawnPlatform(SpawnPlatform platform, boolean warning) {
         Player player = platform.getPlayer();
-
 
         if (warning)
             platform.startRemovalTimer();
