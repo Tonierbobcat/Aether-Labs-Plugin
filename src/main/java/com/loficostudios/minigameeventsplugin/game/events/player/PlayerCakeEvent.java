@@ -3,7 +3,7 @@ package com.loficostudios.minigameeventsplugin.game.events.player;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.utils.PlayerState;
+import com.loficostudios.minigameeventsplugin.game.player.PlayerState;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -20,7 +20,7 @@ public class PlayerCakeEvent extends AbstractGameEvent {
 
     @Override
     public void start(Game game) {
-        Collection<Player> playersAlive = game.getPlayers().getPlayersInGame(PlayerState.ALIVE);
+        Collection<Player> playersAlive = game.getPlayerManager().getPlayersInGame(PlayerState.ALIVE);
 
         playersAlive.forEach(player -> {
             player.getInventory().addItem(new ItemStack(Material.CAKE));
@@ -34,7 +34,7 @@ public class PlayerCakeEvent extends AbstractGameEvent {
 
     @Override
     public void run(Game game) {
-        game.getPlayers().getPlayersInGame(PlayerState.ALIVE).forEach(player ->
+        game.getPlayerManager().getPlayersInGame(PlayerState.ALIVE).forEach(player ->
                 player.getWorld().spawnParticle(
                         Particle.HEART,
                         player.getLocation().add(0, 1, 0), 10));

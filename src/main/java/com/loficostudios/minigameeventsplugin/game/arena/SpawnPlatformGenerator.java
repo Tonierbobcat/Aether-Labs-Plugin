@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.arena;
+package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.utils.Selection;

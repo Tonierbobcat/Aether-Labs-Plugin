@@ -3,8 +3,9 @@ package com.loficostudios.minigameeventsplugin.api;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractSelectorEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.managers.NotificationType;
-import com.loficostudios.minigameeventsplugin.utils.PlayerState;
+import com.loficostudios.minigameeventsplugin.game.GameIndicator;
+import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
+import com.loficostudios.minigameeventsplugin.game.player.PlayerState;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -26,7 +27,7 @@ public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> 
 
     @Override
     public Collection<Player> getObjects(Game game) {
-        return game.getPlayers().getPlayersInGame(PlayerState.ALIVE);
+        return game.getPlayerManager().getPlayersInGame(PlayerState.ALIVE);
     }
 
     @Override
@@ -36,16 +37,17 @@ public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> 
     @Deprecated
     @Override
     public void start(Game game) {
-        var bar = game.getProgressBar();
+        var bar = game.getIndicator();
+        bar.show(GameIndicator.IndicatorType.PROGRESS);
         var message = new StringBuilder();
         selectObjects(game, player -> {
             if (onSelect(game, player)) {
                 if (getDisplayedEnabled()) {
                     message.append(" ").append(player != null ? player.getName() : "NaN");
-                    bar.setTitle(message.toString());
+                    bar.progress(message.toString());
                 }
 
-                game.getPlayers().notify(
+                game.getPlayerManager().notify(
                         NotificationType.GLOBAL,
                         Sound.BLOCK_NOTE_BLOCK_PLING,
                         1, 2);
@@ -56,6 +58,6 @@ public abstract class PlayerSelectorEvent extends AbstractSelectorEvent<Player> 
     @Override
     public void end(Game game) {
         super.end(game);
-        game.getProgressBar().removeAll();
+        game.getIndicator().hide(GameIndicator.IndicatorType.PROGRESS);
     }
 }

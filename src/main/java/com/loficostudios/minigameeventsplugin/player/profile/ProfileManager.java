@@ -15,14 +15,14 @@ import java.util.UUID;
 
 public class ProfileManager {
 
-	private final Map<UUID, Profile> profiles = new HashMap<>();
+	private final Map<UUID, PlayerProfile> profiles = new HashMap<>();
 
 	public void loadProfile(UUID uuid) throws ProfileAlreadyLoadedException {
 		if(profiles.containsKey(uuid)) {
 			throw new ProfileAlreadyLoadedException("Profile with uuid " + uuid + " is already loaded");
 		}
 
-		profiles.put(uuid, new Profile(uuid));
+		profiles.put(uuid, new PlayerProfile(uuid));
 	}
 
 	public void unloadProfile(UUID uuid) throws ProfileNotLoadedException {
@@ -32,7 +32,7 @@ public class ProfileManager {
 		profiles.remove(uuid);
 	}
 
-	public Optional<Profile> getProfile(UUID uuid) {
+	public Optional<PlayerProfile> getProfile(UUID uuid) {
 		return Optional.ofNullable(profiles.get(uuid));
 	}
 

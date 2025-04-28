@@ -1,11 +1,12 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
 import com.loficostudios.minigameeventsplugin.api.bukkit.LavaLevelUpdatedEvent;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
 import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameManager;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
@@ -24,14 +25,17 @@ import java.util.Set;
 
 public class ArenaListener implements Listener {
 
-    private final Game game;
+    private final GameManager gameManager;
 
-    public ArenaListener(Game gameManager) {
-        this.game = gameManager;
+    public ArenaListener(GameManager gameManager) {
+        this.gameManager = gameManager;
     }
 
     @EventHandler
     private void onLavaChange(LavaLevelUpdatedEvent e) {
+        var game = gameManager.getGame(e.getArena().getWorld());
+        if (game == null)
+            return;
 
         Set<SpawnPlatform> spawnPlatform = new HashSet<>(game.getArena().getSpawnPlatforms());
 
@@ -49,7 +53,7 @@ public class ArenaListener implements Listener {
             }
         }
 
-        if (!game.getCurrentMode().equals(GameModes.EGG_WARS)) {
+        if (!game.getMode().equals(GameModes.EGG_WARS)) {
             return;
         }
         EggWarsMode mode = GameModes.EGG_WARS;
@@ -68,12 +72,17 @@ public class ArenaListener implements Listener {
 
     @EventHandler
     private void onArenaBlockBreak(BlockBreakEvent e) {
+
         Block block = e.getBlock();
+        var game = gameManager.getGame(block.getWorld());
+
+        if (game == null)
+            return;
 
         if (e.getPlayer().isOp())
             return;
 
-        if (isArenaBorderBlock(block)) {
+        if (isArenaBorderBlock(game, block)) {
             e.setCancelled(true);
         }
     }
@@ -83,9 +92,12 @@ public class ArenaListener implements Listener {
         Bukkit.getLogger().info("exploded");
         Block block = e.getBlock();
         e.setCancelled(true);
+        var game = gameManager.getGame(block.getWorld());
 
+        if (game == null)
+            return;
 
-        if (isArenaBorderBlock(block)) {
+        if (isArenaBorderBlock(game, block)) {
             e.setCancelled(true);
         }
     }
@@ -93,13 +105,16 @@ public class ArenaListener implements Listener {
     @EventHandler
     private void onArenaBlockChanged(EntityChangeBlockEvent e) {
         Block block = e.getBlock();
+        var game = gameManager.getGame(block.getWorld());
 
-        if (isArenaBorderBlock(block)) {
+        if (game == null)
+            return;
+        if (isArenaBorderBlock(game, block)) {
             e.setCancelled(true);
         }
     }
 
-    private boolean isArenaBorderBlock(Block block) {
+    private boolean isArenaBorderBlock(Game game, Block block) {
         GameArena arena = game.getArena();
 
         if (arena == null)

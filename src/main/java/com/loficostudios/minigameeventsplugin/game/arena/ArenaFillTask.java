@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.arena;
+package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.minigameeventsplugin.api.bukkit.LavaLevelUpdatedEvent;
 import org.bukkit.Bukkit;

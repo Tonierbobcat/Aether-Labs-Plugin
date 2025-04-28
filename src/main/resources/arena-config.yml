@@ -1,9 +1,10 @@
-world: "world"
-pos1:
-  x:
-  y:
-  z:
-pos2:
-  x:
-  y:
-  z:
+#world: # bukkit world
+#  min:
+#    x: 14.0
+#    y: 220.0
+#    z: 61.0
+#  max:
+#    x: 77.0
+#    y: 158.0
+#    z: 124.0
+

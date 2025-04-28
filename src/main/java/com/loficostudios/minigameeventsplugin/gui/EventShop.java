@@ -7,8 +7,8 @@ import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
 import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
+import com.loficostudios.minigameeventsplugin.utils.Economy;
 import net.kyori.adventure.text.Component;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 public class EventShop extends MelodyGui {
     private final List<GameEvent> baseEvents;
@@ -93,28 +91,21 @@ public class EventShop extends MelodyGui {
             AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
 
             return new GuiIcon(event.getIcon(), Component.text("§e" + event.getName()), description, (p, c) -> {
-                if (plugin.vaultHook) {
-                    Economy economy = plugin.getEconomy();
+                if (Economy.getBalance(p) >= event.getCost()) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
+                    p.sendMessage(Component.text("§ePurchased event!"));
 
-                    if (economy != null && economy.getBalance(p) >= event.getCost()) {
-                        p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
-                        p.sendMessage(Component.text("§ePurchased event!"));
-
-                        if (plugin.getActiveGame(p.getWorld()).getEvents().queueEvent(p, event)) {
-                            p.sendMessage(Component.text("§7Your event has been queued up to go next!"));
-                            economy.withdrawPlayer(p, event.getCost());
-                        }
-                        else {
-                            p.sendMessage(Component.text("§cYour event could not be queued!"));
-                        }
+                    if (plugin.getActiveGame(p.getWorld()).getEvents().queueEvent(p, event)) {
+                        p.sendMessage(Component.text("§7Your event has been queued up to go next!"));
+                        Economy.withdrawal(p, event.getCost());
                     }
                     else {
-                        p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
-                        p.sendMessage(Component.text("§cYou don't have enough money to purchase this!"));
+                        p.sendMessage(Component.text("§cYour event could not be queued!"));
                     }
                 }
                 else {
-                    logWarning("vault not installed");
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
+                    p.sendMessage(Component.text("§cYou don't have enough money to purchase this!"));
                 }
             });
         }

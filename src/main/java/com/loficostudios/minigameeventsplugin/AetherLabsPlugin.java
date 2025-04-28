@@ -1,39 +1,30 @@
 package com.loficostudios.minigameeventsplugin;
 
-import com.earth2me.essentials.IEssentials;
 import com.loficostudios.melodyapi.MelodyPlugin;
+import com.loficostudios.melodyapi.file.impl.YamlFile;
 import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.Command;
 import com.loficostudios.minigameeventsplugin.commands.DebugCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameManager;
+import com.loficostudios.minigameeventsplugin.game.arena.ArenaManager;
 import com.loficostudios.minigameeventsplugin.game.events.plate.*;
 import com.loficostudios.minigameeventsplugin.game.events.player.*;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldGhastEvent;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldPlateRepairEvent;
 import com.loficostudios.minigameeventsplugin.listeners.*;
 import com.loficostudios.minigameeventsplugin.managers.EventRegistry;
-import com.loficostudios.minigameeventsplugin.placeholders.MiniGamePlaceholder;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
-import com.loficostudios.minigameeventsplugin.utils.Debug;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import lombok.Getter;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-
-import static com.loficostudios.minigameeventsplugin.utils.Debug.logWarning;
 
 public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
@@ -43,13 +34,10 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     public static final boolean DEBUG_ENABLED = true;
     public static final String COMMAND_PREFIX = "randomEventsPlugin.";
 
-    //region Variables
+    private final GameManager gameManager = new GameManager();
 
     @Getter
-    private Collection<Player> onlinePlayers = new ArrayList<>();
-
-    @Getter
-    private ArenaConfig arenaConfig = new ArenaConfig(this);
+    private final ArenaManager arenaManager = new ArenaManager();
 
     @Getter
     private final ProfileManager profileManager = new ProfileManager();
@@ -57,27 +45,14 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     @Getter
     private final EventRegistry events = new EventRegistry();
 
-
-    private final Game activeGame = new Game(this);
-
-    @Getter
-    private IEssentials essentials;
-
-    @Getter
-    private Economy economy;
-
-    public boolean papiHook = false;
-    public boolean essentialsHook = false;
-    public boolean vaultHook = false;
-
-    //endregion
+//    private Game activeGame;
 
     public AetherLabsPlugin() {
         instance = this;
     }
 
     public Game getActiveGame(World world) {
-        return activeGame;
+        return gameManager.getGame(world);
     }
 
     @Override
@@ -89,21 +64,13 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     protected void onStart() {
         CommandAPI.onEnable();
 
-        if (!setupEconomy()) {
-            logWarning("Could not load vault");
-        }
-
-        hookEssentials();
-        hookPlaceHolderAPI();
-
-        if (papiHook)
-            new MiniGamePlaceholder(profileManager).register();
-
         try {
             registerCommands();
         } catch (Exception e) {
-            throw new IllegalArgumentException("Could not load commands");
+            throw new IllegalArgumentException("Could not register commands");
         }
+
+        this.arenaManager.initialize(new YamlFile("arena-config.yml", this));
 
         registerListeners();
         registerEvents();
@@ -111,14 +78,8 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
     @Override
     public void onDisable() {
-        //instance = null;
+        gameManager.onDisable();
 
-        GameArena arena = activeGame.getArena();
-
-        if (arena != null) {
-            arena.clear();
-            arena.removeEntities();
-        }
     }
 
     private void loadConfigs() {
@@ -129,45 +90,13 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
         CommandAPI.onLoad(config);
     }
 
-    //region Plugin Hooks
-    public void hookEssentials() {
-        essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        essentialsHook = essentials != null;
-        if (essentialsHook) {
-            getLogger().info("Essentials hooked successfully.");
-        } else {
-            getLogger().warning("Essentials not found. Plugin features may be limited.");
-        }
-    }
-
-    public void hookPlaceHolderAPI() {
-        papiHook = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
-        if (essentialsHook) {
-            getLogger().info("PlaceholderAPI hooked successfully.");
-        } else {
-            getLogger().warning("PlaceholderAPI not found. Plugin features may be limited.");
-        }
-    }
-
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        vaultHook = true;
-        economy = rsp.getProvider();
-        return true;
-    }
     //endregion
 
     private void registerCommands() {
         Arrays.asList(
                 new PlayerCommand(profileManager, this),
                         new ArenaCommand(),
-                        new DebugCommand()
+                        new DebugCommand(gameManager)
         ).forEach(Command::register);
     }
 
@@ -218,10 +147,10 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     }
     private void registerListeners() {
         List.of(
-                new PlayerDeathListener(activeGame),
-                new EggListener(activeGame),
-                new ArenaListener(activeGame),
-                new MiniGameListener(this),
+                new PlayerDeathListener(gameManager),
+                new EggListener(gameManager),
+                new ArenaListener(gameManager),
+                new MiniGameListener(this, gameManager),
                 new PlayerListener(this, profileManager)
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }

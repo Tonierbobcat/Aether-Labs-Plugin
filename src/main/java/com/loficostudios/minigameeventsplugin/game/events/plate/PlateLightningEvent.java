@@ -1,9 +1,9 @@
 package com.loficostudios.minigameeventsplugin.game.events.plate;
 
 import com.loficostudios.minigameeventsplugin.api.PlatformSelectorEvent;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.managers.NotificationType;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -26,7 +26,7 @@ public class PlateLightningEvent extends PlatformSelectorEvent {
 
             for (int i = 0; i < 3; i++) {
                 game.getArena().getWorld().strikeLightning(location);
-                game.getPlayers().notify(
+                game.getPlayerManager().notify(
                         NotificationType.GLOBAL,
                         Sound.ENTITY_LIGHTNING_BOLT_IMPACT,
                         0.5f, 1);

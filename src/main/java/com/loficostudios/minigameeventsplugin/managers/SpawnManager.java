@@ -53,7 +53,7 @@ public class SpawnManager {
 
             Vector loc = spawns.get(uuid);
 
-            gameManager.getPlayers().teleportPlayer(player, loc);
+            gameManager.getPlayerManager().teleportPlayer(player, loc);
             return true;
         }
         return false;

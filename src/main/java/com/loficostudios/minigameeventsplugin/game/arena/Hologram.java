@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.arena;
+package com.loficostudios.minigameeventsplugin.game.arena;
 
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;

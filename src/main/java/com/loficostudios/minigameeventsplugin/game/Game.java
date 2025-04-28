@@ -1,33 +1,26 @@
 package com.loficostudios.minigameeventsplugin.game;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
 import com.loficostudios.minigameeventsplugin.config.Messages;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
+import com.loficostudios.minigameeventsplugin.game.player.PlayerManager;
+import com.loficostudios.minigameeventsplugin.game.player.PlayerState;
+import com.loficostudios.minigameeventsplugin.gamemode.GameMode;
 import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
-import com.loficostudios.minigameeventsplugin.managers.*;
-import com.loficostudios.minigameeventsplugin.player.PlayerManager;
-import com.loficostudios.minigameeventsplugin.player.profile.Profile;
+import com.loficostudios.minigameeventsplugin.managers.EventManager;
+import com.loficostudios.minigameeventsplugin.managers.VoteManager;
+import com.loficostudios.minigameeventsplugin.player.profile.PlayerProfile;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import com.loficostudios.minigameeventsplugin.utils.Debug;
-import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
@@ -44,232 +37,172 @@ public class Game {
     public static final int PLAYER_KILL_MONEY_AMOUNT = 100;
 
     @Getter
-    private final RoundManager roundManager;
+    private final RoundManager rounds;
     @Getter
-    private final PlayerManager players;
+    private final PlayerManager playerManager;
     @Getter
-    private GameArena arena;
+    private final GameArena arena;
     @Getter
     private @NotNull GameState currentState = GameState.NONE;
 
     private final HashMap<String, Object> persistentData = new HashMap<String, Object>();
 
-    private com.loficostudios.minigameeventsplugin.gamemode.GameMode currentMode;
+    private com.loficostudios.minigameeventsplugin.gamemode.GameMode mode;
 
-    @Getter
-    private BossBar statusBar = Bukkit.createBossBar(null, BarColor.YELLOW, BarStyle.SOLID);
 
     public HashMap<String, Object> getPersistentData() {
         return persistentData;
     }
 
-    //endregion
+    @Getter
+    private final GameIndicator indicator = new GameIndicator(this);
 
-    private final BossBar progressBar = Bukkit.createBossBar("", BarColor.WHITE, BarStyle.SOLID);
+    //endregion
 
     private final EventManager events = new EventManager(this);
 
-    public Game(AetherLabsPlugin plugin) {
-        this.roundManager = new RoundManager(this, events);
-        this.players = new PlayerManager(this, plugin.getProfileManager());
+    public Game(AetherLabsPlugin plugin, GameArena arena) {
+        this.rounds = new RoundManager(this, events);
+        this.playerManager = new PlayerManager(this, plugin.getProfileManager());
         this.plugin = plugin;
-
-        Location pos1 = ArenaConfig.POS_1;
-        Location pos2 = ArenaConfig.POS_2;
-
-        if (pos1 != null || pos2 != null) {
-            this.arena = new GameArena(plugin, pos1, pos2);
-        }
+        this.arena = arena;
     }
 
     public boolean inProgress() {
         return currentState != GameState.NONE;
     }
 
-    public BossBar getProgressBar() {
-        players.getPlayersInGameWorld().forEach(progressBar::addPlayer);
-        return this.progressBar;
-    }
-
-    public @NotNull com.loficostudios.minigameeventsplugin.gamemode.GameMode getCurrentMode() {
-
-        if (currentMode == null)
+    public @NotNull com.loficostudios.minigameeventsplugin.gamemode.GameMode getMode() {
+        if (mode == null)
             return GameModes.NORMAL;
 
-        return currentMode;
-
+        return mode;
     }
 
-    //region Start & End Game Functions
-    public boolean cancelCountdown() {
-        if (!currentState.equals(GameState.COUNTDOWN))
-            return false;
-
-
-        if (countdown.cancel()) {
-            log("Cancelled countdown");
-
-            setState(GameState.NONE);
-            statusBar.removeAll();
-            progressBar.removeAll();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private Countdown countdown;
     private VoteManager voting;
-    public Boolean startCountdown(Integer time) {
-        if (arena == null) {
+
+    public VoteManager startVoting() {
+        this.voting = new VoteManager(this);
+        return voting;
+    }
+
+    public @Nullable VoteManager getVoting() {
+        return voting;
+    }
+
+    public boolean start() {
+        List<Player> participating = playerManager.getAvailablePlayers();
+        log("Participating" + participating);
+
+        indicator.hide(GameIndicator.IndicatorType.PROGRESS);
+
+        if (participating.isEmpty() || participating.size() < MIN_PLAYERS_TO_START) {
+            setState(GameState.NONE);
+
+            this.playerManager.notify(NotificationType.GLOBAL, Messages.NOT_ENOUGH_PLAYERS);
+            indicator.hide(GameIndicator.IndicatorType.STATUS);
             return false;
         }
 
-        roundManager.cancelRound();
+        indicator.status(Messages.STATUS_STARTING);
 
-        setState(GameState.COUNTDOWN);
+        var opt = Optional.ofNullable(voting);
+        this.voting = null;
 
-        this.voting = new VoteManager(this);
-
-        Collection<Player> playersInGameWorld = players.getPlayersInGameWorld();
-
-        playersInGameWorld.forEach(statusBar::addPlayer);
-
-        statusBar.setTitle(Messages.STATUS_COUNTDOWN);
-
-        BossBar progressBar = getProgressBar();
-
-        Collection<Player> participatingPlayers = getPlayers().getAvailablePlayers();
-
-        log("Participating" + participatingPlayers);
-
-        countdown = new Countdown("countdown",
-                (Integer countdown) -> {
-                    progressBar.setTitle("In... " + countdown);
-
-                    switch (countdown) {
-                        case 3 -> players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
-                        case 2 -> players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1.5f);
-                        case 1 -> players.notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
-                    }
-                },
-                () -> {
-                    progressBar.removeAll();
-
-                    if (!participatingPlayers.isEmpty()) {
-                        if (participatingPlayers.size() >= MIN_PLAYERS_TO_START) {
-                            statusBar.setTitle(Messages.STATUS_STARTING);
-
-                            com.loficostudios.minigameeventsplugin.gamemode.GameMode selected = voting.getMode();
-                            this.voting = null;
-                            if (setCurrentMode(selected)) {
-                                new SetupWizard(this).setup(selected, participatingPlayers);
-                                setState(GameState.SETUP);
-                            } else {
-                                Debug.logError("Game mode selection failed");
-                            }
-
-                            return;
-                        }
-                        Debug.logWarning("Canceled game! Not enough players.");
-                    } else {
-                        Debug.logWarning("Canceled game! Player list is empty.");
-                    }
-
-                    setState(GameState.NONE);
-
-                    players.notify(NotificationType.GLOBAL, Messages.NOT_ENOUGH_PLAYERS);
-
-                    statusBar.removeAll();
-                });
-
-        tasks.add(countdown.start(time));
-
+        setup(participating, opt.isPresent()
+                ? opt.get().getMode()
+                : GameModes.NORMAL);
         return true;
     }
 
-    private boolean setCurrentMode(com.loficostudios.minigameeventsplugin.gamemode.GameMode mode) {
+    private void setup(List<Player> participating, GameMode mode) {
+        setState(GameState.SETUP);
+        this.mode = mode;
 
-        if (mode != null) {
-            currentMode = mode;
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+        getPlayerManager().initializePlayers(participating);
+        indicator.show(GameIndicator.IndicatorType.PROGRESS);
+        indicator.progress("-1");
 
-    public void startGame() {
-        setState(GameState.RUNNING);
-        currentMode.start();
-        log("started game");
+        new Countdown(i -> {
+            if (i == 5) {
+                arena.clear();
+                mode.prepareResources(this, participating);
+            }
 
-        players.notify(NotificationType.INGAME,Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+            else if (i == 3) {
+                mode.initializeCore(this, participating);
+            }
 
-        roundManager.handleNextRound();
+            if (i == 2) {
+                mode.finalizeSetup(this, participating);
+            }
+        }, () -> {
+            setState(GameState.RUNNING);
+
+            this.mode.start();
+            log("started game");
+
+            playerManager.notify(NotificationType.INGAME,Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+
+            rounds.handleNextRound();
+            getArena().startFillTask(mode.getFillMaterial(), mode.getFillSpeed());
+        }).start(5);
     }
 
     public void endGame(Player winner) {
         setState(GameState.ENDED);
-        currentMode.end();
+        mode.end();
         persistentData.clear();
         log("ended game");
 
-
-        roundManager.cancelRound();
+        rounds.cancelRound();
 
         arena.cancelFillTask();
         arena.removeEntities();
 
-        players.restorePlayers();
+        playerManager.restorePlayers();
 
-        statusBar.setColor(BarColor.PURPLE);
+        indicator.status(Messages.STATUS_PLAYER_WIN.replace("{winner}", winner == null ? "NaN" : winner.getName()), BarColor.PURPLE);
 
-        statusBar.setTitle(Messages.STATUS_PLAYER_WIN
-                .replace("{winner}", winner == null ? "NaN" : winner.getName()));
-
-        GameMode previousGM;
+        org.bukkit.GameMode previousGM;
         if (winner != null) {
             previousGM = winner.getGameMode();
-            winner.setGameMode(GameMode.SPECTATOR);
+            winner.setGameMode(org.bukkit.GameMode.SPECTATOR);
         } else {
             previousGM = null;
         }
 
-        var countdown = new Countdown("end",
-                (i) -> players.notify(NotificationType.GLOBAL, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1, 1),
+        var countdown = new Countdown((i) -> playerManager.notify(NotificationType.GLOBAL, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1, 1),
                 () -> finalize(winner, previousGM));
         tasks.add(countdown.start(RESET_TIMER_AFTER_END_GAME));
     }
 
-    private void finalize(Player winner, GameMode previous) {
+    private void finalize(Player winner, org.bukkit.GameMode previous) {
         tasks.forEach(BukkitTask::cancel);
 
         if (winner != null) {
             winner.setGameMode(previous);
             plugin.getProfileManager().getProfile(winner.getUniqueId())
-                    .ifPresent(Profile::addWin);
+                    .ifPresent(PlayerProfile::addWin);
         }
-        players.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
+        playerManager.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
 
         reset();
-        startCountdown(GAME_COUNTDOWN);
     }
 
     public void forceEnd() {
         setState(GameState.ENDED);
 
-        roundManager.cancelRound();
+        rounds.cancelRound();
 
         tasks.forEach(BukkitTask::cancel);
 
         arena.cancelFillTask();
         arena.removeEntities();
 
-        players.restorePlayers();
+        playerManager.restorePlayers();
 
-        players.getPlayersInGame(PlayerState.ALIVE).forEach(player -> {
+        playerManager.getPlayersInGame(PlayerState.ALIVE).forEach(player -> {
             player.teleport(arena.getWorld().getSpawnLocation());
         });
 
@@ -281,16 +214,14 @@ public class Game {
     private void reset(){
         setState(GameState.NONE);
 
-        statusBar.setColor(BarColor.YELLOW);
-        statusBar.removeAll();
-        progressBar.removeAll();
+        indicator.reset();
 
-        currentMode.reset();
+        mode.reset();
 
         resetArena();
         resetPlayers();
 
-        roundManager.resetRounds();
+        rounds.resetRounds();
 
         log("reset game");
     }
@@ -303,23 +234,14 @@ public class Game {
     }
 
     private void resetPlayers() {
-        players.resetPlayers();
+        playerManager.resetPlayers();
     }
 
     private void setState(GameState state) {
         currentState = state;
     }
 
-    public void setGameArena(Location pos1, Location pos2) {
-        plugin.getArenaConfig().update(pos1, pos2);
-        this.arena = new GameArena(plugin, pos1, pos2);
-    }
-
     public EventManager getEvents() {
         return events;
-    }
-
-    public @Nullable VoteManager getVoting() {
-        return voting;
     }
 }

@@ -1,16 +1,16 @@
-package com.loficostudios.minigameeventsplugin.managers;
+package com.loficostudios.minigameeventsplugin.game;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
 import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
 import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
-import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.events.FallBackEvent;
+import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
+import com.loficostudios.minigameeventsplugin.game.player.PlayerState;
+import com.loficostudios.minigameeventsplugin.managers.EventManager;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import com.loficostudios.minigameeventsplugin.utils.PlayerState;
 import lombok.Getter;
 import org.bukkit.Sound;
-import org.bukkit.boss.BossBar;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -26,8 +26,6 @@ public class RoundManager {
 
     private static final int NEXT_ROUND_RETRY_ATTEMPTS = 1;
     private static final int MAX_ROUNDS = 100;
-
-    private BossBar progressBar = null;
 
     @Getter int roundsElapsed;
 
@@ -77,19 +75,15 @@ public class RoundManager {
             warningMessage = nextEvent.getWarning().message();
         }
 
-        game.getStatusBar().setTitle(warningMessage);
+        game.getIndicator().status(warningMessage);
 
-        progressBar = game.getProgressBar();
+        game.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
 
-        game.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 2);
-
-        tasks.add(new Countdown("next round",
-                countdown -> {
-                    progressBar.setTitle(countdown + " seconds");
-                },
+        var indicator = game.getIndicator();
+        indicator.show(GameIndicator.IndicatorType.PROGRESS);
+        tasks.add(new Countdown(countdown -> indicator.progress(countdown + " seconds"),
                 () -> {
-                    progressBar.setTitle("0 seconds");
-                    progressBar.removeAll();
+                    indicator.progress("0 seconds");
                     startRound(nextEvent);
                 }).start((int) nextEvent.getWarning().time()));
     }
@@ -100,11 +94,9 @@ public class RoundManager {
             return;
         }
 
-        game.getPlayers().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
+        game.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
 
-        tasks.add(new Countdown("end round",
-                (Double) -> {
-                },
+        tasks.add(new Countdown((i) -> {},
                 this::endRound).start(e.getDuration()));
     }
 
@@ -125,7 +117,7 @@ public class RoundManager {
                 .getServer()
                 .getPluginManager();
 
-        game.getPlayers()
+        game.getPlayerManager()
                 .getPlayersInGame(PlayerState.ALIVE)
                 .forEach(player -> pluginManager.callEvent(new RoundSurvivedEvent(player)));
 
@@ -136,8 +128,6 @@ public class RoundManager {
 
     public void cancelRound() {
         tasks.forEach(BukkitTask::cancel);
-
-        if (this.progressBar != null)
-            progressBar.removeAll();
+        game.getIndicator().hide(GameIndicator.IndicatorType.PROGRESS);
     }
 }

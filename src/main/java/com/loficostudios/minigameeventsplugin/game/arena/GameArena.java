@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.arena;
+package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
@@ -35,12 +35,12 @@ public class GameArena {
     private static final Boolean DEFAULT_SPAWN_EXTRA_PLATFORMS = true;
     private static final Integer EXTRA_PLATFORMS_AMOUNT = 25;
 
-
     private final AetherLabsPlugin plugin;
 
     @Getter private Location pos1;
     @Getter private Location pos2;
 
+    @Getter
     private World world;
 
     @Setter
@@ -54,30 +54,11 @@ public class GameArena {
 
     private BukkitTask lavaTask;
 
-    public World getWorld() {
-
-        if (this.world == null) {
-            World worldFromConfig = plugin
-                    .getServer()
-                    .getWorld(ArenaConfig.WORLD_NAME);
-
-            if (worldFromConfig != null) {
-                this.world = worldFromConfig;
-                this.pos1.setWorld(worldFromConfig);
-                this.pos2.setWorld(worldFromConfig);
-                return worldFromConfig;
-            }
-            throw new IllegalArgumentException();
-        }
-        else {
-            return this.world;
-        }
-    }
-
-    public GameArena(AetherLabsPlugin plugin, Location pos1, Location pos2) {
+    public GameArena(AetherLabsPlugin plugin, ArenaConfig config) {
         this.plugin = plugin;
-        this.pos1 = pos1;
-        this.pos2 = pos2;
+        this.pos1 = config.getMin().toLocation(config.getWorld());
+        this.pos2 = config.getMax().toLocation(config.getWorld());
+        this.world = config.getWorld();
     }
 
     public Location getRandomLocation() {

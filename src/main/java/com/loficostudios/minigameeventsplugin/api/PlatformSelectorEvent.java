@@ -2,9 +2,10 @@ package com.loficostudios.minigameeventsplugin.api;
 
 import com.loficostudios.minigameeventsplugin.api.event.EventType;
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractSelectorEvent;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
-import com.loficostudios.minigameeventsplugin.managers.NotificationType;
+import com.loficostudios.minigameeventsplugin.game.GameIndicator;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -28,17 +29,18 @@ public abstract class PlatformSelectorEvent extends AbstractSelectorEvent<SpawnP
 
     @Override
     public void start(Game game) {
-        var bar = game.getProgressBar();
+        var bar = game.getIndicator();
+        bar.show(GameIndicator.IndicatorType.PROGRESS);
         var message = new StringBuilder();
         selectObjects(game, (platform) -> {
             if (onSelect(game, platform)) {
                 if (getDisplayedEnabled()) {
                     var player = platform.getPlayer();
                     message.append(" ").append(player != null ? player.getName() : "NaN");
-                    bar.setTitle(message.toString());
+                    bar.progress(message.toString());
                 }
 
-                game.getPlayers().notify(
+                game.getPlayerManager().notify(
                         NotificationType.GLOBAL,
                         Sound.BLOCK_NOTE_BLOCK_PLING,
                         1, 2);
@@ -49,6 +51,6 @@ public abstract class PlatformSelectorEvent extends AbstractSelectorEvent<SpawnP
     @Override
     public void end(Game game) {
         super.end(game);
-        game.getProgressBar().removeAll();
+        game.getIndicator().hide(GameIndicator.IndicatorType.PROGRESS);
     }
 }

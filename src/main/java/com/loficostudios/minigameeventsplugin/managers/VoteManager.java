@@ -16,8 +16,8 @@ public class VoteManager {
 
     private final Map<UUID, GameMode> votes = new HashMap<>();
 
-    public VoteManager(Game gameManager) {
-        this.gameManager = gameManager;
+    public VoteManager(Game game) {
+        this.gameManager = game;
     }
 
     public int getVotes(@NotNull GameMode type) {

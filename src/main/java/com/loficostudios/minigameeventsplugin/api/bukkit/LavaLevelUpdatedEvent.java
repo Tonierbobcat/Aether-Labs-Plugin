@@ -1,6 +1,6 @@
 package com.loficostudios.minigameeventsplugin.api.bukkit;
 
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

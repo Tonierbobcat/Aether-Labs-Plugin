@@ -22,4 +22,9 @@ public class PlateExpandEvent extends AbstractGameEvent {
     public void start(Game game) {
         game.getArena().getSpawnPlatforms().forEach(platform -> platform.setRadius(platform.getRadius() + 1));
     }
+
+    @Override
+    public double getCost() { //todo debug
+        return 1;
+    }
 }

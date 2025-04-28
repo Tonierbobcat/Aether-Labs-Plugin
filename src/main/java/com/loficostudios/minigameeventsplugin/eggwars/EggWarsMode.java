@@ -1,10 +1,10 @@
 package com.loficostudios.minigameeventsplugin.eggwars;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatformGenerator;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameState;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatformGenerator;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -114,7 +114,7 @@ public class EggWarsMode extends AbstractGameMode {
                     Block block = bounds.getBlock(loc.getBlockX(), loc.getBlockY() + 1, loc.getBlockZ());
 
                     if (block != null) {
-                        Egg egg = new Egg(player, block, game.getPlayers());
+                        Egg egg = new Egg(player, block, game.getPlayerManager());
 
                         spawns.put(player.getUniqueId(), egg);
                         player.sendMessage("Added egg");

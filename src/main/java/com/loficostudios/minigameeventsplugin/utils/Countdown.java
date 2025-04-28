@@ -6,8 +6,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.function.Consumer;
 
-import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
-
 public class Countdown {
 
     private BukkitTask task;
@@ -15,10 +13,8 @@ public class Countdown {
     private final Consumer<Integer> onTick;
     private final Runnable onEnd;
     boolean cancelled = false;
-    private final String id;
 
-    public Countdown(String id, Consumer<Integer> onTick, Runnable onEnd) {
-        this.id = id;
+    public Countdown(Consumer<Integer> onTick, Runnable onEnd) {
         this.onTick = onTick;
         this.onEnd = onEnd;
     }
@@ -36,7 +32,7 @@ public class Countdown {
 
     public BukkitTask start(int time) {
         cancelled = false;
-        log(id + " timer started");
+
         task = new BukkitRunnable() {
             int countdown = time;
 
@@ -63,7 +59,6 @@ public class Countdown {
             public synchronized void cancel() throws IllegalStateException {
                 super.cancel();
                 cancelled = true;
-                log(id + " timer cancelled");
             }
         }.runTaskTimer(AetherLabsPlugin.getInstance(), 0, 20);
 

@@ -4,7 +4,7 @@ import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.config.Messages;
 import com.loficostudios.minigameeventsplugin.gui.EventShop;
 import com.loficostudios.minigameeventsplugin.gui.VoteGui;
-import com.loficostudios.minigameeventsplugin.player.profile.Profile;
+import com.loficostudios.minigameeventsplugin.player.profile.PlayerProfile;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.executors.CommandArguments;
@@ -42,7 +42,7 @@ public class PlayerCommand implements Command {
     private void optOut(Player player, CommandArguments args) {
 
         profileManager.getProfile(player.getUniqueId())
-                .ifPresent(Profile::optOutOfGame);
+                .ifPresent(PlayerProfile::optOutOfGame);
 
         player.sendMessage(Component.text(Messages.OPT_OUT));
 

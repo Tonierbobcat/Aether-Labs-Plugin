@@ -2,6 +2,6 @@ name: AetherLabsPlugin
 version: '${project.version}'
 main: com.loficostudios.minigameeventsplugin.AetherLabsPlugin
 api-version: '1.21'
-softdepend: [Essentials, PlaceholderAPI, Vault]
+softdepend: [PlaceholderAPI]
 author: tonierbobcat
 website: www.loficostudios.com

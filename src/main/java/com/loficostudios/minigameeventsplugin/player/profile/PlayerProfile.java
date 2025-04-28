@@ -10,13 +10,13 @@ package com.loficostudios.minigameeventsplugin.player.profile;
 import com.loficostudios.melodyapi.file.impl.YamlFile;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class Profile {
+public class PlayerProfile {
 
 	@Getter
 	private int wins;
@@ -25,8 +25,7 @@ public class Profile {
 	@Getter
 	private int kills;
 
-	private final YamlFile playerFile;
-	private final FileConfiguration playerConfig;
+	private final YamlFile file;
 
 	@Getter
 	private final UUID uuid;
@@ -34,33 +33,40 @@ public class Profile {
 	@Getter
 	private boolean isOptedOut;
 
+	@Getter
+	@Setter
+	private double money;
+
 
 	public void optOutOfGame() {
 		isOptedOut = true;
 	}
 
-	public Profile(UUID uuid) {
+	public PlayerProfile(UUID uuid) {
 		this.uuid = uuid;
 
 
-		this.playerFile = new YamlFile("players/" + uuid + ".yml", AetherLabsPlugin.getInstance());
-		this.playerConfig = playerFile.getConfig();
+		this.file = new YamlFile("players/" + uuid + ".yml", AetherLabsPlugin.getInstance());
+		var conf = file.getConfig();
 
-		this.wins = playerConfig.getInt("wins");
-		this.deaths = playerConfig.getInt("deaths");
-		this.kills = playerConfig.getInt("kills");
-
-		playerFile.save();
+		this.wins = conf.getInt("wins");
+		this.deaths = conf.getInt("deaths");
+		this.kills = conf.getInt("kills");
+		this.money = conf.getDouble("money");
+		file.save();
 	}
 
 	public void saveData() {
-		playerConfig.set("uuid", uuid.toString());
+		var conf = file.getConfig();
+		conf.set("uuid", uuid.toString());
 
-		playerConfig.set("kills", kills);
-		playerConfig.set("wins", wins);
-		playerConfig.set("deaths", deaths);
+		conf.set("kills", kills);
+		conf.set("wins", wins);
+		conf.set("deaths", deaths);
 
-		playerFile.save();
+		conf.set("money", money);
+
+		file.save();
 	}
 
 	public Player getPlayer() {
@@ -82,6 +88,4 @@ public class Profile {
 		kills++;
 		saveData();
 	}
-
-
 }

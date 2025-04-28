@@ -2,13 +2,15 @@ package com.loficostudios.minigameeventsplugin.listeners;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameIndicator;
+import com.loficostudios.minigameeventsplugin.game.GameManager;
 import com.loficostudios.minigameeventsplugin.game.GameState;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatform;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import com.loficostudios.minigameeventsplugin.utils.Debug;
-import net.milkbowl.vault.economy.Economy;
+import com.loficostudios.minigameeventsplugin.utils.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,15 +31,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.loficostudios.minigameeventsplugin.game.Game.MIN_PLAYERS_TO_START;
-
 public class MiniGameListener implements Listener {
     private static final int ROUND_SURVIVED_MONEY_AMOUNT = 10;
 
     private final AetherLabsPlugin plugin;
 
-    public MiniGameListener(AetherLabsPlugin plugin) {
+    private final GameManager gameManager;
+
+    public MiniGameListener(AetherLabsPlugin plugin, GameManager gameManager) {
         this.plugin = plugin;
+        this.gameManager = gameManager;
     }
 
     @EventHandler
@@ -94,32 +97,40 @@ public class MiniGameListener implements Listener {
     @EventHandler
     private void onJoin(final PlayerJoinEvent e) {
         final Player player = e.getPlayer();
-        plugin.getOnlinePlayers().add(player);
         var game = plugin.getActiveGame(player.getWorld());
 
-        GameArena arena = game.getArena();
-        if (arena == null)
+        if (game == null) {
+            Debug.log("Creating new game");
+            var config = plugin.getArenaManager().getConfig(player.getWorld());
+            if (config == null)
+                return;
+            var arena = new GameArena(plugin, config);
+            if (arena.getWorld().getPlayerCount() < Game.MIN_PLAYERS_TO_START)
+                return;
+            Bukkit.getScheduler().runTaskLater(plugin, () -> gameManager.startCountdown(new Game(plugin, arena), Game.GAME_COUNTDOWN), 5);
+            return;
+        }
+
+        var arena = game.getArena();
+
+        if (arena == null || !inArena(player, arena))
             return;
 
-        if (player.getWorld().equals(arena.getWorld())) {
-            if (game.inProgress()) {
-                game.getStatusBar().addPlayer(player);
-            }
-            else if (game.getPlayers().getPlayersInGameWorld().size() >= MIN_PLAYERS_TO_START){
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        game.startCountdown(Game.GAME_COUNTDOWN);
-                    }
-                }.runTaskLater(plugin, 5);
-            }
+        if (game.inProgress()) {
+            game.getIndicator().update(player, GameIndicator.IndicatorType.STATUS);
+            return;
         }
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> gameManager.startCountdown(game, Game.GAME_COUNTDOWN), 5);
+    }
+
+    private boolean inArena(Player player, GameArena arena) {
+        return player.getWorld().getName().equals(arena.getWorld().getName());
     }
 
     @EventHandler
     private void onQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
-        plugin.getOnlinePlayers().remove(player);
         var game = plugin.getActiveGame(player.getWorld());
 
         VoteManager voteManager = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld()).getVoting();
@@ -127,7 +138,7 @@ public class MiniGameListener implements Listener {
             voteManager.validateVotes();
         }
 
-        game.getPlayers().handleQuit(player);
+        game.getPlayerManager().handleQuit(player);
     }
 
     @EventHandler
@@ -140,25 +151,20 @@ public class MiniGameListener implements Listener {
             voteManager.validateVotes();
         }
 
-        game.getPlayers().handleQuit(player);
+        game.getPlayerManager().handleQuit(player);
     }
 
     @EventHandler
     private void onRoundSurvived(RoundSurvivedEvent e) {
-        AetherLabsPlugin plugin = AetherLabsPlugin.getInstance();
-
-        if (plugin.vaultHook) {
-            Economy economy = plugin.getEconomy();
-
-            economy.depositPlayer(e.getPlayer(), ROUND_SURVIVED_MONEY_AMOUNT);
-        }
+        Economy.deposit(e.getPlayer(), ROUND_SURVIVED_MONEY_AMOUNT);
     }
 
     @EventHandler
     private void onAttack(EntityDamageEvent e) {
         if ((e.getEntity() instanceof Player player)) {
             var game = plugin.getActiveGame(player.getWorld());
-
+            if (game == null)
+                return;
             var arena = game.getArena();
             if (arena == null)
                 return;
@@ -200,6 +206,8 @@ public class MiniGameListener implements Listener {
     }
 
     private boolean handleEventDuringSetupGame(Event e, Game game) {
+        if (game == null)
+            return true;
         if (game.getCurrentState() == GameState.SETUP && e instanceof Cancellable cancellable) {
             cancellable.setCancelled(true);
             Bukkit.getLogger().info("cancelled " + e.getEventName());

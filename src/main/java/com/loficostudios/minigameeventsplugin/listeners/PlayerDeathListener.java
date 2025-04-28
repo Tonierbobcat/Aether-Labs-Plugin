@@ -3,10 +3,10 @@ package com.loficostudios.minigameeventsplugin.listeners;
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.eggwars.Egg;
 import com.loficostudios.minigameeventsplugin.eggwars.EggWarsMode;
-import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameManager;
 import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
-import com.loficostudios.minigameeventsplugin.player.PlayerManager;
-import com.loficostudios.minigameeventsplugin.player.profile.Profile;
+import com.loficostudios.minigameeventsplugin.player.profile.PlayerProfile;
+import com.loficostudios.minigameeventsplugin.utils.Economy;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -21,25 +21,27 @@ import static com.loficostudios.minigameeventsplugin.game.Game.PLAYER_KILL_MONEY
 
 public class PlayerDeathListener implements Listener {
 
-    private final Game game;
-    private final AetherLabsPlugin plugin;
-    private final PlayerManager players;
-    public PlayerDeathListener(Game gameManager) {
-        this.game = gameManager;
-        this.plugin = AetherLabsPlugin.getInstance();
-        players = gameManager.getPlayers();
-    }
+    private final GameManager gameManager;
 
+    private final AetherLabsPlugin plugin;
+    public PlayerDeathListener(GameManager gameManager) {
+        this.gameManager = gameManager;
+        this.plugin = AetherLabsPlugin.getInstance();
+    }
 
     @EventHandler
     private void onDeath(EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player player))
             return;
 
+        var game = gameManager.getGame(player.getWorld());
+        if (game == null)
+            return;
+
         var isDeath = player.getHealth() - e.getFinalDamage() <= 0;
         if (!isDeath)
             return;
-        if (!game.inProgress() || !players.getPlayersInGame().contains(player))
+        if (!game.inProgress() || !game.getPlayerManager().getPlayersInGame().contains(player))
             return;
         e.setCancelled(true);
 
@@ -51,10 +53,10 @@ public class PlayerDeathListener implements Listener {
             }
         }
 
-        if (game.getCurrentMode().equals(GameModes.EGG_WARS)) {
+        if (game.getMode().equals(GameModes.EGG_WARS)) {
             handleEggWars(player);
         } else {
-            players.handlePlayerDeath(player);
+            game.getPlayerManager().handlePlayerDeath(player);
             respawn(player, () -> player.teleport(player.getWorld().getSpawnLocation()), getMaxHealth(player), 5);
         }
 
@@ -67,13 +69,8 @@ public class PlayerDeathListener implements Listener {
     }
 
     private void handleKill(Player killer) {
-        plugin.getProfileManager().getProfile(killer.getUniqueId()).ifPresent(Profile::addKill);
-
-        if (plugin.vaultHook) {
-            plugin.getEconomy().depositPlayer(
-                    killer,
-                    PLAYER_KILL_MONEY_AMOUNT);
-        }
+        plugin.getProfileManager().getProfile(killer.getUniqueId()).ifPresent(PlayerProfile::addKill);
+        Economy.deposit(killer, PLAYER_KILL_MONEY_AMOUNT);
     }
 
     private void respawn(Player player, Runnable onSpawn, double health, long delay) {
@@ -85,12 +82,15 @@ public class PlayerDeathListener implements Listener {
     }
 
     private void handleEggWars(Player player) {
-        EggWarsMode mode = (EggWarsMode) game.getCurrentMode();
+        var game = gameManager.getGame(player.getWorld());
+        if (game == null)
+            return;
+        EggWarsMode mode = (EggWarsMode) game.getMode();
 
         Egg egg = mode.getEgg(game, player);
 
         if (egg == null) {
-            players.handlePlayerDeath(player);
+            game.getPlayerManager().handlePlayerDeath(player);
         }
         respawn(player, () -> {
             if (egg != null)

@@ -1,9 +1,9 @@
 package com.loficostudios.minigameeventsplugin.gamemode;
 
 import com.loficostudios.minigameeventsplugin.api.event.impl.AbstractGameMode;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatform;
-import com.loficostudios.minigameeventsplugin.arena.SpawnPlatformGenerator;
 import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatform;
+import com.loficostudios.minigameeventsplugin.game.arena.SpawnPlatformGenerator;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 

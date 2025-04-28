@@ -1,6 +1,9 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.game.Game;
+import com.loficostudios.minigameeventsplugin.game.GameManager;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
@@ -12,6 +15,12 @@ import static com.loficostudios.minigameeventsplugin.AetherLabsPlugin.COMMAND_PR
 import static com.loficostudios.minigameeventsplugin.game.Game.GAME_COUNTDOWN;
 
 public class DebugCommand implements Command {
+
+    private final GameManager gameManager;
+
+    public DebugCommand(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
 
     @Override
     public void register() {
@@ -26,15 +35,13 @@ public class DebugCommand implements Command {
     }
 
     private void start(Player player, CommandArguments args) {
-        var activeGame = AetherLabsPlugin.getInstance().getActiveGame(player.getWorld());
-        if (!activeGame.inProgress()) {
+        var plugin = AetherLabsPlugin.getInstance();
+        var activeGame = plugin.getActiveGame(player.getWorld());
+
+        if (activeGame == null || !activeGame.inProgress()) {
             Integer countdown = (Integer) args.get("countdown");
-            if (activeGame.startCountdown(countdown != null ? countdown : GAME_COUNTDOWN)) {
-                player.sendMessage(Component.text("§aSuccessfully started countdown!"));
-            }
-            else {
-                player.sendMessage(Component.text("§cArena is not setup! /arena set <pos1> <pos2>"));
-            }
+            var game = new Game(plugin, new GameArena(plugin, plugin.getArenaManager().getConfig(player.getWorld())));
+            gameManager.startCountdown(game, countdown != null ? countdown : GAME_COUNTDOWN);
         } else {
             player.sendMessage(Component.text("§cGame running! End it first."));
         }

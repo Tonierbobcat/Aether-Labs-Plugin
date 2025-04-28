@@ -1,4 +1,4 @@
-package com.loficostudios.minigameeventsplugin.arena;
+package com.loficostudios.minigameeventsplugin.game.arena;
 
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import org.bukkit.Location;
@@ -137,8 +137,8 @@ public class SpawnPlatform {
     }
 
     public void startRemovalTimer() {
-        removalTask = new Countdown("platform removal", countdown -> {
-            if (countdown % 2 == 0) {
+        removalTask = new Countdown(i -> {
+            if (i % 2 == 0) {
                 setPlatform(Material.RED_STAINED_GLASS);
             } else {
                 setPlatform(Material.WHITE_STAINED_GLASS);

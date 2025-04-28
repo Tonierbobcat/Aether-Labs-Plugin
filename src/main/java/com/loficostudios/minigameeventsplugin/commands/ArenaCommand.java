@@ -1,7 +1,8 @@
 package com.loficostudios.minigameeventsplugin.commands;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
-import com.loficostudios.minigameeventsplugin.arena.GameArena;
+import com.loficostudios.minigameeventsplugin.config.ArenaConfig;
+import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.utils.Selection;
 import com.loficostudios.minigameeventsplugin.utils.WorldUtils;
 import dev.jorel.commandapi.CommandTree;
@@ -15,7 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import static com.loficostudios.minigameeventsplugin.AetherLabsPlugin.COMMAND_PREFIX;
-import static com.loficostudios.minigameeventsplugin.arena.GameArena.MIN_GAME_ARENA_AREA;
+import static com.loficostudios.minigameeventsplugin.game.arena.GameArena.MIN_GAME_ARENA_AREA;
 
 public class ArenaCommand implements Command {
 
@@ -58,7 +59,10 @@ public class ArenaCommand implements Command {
         int selectionBlockCount = selection.count();
 
         if (selectionBlockCount >= MIN_GAME_ARENA_AREA) {
-            activeGame.setGameArena(pos1, pos2);
+            var config = new ArenaConfig(pos1.toVector(), pos2.toVector(), player.getWorld());
+
+            AetherLabsPlugin.getInstance().getArenaManager().setConfig(player.getWorld(), config);
+
             String pos1Msg = pos1.getBlockX() + ", " + pos1.getBlockY() + ", " + pos1.getBlockZ();
             String pos2Msg = pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ();
 

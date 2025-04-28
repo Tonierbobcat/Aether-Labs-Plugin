@@ -27,4 +27,9 @@ public class PlateShrinkEvent extends AbstractGameEvent {
             }
         });
     }
+
+    @Override
+    public double getCost() { //todo debug
+        return 1;
+    }
 }
