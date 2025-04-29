@@ -7,12 +7,14 @@ import com.loficostudios.minigameeventsplugin.commands.ArenaCommand;
 import com.loficostudios.minigameeventsplugin.commands.Command;
 import com.loficostudios.minigameeventsplugin.commands.DebugCommand;
 import com.loficostudios.minigameeventsplugin.commands.PlayerCommand;
+import com.loficostudios.minigameeventsplugin.cosmetics.CosmeticModule;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameManager;
 import com.loficostudios.minigameeventsplugin.game.arena.ArenaManager;
 import com.loficostudios.minigameeventsplugin.game.events.plate.*;
 import com.loficostudios.minigameeventsplugin.game.events.player.*;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldGhastEvent;
+import com.loficostudios.minigameeventsplugin.game.events.world.WorldMeteoriteEvent;
 import com.loficostudios.minigameeventsplugin.game.events.world.WorldPlateRepairEvent;
 import com.loficostudios.minigameeventsplugin.listeners.*;
 import com.loficostudios.minigameeventsplugin.managers.EventRegistry;
@@ -43,6 +45,8 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
     @Getter
     private final EventRegistry events = new EventRegistry();
+
+
 
 //    private Game activeGame;
 
@@ -76,9 +80,15 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
 
         this.arenaManager.initialize(new YamlFile("arena-config.yml", this));
 
+        boolean hasCosmetics = true;
+        if (hasCosmetics) {
+            var a = CosmeticModule.onEnable(this);
+        }
+
         registerListeners();
         registerEvents();
     }
+
 
     @Override
     public void onDisable() {
@@ -146,6 +156,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
         // world events
         Arrays.asList(
                 new WorldGhastEvent(),
+                new WorldMeteoriteEvent(),
                 new WorldPlateRepairEvent()
         ).forEach(GameEvent::register);
     }

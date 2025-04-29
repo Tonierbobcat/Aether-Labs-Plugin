@@ -84,7 +84,7 @@ public class EventShop extends MelodyGui {
         public @NotNull GuiIcon getGUIIcon(GameEvent event) {
             var description = Stream.of((event instanceof SelectorEvent<?> selector) ? "§7[" + selector.getMin() + "-" + selector.getMax() + "] " + event.getWarning().message() : "§7" + event.getWarning().message(),
                     "",
-                    "§7Cost: §e§l" + event.getCost(),
+                    "§7Cost: §e§l$" + event.getCost(),
                     "",
                     "§8" + event.getIdentifier()).map(Component::text).toList();
 
@@ -95,7 +95,7 @@ public class EventShop extends MelodyGui {
                     p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
                     p.sendMessage(Component.text("§ePurchased event!"));
 
-                    if (plugin.getActiveGame(p.getWorld()).getEvents().queueEvent(p, event)) {
+                    if (plugin.getActiveGame(p.getWorld()).getRounds().getEventController().queueEvent(p, event)) {
                         p.sendMessage(Component.text("§7Your event has been queued up to go next!"));
                         Economy.withdrawal(p, event.getCost());
                     }

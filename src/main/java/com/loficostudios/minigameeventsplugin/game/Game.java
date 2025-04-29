@@ -8,7 +8,7 @@ import com.loficostudios.minigameeventsplugin.game.player.PlayerManager;
 import com.loficostudios.minigameeventsplugin.game.player.PlayerState;
 import com.loficostudios.minigameeventsplugin.gamemode.GameMode;
 import com.loficostudios.minigameeventsplugin.gamemode.GameModes;
-import com.loficostudios.minigameeventsplugin.managers.EventManager;
+import com.loficostudios.minigameeventsplugin.managers.EventController;
 import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import com.loficostudios.minigameeventsplugin.player.profile.PlayerProfile;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
@@ -33,7 +33,6 @@ public class Game {
 
     private final Set<BukkitTask> tasks = new HashSet<>();
     private final HashMap<String, Object> persistentData = new HashMap<String, Object>();
-    private final EventManager events = new EventManager(this);
 
     @Getter
     private final RoundManager rounds;
@@ -52,7 +51,7 @@ public class Game {
     private final GameIndicator indicator = new GameIndicator(this);
 
     public Game(GameArena arena) {
-        this.rounds = new RoundManager(this, events);
+        this.rounds = new RoundManager(this);
         this.playerManager = new PlayerManager(this, AetherLabsPlugin.inst().getProfileManager());
         this.arena = arena;
     }
@@ -228,9 +227,5 @@ public class Game {
 
     private void setState(GameState state) {
         currentState = state;
-    }
-
-    public EventManager getEvents() {
-        return events;
     }
 }

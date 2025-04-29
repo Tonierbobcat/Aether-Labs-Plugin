@@ -7,15 +7,13 @@ import com.loficostudios.minigameeventsplugin.api.event.SelectorEvent;
 import com.loficostudios.minigameeventsplugin.game.events.FallBackEvent;
 import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
 import com.loficostudios.minigameeventsplugin.game.player.PlayerState;
-import com.loficostudios.minigameeventsplugin.managers.EventManager;
+import com.loficostudios.minigameeventsplugin.managers.EventController;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
-import lombok.Getter;
 import org.bukkit.Sound;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 
@@ -25,16 +23,23 @@ public class RoundManager {
     private static final int MAX_ROUNDS = 100;
 
     private final Game game;
-    private final EventManager eventManager;
+    private final EventController controller;
 
     private final Set<BukkitTask> tasks = new HashSet<>();
 
-    @Getter
-    private int roundsElapsed;
+    private final List<Round> rounds = new ArrayList<>();
 
-    public RoundManager(Game gameManager, EventManager eventManager) {
-        this.game = gameManager;
-        this.eventManager = eventManager;
+    public List<Round> getRoundsElapsed() {
+        return Collections.unmodifiableList(rounds);
+    }
+
+    public RoundManager(Game game) {
+        this.game = game;
+        this.controller = new EventController(game);
+    }
+
+    public EventController getEventController() {
+        return controller;
     }
 
     public void handleNextRound() {
@@ -46,32 +51,32 @@ public class RoundManager {
         boolean valid = false;
 
         while (!valid && attempts < NEXT_ROUND_RETRY_ATTEMPTS) {
-            GameEvent nextEvent = eventManager.getNextEvent();
+            GameEvent nextEvent = controller.getNextEvent();
 
             if (nextEvent != null) {
                 valid = true;
-                nextRound(nextEvent);
+                setupRound(nextEvent);
             }
 
             attempts++;
         }
 
         if (!valid) {
-            nextRound(new FallBackEvent());
+            setupRound(new FallBackEvent());
         }
     }
 
-    private void nextRound(GameEvent nextEvent) {
-
-        roundsElapsed++;
+    private void setupRound(GameEvent next) {
+        var round = new Round(next, System.currentTimeMillis(), rounds.size() + 1);
+        rounds.add(round);
 
         String warningMessage;
 
-        if (nextEvent instanceof SelectorEvent<?> selector) {
-            warningMessage = selector.getAmount(game) + " " + nextEvent.getWarning().message();
+        if (next instanceof SelectorEvent<?> selector) {
+            warningMessage = selector.getAmount(game) + " " + next.getWarning().message();
         }
         else {
-            warningMessage = nextEvent.getWarning().message();
+            warningMessage = next.getWarning().message();
         }
 
         game.getIndicator().status(warningMessage);
@@ -83,12 +88,12 @@ public class RoundManager {
         tasks.add(new Countdown(countdown -> indicator.progress(countdown + " seconds"),
                 () -> {
                     indicator.progress("0 seconds");
-                    startRound(nextEvent);
-                }).start((int) nextEvent.getWarning().time()));
+                    startNextRound(next);
+                }).start((int) next.getWarning().time()));
     }
 
-    private void startRound(GameEvent e) {
-        eventManager.handleStart(e);
+    private void startNextRound(GameEvent e) {
+        controller.handleStart(e);
         if (!game.inProgress()) {
             return;
         }
@@ -96,20 +101,19 @@ public class RoundManager {
         game.getPlayerManager().notify(NotificationType.GLOBAL, Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
 
         tasks.add(new Countdown((i) -> {},
-                this::endRound).start(e.getDuration()));
+                this::endCurrentRound).start(e.getDuration()));
     }
 
     public void resetRounds() {
-        eventManager.handleCancel(eventManager.getCurrentEvent());
-
-        roundsElapsed = 0;
+        controller.handleCancel(controller.getCurrentEvent());
+        rounds.clear();
     }
 
-    public void endRound() {
+    public void endCurrentRound() {
         cancelRound();
 
-        if (eventManager.handleEnd(eventManager.getCurrentEvent())) {
-            eventManager.handleCancel(eventManager.getCurrentEvent());
+        if (controller.handleEnd(controller.getCurrentEvent())) {
+            controller.handleCancel(controller.getCurrentEvent());
         }
 
         PluginManager pluginManager = AetherLabsPlugin.inst()
@@ -120,7 +124,7 @@ public class RoundManager {
                 .getPlayersInGame(PlayerState.ALIVE)
                 .forEach(player -> pluginManager.callEvent(new RoundSurvivedEvent(player)));
 
-        log("current round: " + roundsElapsed + " maxRounds: " + MAX_ROUNDS);
+        log("current round: " + getRoundsElapsed().size() + " maxRounds: " + MAX_ROUNDS);
 
         handleNextRound();
     }

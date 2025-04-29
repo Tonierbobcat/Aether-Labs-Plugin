@@ -37,7 +37,6 @@ public class PlayerProfile {
 	@Setter
 	private double money;
 
-
 	public void optOutOfGame() {
 		isOptedOut = true;
 	}
@@ -47,7 +46,8 @@ public class PlayerProfile {
 
 
 		this.file = new YamlFile("players/" + uuid + ".yml", AetherLabsPlugin.inst());
-		var conf = file.getConfig();
+
+        var conf = file.getConfig();
 
 		this.wins = conf.getInt("wins");
 		this.deaths = conf.getInt("deaths");

@@ -50,7 +50,7 @@ public class SpawnPlatformGenerator {
             center = bounds.getRandomLocation();
             center.setY(bounds.getMiddleY());
 
-            if (!isLocationValid(center)) {
+            if (!isLocationValid(center, plate.getRadius())) {
                 attempts++;
                 continue;
             }
@@ -79,8 +79,7 @@ public class SpawnPlatformGenerator {
         }
     }
 
-    private boolean isLocationValid(Location center) {
-        var radius = plate.getRadius();
+    public boolean isLocationValid(Location center, int radius) {
         for (SpawnPlatform platform : arena.getSpawnPlatforms()) {
 
             double dx = center.getX() - platform.getLocation().getX();

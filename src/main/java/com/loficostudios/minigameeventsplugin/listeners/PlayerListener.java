@@ -45,7 +45,7 @@ public class PlayerListener implements Listener {
                         "Money: " + Economy.getBalance(player),
                         " ",
                         "Alive: " + game.getPlayerManager().getPlayersInGame(PlayerState.ALIVE).size(),
-                        "Rounds: " + game.getRounds().getRoundsElapsed(),
+                        "Rounds: " + game.getRounds().getRoundsElapsed().size(),
                         " ",
                         "Wins: " + profile.getWins(),
                         "Kills: " + profile.getKills(),

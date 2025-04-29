@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class WorldGhastEvent extends AbstractGameEvent {
 
     public WorldGhastEvent() {
-        super("Ghast event", EventType.GLOBAL, Material.GHAST_TEAR);
+        super("Ghast Event", EventType.GLOBAL, Material.GHAST_TEAR);
     }
 
     @Override

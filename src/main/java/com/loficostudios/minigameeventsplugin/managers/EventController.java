@@ -16,7 +16,7 @@ import java.util.Random;
 import static com.loficostudios.minigameeventsplugin.utils.Debug.log;
 import static com.loficostudios.minigameeventsplugin.utils.Debug.logError;
 
-public class EventManager {
+public class EventController {
 
     @Getter
     private GameEvent currentEvent;
@@ -30,7 +30,7 @@ public class EventManager {
 
     private final Game game;
 
-    public EventManager(Game game) {
+    public EventController(Game game) {
         this.game = game;
     }
 
