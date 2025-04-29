@@ -30,7 +30,7 @@ public class CosmeticModule {
     }
 
     private void onEnable() {
-        CosmeticManager manager = new CosmeticManager(AetherLabsPlugin.inst().getProfileManager(), cosmeticRegistry);
+        CosmeticManager manager = new CosmeticManager(cosmeticRegistry, plugin);
         new CosmeticsCommand(manager)
                 .register();
 

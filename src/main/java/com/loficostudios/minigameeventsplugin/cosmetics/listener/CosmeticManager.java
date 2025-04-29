@@ -16,6 +16,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -24,11 +25,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CosmeticManager implements Listener {
-    private final ProfileManager profileManager;
+
     private final CosmeticRegistry registry;
-    public CosmeticManager(ProfileManager profileManager, CosmeticRegistry registry) {
-        this.profileManager = profileManager;
+    private final JavaPlugin plugin;
+    public CosmeticManager(CosmeticRegistry registry, JavaPlugin plugin) {
         this.registry = registry;
+        this.plugin = plugin;
     }
 
     private final HashMap<UUID, CosmeticArrow> trackedArrows = new HashMap<>();
@@ -66,11 +68,7 @@ public class CosmeticManager implements Listener {
             public void run() {
                 cosmetic.update(e.getProjectile());
             }
-        }.runTaskTimer(AetherLabsPlugin.inst(), 0, 2)));
-    }
-
-    public CosmeticRegistry getRegistry() {
-        return registry;
+        }.runTaskTimer(plugin, 0, 2)));
     }
 
     @EventHandler

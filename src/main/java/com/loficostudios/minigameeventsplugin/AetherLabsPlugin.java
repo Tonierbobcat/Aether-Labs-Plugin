@@ -1,5 +1,6 @@
 package com.loficostudios.minigameeventsplugin;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.loficostudios.melodyapi.MelodyPlugin;
 import com.loficostudios.melodyapi.file.impl.YamlFile;
 import com.loficostudios.minigameeventsplugin.api.event.GameEvent;
@@ -21,6 +22,7 @@ import com.loficostudios.minigameeventsplugin.managers.EventRegistry;
 import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -66,10 +68,13 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     @Override
     public void onLoad() {
         loadConfigs();
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().load();
     }
 
     @Override
     protected void onStart() {
+        PacketEvents.getAPI().init();
         CommandAPI.onEnable();
 
         try {
@@ -93,7 +98,7 @@ public final class AetherLabsPlugin extends MelodyPlugin<AetherLabsPlugin> {
     @Override
     public void onDisable() {
         gameManager.onDisable();
-
+        PacketEvents.getAPI().terminate();
     }
 
     private void loadConfigs() {
