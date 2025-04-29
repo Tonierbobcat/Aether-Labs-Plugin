@@ -52,8 +52,4 @@ public class CosmeticModule {
         initialized = true;
         return module;
     }
-
-    private boolean canBuy(Player player, double cost) {
-        return Economy.getBalance(player) >= cost;
-    }
 }
