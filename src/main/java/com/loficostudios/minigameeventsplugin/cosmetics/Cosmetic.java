@@ -12,8 +12,12 @@ public interface Cosmetic {
 
     @Nullable UnlockCondition getCondition();
 
+    void equip(CosmeticProfile profile);
+    void unequip(CosmeticProfile profile);
+
     String getIdentifier();
     enum Type {
+        PET,
         ARROW_TRAIL
     }
 }

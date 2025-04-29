@@ -1,13 +1,13 @@
 package com.loficostudios.minigameeventsplugin.cosmetics.listener;
 
-import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
 import com.loficostudios.minigameeventsplugin.cosmetics.Cosmetic;
 import com.loficostudios.minigameeventsplugin.cosmetics.CosmeticProfile;
 import com.loficostudios.minigameeventsplugin.cosmetics.CosmeticRegistry;
 import com.loficostudios.minigameeventsplugin.cosmetics.impl.AdvancedArrowTrailCosmetic;
 import com.loficostudios.minigameeventsplugin.cosmetics.impl.ArrowTrailCosmetic;
-import com.loficostudios.minigameeventsplugin.player.profile.ProfileManager;
-import org.bukkit.entity.Arrow;
+import com.loficostudios.minigameeventsplugin.cosmetics.impl.pet.PetCosmetic;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,6 +31,21 @@ public class CosmeticManager implements Listener {
     public CosmeticManager(CosmeticRegistry registry, JavaPlugin plugin) {
         this.registry = registry;
         this.plugin = plugin;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (World world : Bukkit.getWorlds()) {
+                    for (Player player : world.getPlayers()) {
+                        getProfile(player).ifPresent((profile) -> {
+                            var pet = profile.getContainer().getCosmetic(Cosmetic.Type.PET, PetCosmetic.class);
+                            if (pet == null)
+                                return;
+                            pet.update(player);
+                        });
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 0, 1);
     }
 
     private final HashMap<UUID, CosmeticArrow> trackedArrows = new HashMap<>();

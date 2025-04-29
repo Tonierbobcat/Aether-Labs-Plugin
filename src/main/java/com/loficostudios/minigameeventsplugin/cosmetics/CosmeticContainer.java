@@ -7,7 +7,10 @@ import java.util.HashMap;
 public class CosmeticContainer {
     private final HashMap<Cosmetic.Type, Cosmetic> slots = new HashMap<>();
 
-    public CosmeticContainer() {
+    private final CosmeticProfile profile;
+
+    public CosmeticContainer(CosmeticProfile profile) {
+        this.profile = profile;
     }
 
     /**
@@ -16,11 +19,17 @@ public class CosmeticContainer {
      */
     public @Nullable Cosmetic setSlot(Cosmetic.Type slot, @Nullable Cosmetic cosmetic) {
         if (cosmetic == null) {
-            return slots.put(slot, null);
+            var last = slots.put(slot, null);
+            if (last != null) {
+                last.unequip(profile);
+            }
+            return last;
         }
         if (!cosmetic.getType().equals(slot))
             throw new IllegalArgumentException("Cosmetic is not of correct slot type");
-        return slots.put(slot, cosmetic);
+        var last = slots.put(slot, cosmetic);
+        cosmetic.equip(profile);
+        return last;
     }
 
     public @Nullable Cosmetic getCosmetic(Cosmetic.Type slot) {

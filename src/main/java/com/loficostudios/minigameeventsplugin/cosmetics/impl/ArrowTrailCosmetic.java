@@ -1,5 +1,6 @@
 package com.loficostudios.minigameeventsplugin.cosmetics.impl;
 
+import com.loficostudios.minigameeventsplugin.cosmetics.CosmeticProfile;
 import com.loficostudios.minigameeventsplugin.cosmetics.Quality;
 import com.loficostudios.minigameeventsplugin.cosmetics.UnlockCondition;
 import org.bukkit.Material;
@@ -19,5 +20,13 @@ public class ArrowTrailCosmetic extends AbstractCosmetic {
 
     public void update(Entity arrow) {
         arrow.getWorld().spawnParticle(data.getParticle(), arrow.getLocation().clone().add(data.getLocation()), data.getCount(), data.getOffsetX(), data.getOffsetY(), data.getOffsetZ(), data.getExtra(), data.getData());
+    }
+
+    @Override
+    public void equip(CosmeticProfile profile) {
+    }
+
+    @Override
+    public void unequip(CosmeticProfile profile) {
     }
 }

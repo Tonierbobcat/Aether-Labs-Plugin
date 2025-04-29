@@ -13,7 +13,7 @@ public class CosmeticProfile {
     public CosmeticProfile(Player player, CosmeticRegistry registry) {
         this.player = player;
         this.uuid = UUID.randomUUID();
-        this.container = new CosmeticContainer();
+        this.container = new CosmeticContainer(this);
         this.inventory = new CosmeticInventory(registry);
     }
 
