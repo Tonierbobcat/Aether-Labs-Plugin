@@ -62,7 +62,8 @@ public class PetCosmetic extends AbstractCosmetic {
 
         pet.setCustomNameVisible(true);
         pet.customName(Component.text(getName()));
-
+        pet.setInvisible(true);
+        pet.setInvulnerable(true);
         pet.teleport(location);
     }
 
@@ -126,6 +127,10 @@ public class PetCosmetic extends AbstractCosmetic {
         }
         playIdleAnimation(pet);
         var distanceFromOwner = owner.getLocation().distance(location);
+        if (distanceFromOwner >= 15) {
+            pet.teleport(owner.getLocation());
+            return;
+        }
         if (distanceFromOwner <= 2.5)
             return;
         moveTowards(owner, pet);

@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.listeners;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.api.bukkit.GameEndEvent;
 import com.loficostudios.minigameeventsplugin.api.bukkit.RoundSurvivedEvent;
 import com.loficostudios.minigameeventsplugin.game.Game;
 import com.loficostudios.minigameeventsplugin.game.GameIndicator;
@@ -95,6 +96,11 @@ public class MiniGameListener implements Listener {
                 }
             }.runTaskTimer(plugin, 0, 20);
         }
+    }
+
+    @EventHandler
+    private void onEnd(GameEndEvent e) {
+        gameManager.startCountdown(e.getGame(), 10);
     }
 
     @EventHandler

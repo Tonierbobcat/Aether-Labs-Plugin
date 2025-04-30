@@ -1,6 +1,7 @@
 package com.loficostudios.minigameeventsplugin.game;
 
 import com.loficostudios.minigameeventsplugin.AetherLabsPlugin;
+import com.loficostudios.minigameeventsplugin.api.bukkit.GameEndEvent;
 import com.loficostudios.minigameeventsplugin.config.Messages;
 import com.loficostudios.minigameeventsplugin.game.arena.GameArena;
 import com.loficostudios.minigameeventsplugin.game.player.NotificationType;
@@ -13,6 +14,7 @@ import com.loficostudios.minigameeventsplugin.managers.VoteManager;
 import com.loficostudios.minigameeventsplugin.player.profile.PlayerProfile;
 import com.loficostudios.minigameeventsplugin.utils.Countdown;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.entity.Player;
@@ -179,6 +181,8 @@ public class Game {
         playerManager.getPlayersInGame(PlayerState.ALIVE).forEach(player -> player.teleport(arena.getWorld().getSpawnLocation()));
 
         reset();
+
+        Bukkit.getPluginManager().callEvent(new GameEndEvent(this));
     }
 
     public void forceEnd() {
